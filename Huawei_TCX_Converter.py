@@ -139,102 +139,106 @@ def process_data(data, stats):
 def generate_xml(data, stats):
     print('---- XML file ----')
     print('generating: ', end='')
-    # TrainingCenterDatabase
-    TrainingCenterDatabase = ET.Element('TrainingCenterDatabase')
-    TrainingCenterDatabase.set('xsi:schemaLocation','http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2 http://www.garmin.com/xmlschemas/TrainingCenterDatabasev2.xsd')
-    TrainingCenterDatabase.set('xmlns', 'http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2')
-    TrainingCenterDatabase.set('xmlns:xsi', 'http://www.w3.org/2001/XMLSchema-instance')
+    try:
+        # TrainingCenterDatabase
+        TrainingCenterDatabase = ET.Element('TrainingCenterDatabase')
+        TrainingCenterDatabase.set('xsi:schemaLocation','http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2 http://www.garmin.com/xmlschemas/TrainingCenterDatabasev2.xsd')
+        TrainingCenterDatabase.set('xmlns', 'http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2')
+        TrainingCenterDatabase.set('xmlns:xsi', 'http://www.w3.org/2001/XMLSchema-instance')
 
-    ## Activities
-    Activities = ET.SubElement(TrainingCenterDatabase,'Activities')
+        ## Activities
+        Activities = ET.SubElement(TrainingCenterDatabase,'Activities')
 
-    ### Activity
-    Activity = ET.SubElement(Activities,'Activity')
-    Activity.set('Sport','Running') # TODO: Make an option to change sports?
-    Id = ET.SubElement(Activity,'Id')
-    Id.text = stats[0] # The StartTime timestamp
+        ### Activity
+        Activity = ET.SubElement(Activities,'Activity')
+        Activity.set('Sport','Running') # TODO: Make an option to change sports?
+        Id = ET.SubElement(Activity,'Id')
+        Id.text = stats[0] # The StartTime timestamp
 
-    #### Lap
-    # TODO: Work out how to split exercises up into laps (by distance?)
-    Lap = ET.SubElement(Activity,'Lap')
-    Lap.set('StartTime',stats[0]) # start_time
-    TotalTimeSeconds = ET.SubElement(Lap,'TotalTimeSeconds')
-    TotalTimeSeconds.text = str(stats[1]) # duration
-    DistanceMeters = ET.SubElement(Lap,'DistanceMeters')
-    DistanceMeters.text = str(stats[2]) # total_distance
-    Calories = ET.SubElement(Lap,'Calories')
-    Calories.text = '0' # TODO: Can we nullify or get rid of this?
-    Intensity = ET.SubElement(Lap,'Intensity')
-    Intensity.text = 'Active' # TODO: Can we nullify or get rid of this?
-    TriggerMethod = ET.SubElement(Lap,'TriggerMethod')
-    TriggerMethod.text = 'Manual' # TODO: How are Laps (or Tracks?) split?
-    Track = ET.SubElement(Lap,'Track')
+        #### Lap
+        # TODO: Work out how to split exercises up into laps (by distance?)
+        Lap = ET.SubElement(Activity,'Lap')
+        Lap.set('StartTime',stats[0]) # start_time
+        TotalTimeSeconds = ET.SubElement(Lap,'TotalTimeSeconds')
+        TotalTimeSeconds.text = str(stats[1]) # duration
+        DistanceMeters = ET.SubElement(Lap,'DistanceMeters')
+        DistanceMeters.text = str(stats[2]) # total_distance
+        Calories = ET.SubElement(Lap,'Calories')
+        Calories.text = '0' # TODO: Can we nullify or get rid of this?
+        Intensity = ET.SubElement(Lap,'Intensity')
+        Intensity.text = 'Active' # TODO: Can we nullify or get rid of this?
+        TriggerMethod = ET.SubElement(Lap,'TriggerMethod')
+        TriggerMethod.text = 'Manual' # TODO: How are Laps (or Tracks?) split?
+        Track = ET.SubElement(Lap,'Track')
 
-    ##### Track
-    distance_holder = 0
-    for line in data:
-        Trackpoint = ET.SubElement(Track,'Trackpoint')
-        Time = ET.SubElement(Trackpoint,'Time')
-        Time.text = line[2]
-        Position = ET.SubElement(Trackpoint,'Position')
-        LatitudeDegrees = ET.SubElement(Position,'LatitudeDegrees')
-        LatitudeDegrees.text = line[0]
-        LongitudeDegrees = ET.SubElement(Position,'LongitudeDegrees')
-        LongitudeDegrees.text = line[1]
-        AltitudeMeters = ET.SubElement(Trackpoint,'AltitudeMeters')
-        AltitudeMeters.text = '0.0'
-        # TODO: Some (all?) Huawei devices don't collect Altitude data, but in that
-        # case can we call on some open API to estimate it?
-        DistanceMeters = ET.SubElement(Trackpoint,'DistanceMeters')
-        distance_holder += line[3]
-        DistanceMeters.text = str(distance_holder)
-        # TODO: Some Huawei devices might collect the distance between points?
+        ##### Track
+        distance_holder = 0
+        for line in data:
+            Trackpoint = ET.SubElement(Track,'Trackpoint')
+            Time = ET.SubElement(Trackpoint,'Time')
+            Time.text = line[2]
+            Position = ET.SubElement(Trackpoint,'Position')
+            LatitudeDegrees = ET.SubElement(Position,'LatitudeDegrees')
+            LatitudeDegrees.text = line[0]
+            LongitudeDegrees = ET.SubElement(Position,'LongitudeDegrees')
+            LongitudeDegrees.text = line[1]
+            AltitudeMeters = ET.SubElement(Trackpoint,'AltitudeMeters')
+            AltitudeMeters.text = '0.0'
+            # TODO: Some (all?) Huawei devices don't collect Altitude data, but in that
+            # case can we call on some open API to estimate it?
+            DistanceMeters = ET.SubElement(Trackpoint,'DistanceMeters')
+            distance_holder += line[3]
+            DistanceMeters.text = str(distance_holder)
+            # TODO: Some Huawei devices might collect the distance between points?
 
-        # TODO: Implement HeartRateBpm
-        #HeartRateBpm = ET.SubElement(Trackpoint,'HeartRateBpm')
-        #HeartRateBpm.text = '84'
+            # TODO: Implement HeartRateBpm
+            #HeartRateBpm = ET.SubElement(Trackpoint,'HeartRateBpm')
+            #HeartRateBpm.text = '84'
 
-    #### Creator
-    # TODO: See if we can scrape this data from other files in the .tar
-    Creator = ET.SubElement(Activity,'Creator')
-    Creator.set('xsi:type','Device_t')
-    Name = ET.SubElement(Creator,'Name')
-    Name.text = 'Huawei Fitness Tracking Device'
-    UnitId = ET.SubElement(Creator,'UnitId')
-    UnitId.text = '0000000000'
-    ProductID = ET.SubElement(Creator,'ProductID')
-    ProductID.text = '0000'
-    Version = ET.SubElement(Creator,'Version')
-    VersionMajor = ET.SubElement(Version,'VersionMajor')
-    VersionMajor.text = '0'
-    VersionMinor = ET.SubElement(Version,'VersionMinor')
-    VersionMinor.text = '0'
-    BuildMajor = ET.SubElement(Version,'BuildMajor')
-    BuildMajor.text = '0'
-    BuildMinor = ET.SubElement(Version,'BuildMinor')
-    BuildMinor.text = '0'
+        #### Creator
+        # TODO: See if we can scrape this data from other files in the .tar
+        Creator = ET.SubElement(Activity,'Creator')
+        Creator.set('xsi:type','Device_t')
+        Name = ET.SubElement(Creator,'Name')
+        Name.text = 'Huawei Fitness Tracking Device'
+        UnitId = ET.SubElement(Creator,'UnitId')
+        UnitId.text = '0000000000'
+        ProductID = ET.SubElement(Creator,'ProductID')
+        ProductID.text = '0000'
+        Version = ET.SubElement(Creator,'Version')
+        VersionMajor = ET.SubElement(Version,'VersionMajor')
+        VersionMajor.text = '0'
+        VersionMinor = ET.SubElement(Version,'VersionMinor')
+        VersionMinor.text = '0'
+        BuildMajor = ET.SubElement(Version,'BuildMajor')
+        BuildMajor.text = '0'
+        BuildMinor = ET.SubElement(Version,'BuildMinor')
+        BuildMinor.text = '0'
 
-    ## Author
-    Author = ET.SubElement(TrainingCenterDatabase,'Author')
-    Author.set('xsi:type','Application_t') # TODO: Check this is right
-    Name = ET.SubElement(Author,'Name')
-    Name.text = 'Huawei_TCX_Converter'
-    Build = ET.SubElement(Author,'Build')
-    Version = ET.SubElement(Build,'Version')
-    VersionMajor = ET.SubElement(Version,'VersionMajor')
-    VersionMajor.text = '1'
-    VersionMinor = ET.SubElement(Version,'VersionMinor')
-    VersionMinor.text = '0'
-    BuildMajor = ET.SubElement(Version,'BuildMajor')
-    BuildMajor.text = '1'
-    BuildMinor = ET.SubElement(Version,'BuildMinor')
-    BuildMinor.text = '0'
-    LangID = ET.SubElement(Author,'LangID')
-    LangID.text = 'en' # TODO: Translations? Probably not...
-    PartNumber = ET.SubElement(Author,'PartNumber')
-    PartNumber.text = '000-00000-00'
+        ## Author
+        Author = ET.SubElement(TrainingCenterDatabase,'Author')
+        Author.set('xsi:type','Application_t') # TODO: Check this is right
+        Name = ET.SubElement(Author,'Name')
+        Name.text = 'Huawei_TCX_Converter'
+        Build = ET.SubElement(Author,'Build')
+        Version = ET.SubElement(Build,'Version')
+        VersionMajor = ET.SubElement(Version,'VersionMajor')
+        VersionMajor.text = '1'
+        VersionMinor = ET.SubElement(Version,'VersionMinor')
+        VersionMinor.text = '0'
+        BuildMajor = ET.SubElement(Version,'BuildMajor')
+        BuildMajor.text = '1'
+        BuildMinor = ET.SubElement(Version,'BuildMinor')
+        BuildMinor.text = '0'
+        LangID = ET.SubElement(Author,'LangID')
+        LangID.text = 'en' # TODO: Translations? Probably not...
+        PartNumber = ET.SubElement(Author,'PartNumber')
+        PartNumber.text = '000-00000-00'
 
-    print('OKAY')
+        print('OKAY')
+    except:
+        print('FAILED')
+
     return TrainingCenterDatabase
 
 def indent(elem, level=0):
@@ -254,25 +258,28 @@ def indent(elem, level=0):
 
 def save_xml(TrainingCenterDatabase):
     print('saving: ', end='')
-    tree = ET.ElementTree(TrainingCenterDatabase)
-    indent(TrainingCenterDatabase)
-    new_filename = sys.argv[1][8:]+'.tcx'
-    with open(new_filename, 'wb') as f:
-        f.write('<?xml version="1.0" encoding="UTF-8"?>'.encode('utf8'))
-        tree.write(f, 'utf-8')
-    print('OKAY')
+    try:
+        tree = ET.ElementTree(TrainingCenterDatabase)
+        indent(TrainingCenterDatabase)
+        new_filename = sys.argv[1][8:]+'.tcx'
+        with open(new_filename, 'wb') as f:
+            f.write('<?xml version="1.0" encoding="UTF-8"?>'.encode('utf8'))
+            tree.write(f, 'utf-8')
+        print('OKAY')
+    except:
+        print('FAILED')
 
     return new_filename
 
 def validate_xml(filename, xmlschema_found):
     if xmlschema_found:
-        print('validating: ', end='')
-        # Download and import schema to check against
-        url = 'https://www8.garmin.com/xmlschemas/TrainingCenterDatabasev2.xsd'
-        urllib.request.urlretrieve(url, 'TrainingCenterDatabasev2.xsd')
-        schema = xmlschema.XMLSchema('TrainingCenterDatabasev2.xsd')
-        # Validate
         try:
+            print('validating: ', end='')
+            # Download and import schema to check against
+            url = 'https://www8.garmin.com/xmlschemas/TrainingCenterDatabasev2.xsd'
+            urllib.request.urlretrieve(url, 'TrainingCenterDatabasev2.xsd')
+            schema = xmlschema.XMLSchema('TrainingCenterDatabasev2.xsd')
+            # Validate
             schema.validate(filename)
             print('OKAY')
         except:
