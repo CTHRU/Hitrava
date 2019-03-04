@@ -273,7 +273,7 @@ def validate_xml(filename, xmlschema_found):
         schema = xmlschema.XMLSchema('TrainingCenterDatabasev2.xsd')
         # Validate
         try:
-            schema.validate('test.tcx')
+            schema.validate(filename)
             print('OKAY')
         except:
             print('FAILED')
