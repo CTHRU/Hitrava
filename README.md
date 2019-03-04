@@ -1,7 +1,7 @@
 # Huawei TCX Converter
 A makeshift python tool that generates TCX files from Huawei HiTrack files.
 
-Users of Huawei Watches/Bands sync this data with the Huawei Health App. It is notoriously difficult to get the data out of this app, but through some cunning you can find `HiTrack` files which seem to contain some run data. This program allows you to take these files and generate `.TCX` files for use in your tracking app of choice (i.e. Strava).
+Users of Huawei Watches/Bands sync their fitness data with the Huawei Health App. It is notoriously difficult to get the data out of this app, but [through some cunning](https://forum.xda-developers.com/smartwatch/huawei-watch/huawei-watch-gt-export-data-health-t3874330) you can find `HiTrack` files which seem to contain some run data. This program allows you to take these files and generate `.TCX` files for use in your tracking app of choice (i.e. Strava).
 
 ## How to get the HiTrack Files - Android only
 
@@ -18,24 +18,26 @@ You need [`python 3`](https://www.python.org/downloads/) to use this tool. If yo
 
 The tool is run on the command line by passing it the name of your file as a command line argument. Please **do not rename your HiTrack files** as this tool extracts the start and end time of your exercise from it! For example you could copy the tool to the directory containing your HiTrack file and run:
 
-    python Huawei_TCX_Converter.py HiTrack_1550862681000155086673800030001
+    python Huawei_TCX_Converter.py HiTrack_1551732120000155173259000030001
 
 This gave me the output:
 
     ---- Information extracted from filename ----
-    start: 2019-02-22T19:11:21.000Z
-    end: 2019-02-22T20:18:58.000Z
-    duration: 01:07:37
+    start: 2019-03-04T20:42:00.000Z
+    end: 2019-03-04T20:49:50.000Z
+    duration: 00:07:50
     ---- Information extracted from file ----
-    location data points: 1911
-    distance (approx): 9815 m
+    location data points: 235
+    distance (approx): 1700 m
     ---- XML file ----
     generating: OKAY
     saving: OKAY
     validating: OKAY
-    
+
+You can test this out yourself using the same HiTrack file, which I've included in the Examples folder. You can also [visualise the data online](https://www.mygpsfiles.com/app/#3gcQ1H3M).
+
 ## Contributing
-This is a very early alpha version of this tool, so please help me by making it better! I'll accept any improvements, but if you're looking for inspiration you could start with this to-do list
+This is a very early alpha version of this tool, so please help me by making it better! I'll accept any improvements, but if you're looking for inspiration you could start with this to-do list:
 * Check that this works for files other than those generated using the Huawei Band 2 Pro
 * Improve the distance measurement method (currently using [Viscenty's Formulae](https://en.wikipedia.org/wiki/Vincenty%27s_formulae))
 * Try and work out what `tp=b-p-m` is
