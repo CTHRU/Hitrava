@@ -36,6 +36,8 @@ This gave me the output:
 
 You can test this out yourself using the same HiTrack file, which I've included in the Examples folder. You can also [visualise the data online](https://www.mygpsfiles.com/app/#3gcQ1H3M).
 
+![Map of example route](https://raw.githubusercontent.com/aricooperdavis/Huawei-TCX-Converter/master/Examples/Route.PNG) 
+
 ## Contributing
 This is a very early alpha version of this tool, so please help me by making it better! I'll accept any improvements, but if you're looking for inspiration you could start with this to-do list:
 * Check that this works for files other than those generated using the Huawei Band 2 Pro
