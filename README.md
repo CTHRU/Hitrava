@@ -16,24 +16,25 @@ If you have an **unrooted** phone then:
 ## How to use the Huawei TCX Converter
 You need [`python 3`](https://www.python.org/downloads/) to use this tool.
 
-The tool is run on the command line by passing it the name of your file as a command line argument. Please **do not rename your HiTrack files** as this tool extracts the start and end time of your exercise from it! Other command line arguments are `-v` which will validate the final TCX file in order to check that the conversion has worked (requires [xmlschema](https://pypi.org/project/xmlschema/)), and `-f` which will try to filter out any records for which GPS signal was lost.
+The tool is run on the command line by passing it the name of your file as a command line argument. Other command line arguments are `-v` which will validate the final TCX file in order to check that the conversion has worked (requires [xmlschema](https://pypi.org/project/xmlschema/)), and `-f` which will try to filter out any records for which GPS signal was lost.
 
-For example you could copy the tool to the directory containing your HiTrack file and run:
+You can rename your HiTrack files if you wish, but for clarity in the examples below I leave mine exactly as I found it.
 
-python .\Huawei_TCX_Converter.py HiTrack_1551732120000155173259000030001 -f -v
+### Illustration
+I have copied the `Huawei_TCX_Converter.py` file to the directory containing my HiTrack file (`HiTrack_1551732120000155173259000030001` ). Now I can run the tool as follows:
 
-This gave me the output:
+    python Huawei_TCX_Converter.py HiTrack_1551732120000155173259000030001 -f -v
 
-    ---- Information extracted from filename ----
-    start: 2019-03-04T20:42:00.000Z
-    end: 2019-03-04T20:49:50.000Z
-    duration: 00:07:50
+This gives me the output:
 
     ---- Filtering data ----
     filtering: OKAY
 
     ---- Information extracted from file ----
-    location data points: 235
+    start: 2019-03-04 20:42:00
+    end: 2019-03-04 20:49:49
+    duration: 00:07:49
+    data points: 235
     distance (approx): 1700 m
 
     ---- XML file ----
@@ -41,13 +42,15 @@ This gave me the output:
     saving: OKAY
     validating: OKAY
 
-You can test this out yourself using the same HiTrack file, which I've included in the Examples folder. You can also [visualise the data online](https://www.mygpsfiles.com/app/#3gcQ1H3M).
+I've included both the HiTrack file and the resultant TCX file in the Examples folder for you to have a go with. You can also [visualise the data online](https://www.mygpsfiles.com/app/#3gcQ1H3M).
 
 ![Map of example route](https://raw.githubusercontent.com/aricooperdavis/Huawei-TCX-Converter/master/Examples/Route.PNG)
 
 ## Contributing
 This is a very early alpha version of this tool, so please help me by making it better! There are some scripts in the Development Tools folder that I find useful for debugging. I'll accept any improvements, but if you're looking for inspiration you could start with this to-do list:
-* Check that this works for files other than those generated using the Huawei Band 2 Pro
+* ~~Remove reliance on using the original filename~~
+* Check that this works for files other than those generated using the Huawei Band 2 Pro:
+  * Confirmed working on a [file from a Huawei Watch GT](https://forum.xda-developers.com/smartwatch/huawei-watch/huawei-watch-gt-export-data-health-t3874330#post79042345)
 * Improve the distance measurement method (currently using [Viscenty's Formulae](https://en.wikipedia.org/wiki/Vincenty%27s_formulae))
 * Try and work out what `tp=b-p-m` is
 * Add interpolated heart-rate/pace/average speed data to each location element
