@@ -14,11 +14,13 @@ If you have an **unrooted** phone then:
 - Unzip the file and navigate to `com.huawei.health/files/` and you should should see a number of `HiTrack` files.
 
 ## How to use the Huawei TCX Converter
-You need [`python 3`](https://www.python.org/downloads/) to use this tool. If you have [xmlschema](https://pypi.org/project/xmlschema/) then the tool will be able to validate the final TCX file in order to check that the conversion has worked.
+You need [`python 3`](https://www.python.org/downloads/) to use this tool.
 
-The tool is run on the command line by passing it the name of your file as a command line argument. Please **do not rename your HiTrack files** as this tool extracts the start and end time of your exercise from it! For example you could copy the tool to the directory containing your HiTrack file and run:
+The tool is run on the command line by passing it the name of your file as a command line argument. Please **do not rename your HiTrack files** as this tool extracts the start and end time of your exercise from it! Other command line arguments are `-v` which will validate the final TCX file in order to check that the conversion has worked (requires [xmlschema](https://pypi.org/project/xmlschema/)), and `-f` which will try to filter out any records for which GPS signal was lost.
 
-    python Huawei_TCX_Converter.py HiTrack_1551732120000155173259000030001
+For example you could copy the tool to the directory containing your HiTrack file and run:
+
+python .\Huawei_TCX_Converter.py HiTrack_1551732120000155173259000030001 -f -v
 
 This gave me the output:
 
@@ -26,9 +28,14 @@ This gave me the output:
     start: 2019-03-04T20:42:00.000Z
     end: 2019-03-04T20:49:50.000Z
     duration: 00:07:50
+
+    ---- Filtering data ----
+    filtering: OKAY
+
     ---- Information extracted from file ----
     location data points: 235
     distance (approx): 1700 m
+
     ---- XML file ----
     generating: OKAY
     saving: OKAY
