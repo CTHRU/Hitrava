@@ -16,7 +16,7 @@ If you have an **unrooted** phone then:
 ## How to use the Huawei TCX Converter
 You need [`python 3`](https://www.python.org/downloads/) to use this tool.
 
-The tool is run on the command line by passing it the name of your file as a command line argument. Other command line arguments are `-v` which will validate the final TCX file in order to check that the conversion has worked (requires [xmlschema](https://pypi.org/project/xmlschema/)), and `-f` which will try to filter out any records for which GPS signal was lost.
+The tool is run on the command line by passing it the name of your file as a command line argument. Other command line arguments are `-v` which will validate the final TCX file in order to check that the conversion has worked (requires [xmlschema](https://pypi.org/project/xmlschema/) and an internet connection to download the TCX schema to check against), and `-f` which will try to filter out any records in which GPS signal was lost.
 
 You can rename your HiTrack files if you wish, but for clarity in the examples below I leave mine exactly as I found it.
 

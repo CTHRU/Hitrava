@@ -2,7 +2,7 @@
 
 # Imports
 import xml.etree.cElementTree as ET
-import math, sys, urllib.request
+import math, sys, tempfile, urllib.request
 from datetime import datetime as dt
 try:
     import xmlschema
@@ -309,17 +309,19 @@ def validate_xml(filename, xmlschema_found):
     print('validating: ', end='')
     if xmlschema_found:
         try:
-            # Download and import schema to check against
-            url = 'https://www8.garmin.com/xmlschemas/TrainingCenterDatabasev2.xsd'
-            urllib.request.urlretrieve(url, 'TrainingCenterDatabasev2.xsd')
-            schema = xmlschema.XMLSchema('TrainingCenterDatabasev2.xsd')
-            # Validate
-            schema.validate(filename)
+        # Make temporary directory
+            with tempfile.TemporaryDirectory() as tempdir:
+                # Download and import schema to check against
+                url = 'https://www8.garmin.com/xmlschemas/TrainingCenterDatabasev2.xsd'
+                urllib.request.urlretrieve(url, tempdir+'/TrainingCenterDatabasev2.xsd')
+                schema = xmlschema.XMLSchema(tempdir+'/TrainingCenterDatabasev2.xsd')
+                # Validate
+                schema.validate(filename)
             print('OKAY')
         except:
             print('FAILED')
     else:
-        print('XMLSCHEMA NOT FOUND; SKIPPING')
+        print('FAILED: xmlschema not found')
 
         return
 
