@@ -16,7 +16,11 @@ If you have an **unrooted** phone then:
 ## How to use the Huawei TCX Converter
 You need [`python 3`](https://www.python.org/downloads/) to use this tool.
 
-The tool is run on the command line by passing it the name of your file as a command line argument. Other command line arguments are `-v` which will validate the final TCX file in order to check that the conversion has worked (requires [xmlschema](https://pypi.org/project/xmlschema/) and an internet connection to download the TCX schema to check against), and `-f` which will try to filter out any records in which GPS signal was lost.
+The tool is run on the command line by passing it the name of your file as a command line argument.
+Other command line arguments:
+* `-v` - validate the final TCX file in order to check that the conversion has worked (requires [xmlschema](https://pypi.org/project/xmlschema/) and an internet connection to download the TCX schema to check against)
+* `-f` - attempt to filter out any records in which GPS signal was lost
+* `-b` - change sport to Biking
 
 You can rename your HiTrack files if you wish, but for clarity in the examples below I leave mine exactly as I found it.
 
@@ -37,6 +41,7 @@ This gives me the output:
     start: 2019-03-04 20:42:00
     duration: 00:07:49
     distance: 1700m
+    sport: Running
 
     ---- XML file ----
     generating: OKAY
@@ -55,7 +60,7 @@ This is a very early alpha version of this tool, so please help me by making it 
 * Improve the distance measurement method (currently using [Viscenty's Formulae](https://en.wikipedia.org/wiki/Vincenty%27s_formulae))
 * Try and work out what `tp=b-p-m` is
 * Add interpolated heart-rate/pace/average speed data to each location element
-* Look into files from different sports, and enable changing sports type
+* ~~Look into files from different sports, and enable changing sports type~~
 * Work on splitting data into `Laps`/`Tracks` rather than shoving it all into one
 * See if you really need to add the unused data elements (e.g. Calories) to the TCX
 * Try to call on an open API to get altitude data for location points that don't have it

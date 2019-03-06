@@ -15,12 +15,15 @@ def parse_arguments():
     print('\n')
     filter = False
     validate = False
+    sport = 'Running'
     input_file = ''
     for argument in sys.argv[1:]:
         if argument == '-f':
             filter = True
         elif argument == '-v':
             validate = True
+        elif argument == '-b':
+            sport = 'Biking'
         elif argument[0] == '-':
             print('Error: invalid input argument \''+argument+'\'')
             exit()
@@ -37,7 +40,7 @@ def parse_arguments():
             else:
                 input_file = argument
 
-    return input_file, {'filter': filter, 'validate': validate}
+    return input_file, {'filter': filter, 'validate': validate, 'sport': sport}
 
 def read_file(input_file):
     print('---- Input File ----')
@@ -243,7 +246,8 @@ def file_details(data):
     return stats
 
 
-def generate_xml(data, stats):
+def generate_xml(data, stats, options):
+    print('sport: '+str(options['sport']))
     print('\n---- XML file ----')
     print('generating: ', end='')
 
@@ -260,7 +264,7 @@ def generate_xml(data, stats):
 
         ### Activity
         Activity = ET.SubElement(Activities,'Activity')
-        Activity.set('Sport','Running') # TODO: Make an option to change sports?
+        Activity.set('Sport',options['sport'])
         Id = ET.SubElement(Activity,'Id')
         Id.text = stats['start_time'] # The StartTime timestamp
 
@@ -416,7 +420,7 @@ if options['filter']: gps_data = filter_data(gps_data)
 gps_data = process_gps(gps_data)
 data = merge_data(gps_data, hr_data)
 stats = file_details(data)
-TrainingCenterDatabase = generate_xml(data, stats)
+TrainingCenterDatabase = generate_xml(data, stats, options)
 filename = save_xml(TrainingCenterDatabase, input_file)
 if options['validate']: validate_xml(filename, xmlschema_found)
 print('\n')
