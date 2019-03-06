@@ -52,6 +52,9 @@ This gives me the output:
 
 I've included both the HiTrack file and the resultant TCX file in the Examples folder for you to have a go with. You can also [visualise the data online](https://www.mygpsfiles.com/app/#3gcQ1H3M).
 
+## Comparison
+This is an image of the GPS trace from the .tcx file. The command line output above also lists the start time as 2019-03-04 20:42:00, the distance as 1.70km, and the duration as 00:07:49.
+
 ![Map of example route](https://raw.githubusercontent.com/aricooperdavis/Huawei-TCX-Converter/master/Examples/Route.PNG)
 
 For comparison, below is the data visable on the Huawei Health App. You can see that the distance is off by about 80m, and the duration off by 1 second, but the GPS trace is spot on.
