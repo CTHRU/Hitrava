@@ -56,7 +56,7 @@ I've included both the HiTrack file and the resultant TCX file in the Examples f
 
 For comparison, below is the data visable on the Huawei Health App. You can see that the distance is off by about 80m, and the duration off by 1 second, but the GPS trace is spot on.
 
-![Huawei Health App example route](https://raw.githubusercontent.com/aricooperdavis/Huawei_TCX_Converter/master/Examples/Huawei_Health.png)
+![Huawei Health App example route](https://raw.githubusercontent.com/aricooperdavis/Huawei-TCX-Converter/master/Examples/Huawei_Health.png)
 
 ## Contributing
 This is a very early alpha version of this tool, so please help me by making it better! There are some scripts in the Development Tools folder that I find useful for debugging. I'll accept any improvements, but if you're looking for inspiration you could start with this to-do list:
