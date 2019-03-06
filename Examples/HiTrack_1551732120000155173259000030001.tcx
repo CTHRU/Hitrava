@@ -1,9 +1,9 @@
-<?xml version="1.0" encoding="UTF-8"?><TrainingCenterDatabase xmlns="http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2 http://www.garmin.com/xmlschemas/TrainingCenterDatabasev2.xsd">
+<?xml version="1.0" encoding="UTF-8"?><TrainingCenterDatabase xmlns="http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2 http://www.garmin.com/xmlschemas/TrainingCenterDatabasev2.xsd">
   <Activities>
     <Activity Sport="Running">
       <Id>2019-03-04T20:42:00.000Z</Id>
       <Lap StartTime="2019-03-04T20:42:00.000Z">
-        <TotalTimeSeconds>469</TotalTimeSeconds>
+        <TotalTimeSeconds>469.0</TotalTimeSeconds>
         <DistanceMeters>1700</DistanceMeters>
         <Calories>0</Calories>
         <Intensity>Active</Intensity>
@@ -34,7 +34,7 @@
               <LongitudeDegrees>-3.513595</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>4.450862</DistanceMeters>
+            <DistanceMeters>2.6312569999999997</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:42:05.000Z</Time>
@@ -43,7 +43,10 @@
               <LongitudeDegrees>-3.5135626</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>10.848980000000001</DistanceMeters>
+            <DistanceMeters>6.398118</DistanceMeters>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>105</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:42:07.000Z</Time>
@@ -52,7 +55,7 @@
               <LongitudeDegrees>-3.5135185</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>22.936271</DistanceMeters>
+            <DistanceMeters>12.087291</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:42:09.000Z</Time>
@@ -61,7 +64,13 @@
               <LongitudeDegrees>-3.5134628</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>41.908746</DistanceMeters>
+            <DistanceMeters>18.972475</DistanceMeters>
+          </Trackpoint>
+          <Trackpoint>
+            <Time>2019-03-04T20:42:10.000Z</Time>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>105</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:42:11.000Z</Time>
@@ -70,7 +79,7 @@
               <LongitudeDegrees>-3.5134057</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>68.069969</DistanceMeters>
+            <DistanceMeters>26.161223</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:42:13.000Z</Time>
@@ -79,7 +88,7 @@
               <LongitudeDegrees>-3.5133442</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>101.02797100000001</DistanceMeters>
+            <DistanceMeters>32.958002</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:42:15.000Z</Time>
@@ -88,7 +97,10 @@
               <LongitudeDegrees>-3.5132858</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>140.21781900000002</DistanceMeters>
+            <DistanceMeters>39.189848</DistanceMeters>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>115</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:42:17.000Z</Time>
@@ -97,7 +109,7 @@
               <LongitudeDegrees>-3.5132298</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>185.00417400000003</DistanceMeters>
+            <DistanceMeters>44.786355</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:42:19.000Z</Time>
@@ -106,7 +118,13 @@
               <LongitudeDegrees>-3.5131728</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>235.95739600000002</DistanceMeters>
+            <DistanceMeters>50.953222</DistanceMeters>
+          </Trackpoint>
+          <Trackpoint>
+            <Time>2019-03-04T20:42:20.000Z</Time>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>112</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:42:21.000Z</Time>
@@ -115,7 +133,7 @@
               <LongitudeDegrees>-3.513108</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>293.442359</DistanceMeters>
+            <DistanceMeters>57.48496299999999</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:42:23.000Z</Time>
@@ -124,7 +142,7 @@
               <LongitudeDegrees>-3.5130272</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>359.16396</DistanceMeters>
+            <DistanceMeters>65.72160099999999</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:42:25.000Z</Time>
@@ -133,7 +151,10 @@
               <LongitudeDegrees>-3.5129436</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>432.68348999999995</DistanceMeters>
+            <DistanceMeters>73.51952999999999</DistanceMeters>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>118</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:42:27.000Z</Time>
@@ -142,7 +163,7 @@
               <LongitudeDegrees>-3.5128648</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>513.5553729999999</DistanceMeters>
+            <DistanceMeters>80.87188299999998</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:42:29.000Z</Time>
@@ -151,7 +172,13 @@
               <LongitudeDegrees>-3.5127943</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>601.5505699999999</DistanceMeters>
+            <DistanceMeters>87.99519699999998</DistanceMeters>
+          </Trackpoint>
+          <Trackpoint>
+            <Time>2019-03-04T20:42:30.000Z</Time>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>121</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:42:31.000Z</Time>
@@ -160,7 +187,7 @@
               <LongitudeDegrees>-3.5127176</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>698.0124259999999</DistanceMeters>
+            <DistanceMeters>96.46185599999998</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:42:33.000Z</Time>
@@ -169,7 +196,7 @@
               <LongitudeDegrees>-3.512634</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>804.1311579999999</DistanceMeters>
+            <DistanceMeters>106.11873199999998</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:42:35.000Z</Time>
@@ -178,7 +205,10 @@
               <LongitudeDegrees>-3.5125425</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>919.5155309999999</DistanceMeters>
+            <DistanceMeters>115.38437299999998</DistanceMeters>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>123</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:42:37.000Z</Time>
@@ -187,7 +217,7 @@
               <LongitudeDegrees>-3.5124565</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>1043.3021909999998</DistanceMeters>
+            <DistanceMeters>123.78665999999998</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:42:39.000Z</Time>
@@ -196,7 +226,13 @@
               <LongitudeDegrees>-3.5123727</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>1174.5396799999999</DistanceMeters>
+            <DistanceMeters>131.23748899999998</DistanceMeters>
+          </Trackpoint>
+          <Trackpoint>
+            <Time>2019-03-04T20:42:40.000Z</Time>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>124</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:42:41.000Z</Time>
@@ -205,7 +241,7 @@
               <LongitudeDegrees>-3.5122916</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>1313.3396599999999</DistanceMeters>
+            <DistanceMeters>138.79997999999998</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:42:43.000Z</Time>
@@ -214,7 +250,7 @@
               <LongitudeDegrees>-3.5122186</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>1459.1946739999998</DistanceMeters>
+            <DistanceMeters>145.85501399999998</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:42:45.000Z</Time>
@@ -223,7 +259,10 @@
               <LongitudeDegrees>-3.51217</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>1611.192619</DistanceMeters>
+            <DistanceMeters>151.997945</DistanceMeters>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>129</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:42:47.000Z</Time>
@@ -232,7 +271,7 @@
               <LongitudeDegrees>-3.5121505</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>1768.4682819999998</DistanceMeters>
+            <DistanceMeters>157.27566299999998</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:42:49.000Z</Time>
@@ -241,7 +280,13 @@
               <LongitudeDegrees>-3.512159</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>1931.7145659999999</DistanceMeters>
+            <DistanceMeters>163.24628399999997</DistanceMeters>
+          </Trackpoint>
+          <Trackpoint>
+            <Time>2019-03-04T20:42:50.000Z</Time>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>134</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:42:51.000Z</Time>
@@ -250,7 +295,7 @@
               <LongitudeDegrees>-3.5121773</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>2102.426693</DistanceMeters>
+            <DistanceMeters>170.71212699999998</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:42:53.000Z</Time>
@@ -259,7 +304,7 @@
               <LongitudeDegrees>-3.5122045</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>2281.700266</DistanceMeters>
+            <DistanceMeters>179.27357299999997</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:42:55.000Z</Time>
@@ -268,7 +313,10 @@
               <LongitudeDegrees>-3.5122291</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>2469.779333</DistanceMeters>
+            <DistanceMeters>188.07906699999998</DistanceMeters>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>135</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:42:57.000Z</Time>
@@ -277,7 +325,7 @@
               <LongitudeDegrees>-3.5122507</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>2666.75605</DistanceMeters>
+            <DistanceMeters>196.97671699999998</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:42:59.000Z</Time>
@@ -286,7 +334,13 @@
               <LongitudeDegrees>-3.5122799</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>2872.0572779999998</DistanceMeters>
+            <DistanceMeters>205.30122799999998</DistanceMeters>
+          </Trackpoint>
+          <Trackpoint>
+            <Time>2019-03-04T20:43:00.000Z</Time>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>136</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:43:01.000Z</Time>
@@ -295,7 +349,7 @@
               <LongitudeDegrees>-3.512324</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>3086.1285839999996</DistanceMeters>
+            <DistanceMeters>214.071306</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:43:03.000Z</Time>
@@ -304,7 +358,7 @@
               <LongitudeDegrees>-3.5123765</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>3309.0762119999995</DistanceMeters>
+            <DistanceMeters>222.94762799999998</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:43:05.000Z</Time>
@@ -313,7 +367,10 @@
               <LongitudeDegrees>-3.5124254</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>3540.9199069999995</DistanceMeters>
+            <DistanceMeters>231.84369499999997</DistanceMeters>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>138</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:43:07.000Z</Time>
@@ -322,7 +379,7 @@
               <LongitudeDegrees>-3.5124667</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>3780.2928789999996</DistanceMeters>
+            <DistanceMeters>239.37297199999998</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:43:09.000Z</Time>
@@ -331,7 +388,13 @@
               <LongitudeDegrees>-3.5125096</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>4026.4532139999997</DistanceMeters>
+            <DistanceMeters>246.16033499999998</DistanceMeters>
+          </Trackpoint>
+          <Trackpoint>
+            <Time>2019-03-04T20:43:10.000Z</Time>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>138</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:43:11.000Z</Time>
@@ -340,7 +403,7 @@
               <LongitudeDegrees>-3.5125543</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>4279.846318999999</DistanceMeters>
+            <DistanceMeters>253.39310499999996</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:43:13.000Z</Time>
@@ -349,7 +412,7 @@
               <LongitudeDegrees>-3.512597</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>4541.455091999999</DistanceMeters>
+            <DistanceMeters>261.608773</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:43:15.000Z</Time>
@@ -358,7 +421,10 @@
               <LongitudeDegrees>-3.5126386</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>4812.182414999999</DistanceMeters>
+            <DistanceMeters>270.727323</DistanceMeters>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>140</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:43:17.000Z</Time>
@@ -367,7 +433,7 @@
               <LongitudeDegrees>-3.5126769</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>5092.221670999999</DistanceMeters>
+            <DistanceMeters>280.039256</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:43:19.000Z</Time>
@@ -376,7 +442,13 @@
               <LongitudeDegrees>-3.5127112</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>5380.809796999999</DistanceMeters>
+            <DistanceMeters>288.58812600000005</DistanceMeters>
+          </Trackpoint>
+          <Trackpoint>
+            <Time>2019-03-04T20:43:20.000Z</Time>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>141</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:43:21.000Z</Time>
@@ -385,7 +457,7 @@
               <LongitudeDegrees>-3.5127376</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>5677.394135999999</DistanceMeters>
+            <DistanceMeters>296.58433900000006</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:43:23.000Z</Time>
@@ -394,7 +466,7 @@
               <LongitudeDegrees>-3.5127618</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>5981.397613999999</DistanceMeters>
+            <DistanceMeters>304.00347800000003</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:43:25.000Z</Time>
@@ -403,7 +475,10 @@
               <LongitudeDegrees>-3.5127859</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>6292.807780999999</DistanceMeters>
+            <DistanceMeters>311.410167</DistanceMeters>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>139</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:43:27.000Z</Time>
@@ -412,7 +487,7 @@
               <LongitudeDegrees>-3.5128134</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>6611.694194999998</DistanceMeters>
+            <DistanceMeters>318.886414</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:43:29.000Z</Time>
@@ -421,7 +496,13 @@
               <LongitudeDegrees>-3.5128429</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>6938.641410999999</DistanceMeters>
+            <DistanceMeters>326.947216</DistanceMeters>
+          </Trackpoint>
+          <Trackpoint>
+            <Time>2019-03-04T20:43:30.000Z</Time>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>142</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:43:31.000Z</Time>
@@ -430,7 +511,7 @@
               <LongitudeDegrees>-3.5128744</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>7274.212498999998</DistanceMeters>
+            <DistanceMeters>335.57108800000003</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:43:33.000Z</Time>
@@ -439,7 +520,7 @@
               <LongitudeDegrees>-3.5128996</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>7618.183942999998</DistanceMeters>
+            <DistanceMeters>343.971444</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:43:35.000Z</Time>
@@ -448,7 +529,10 @@
               <LongitudeDegrees>-3.5129182</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>7969.209173999998</DistanceMeters>
+            <DistanceMeters>351.025231</DistanceMeters>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>139</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:43:37.000Z</Time>
@@ -457,7 +541,7 @@
               <LongitudeDegrees>-3.5129246</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>8326.058847999997</DistanceMeters>
+            <DistanceMeters>356.849674</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:43:39.000Z</Time>
@@ -466,7 +550,13 @@
               <LongitudeDegrees>-3.5129182</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>8687.170904999997</DistanceMeters>
+            <DistanceMeters>361.112057</DistanceMeters>
+          </Trackpoint>
+          <Trackpoint>
+            <Time>2019-03-04T20:43:40.000Z</Time>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>137</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:43:41.000Z</Time>
@@ -475,7 +565,7 @@
               <LongitudeDegrees>-3.5129112</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>9052.273938999997</DistanceMeters>
+            <DistanceMeters>365.103034</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:43:43.000Z</Time>
@@ -484,7 +574,7 @@
               <LongitudeDegrees>-3.5129065</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>9421.495233999996</DistanceMeters>
+            <DistanceMeters>369.221295</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:43:45.000Z</Time>
@@ -493,7 +583,10 @@
               <LongitudeDegrees>-3.5129163</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>9795.858235999996</DistanceMeters>
+            <DistanceMeters>374.363002</DistanceMeters>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>142</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:43:47.000Z</Time>
@@ -502,7 +595,7 @@
               <LongitudeDegrees>-3.5129317</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>10175.976051999996</DistanceMeters>
+            <DistanceMeters>380.117816</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:43:49.000Z</Time>
@@ -511,7 +604,13 @@
               <LongitudeDegrees>-3.5129466</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>10562.269144999997</DistanceMeters>
+            <DistanceMeters>386.293093</DistanceMeters>
+          </Trackpoint>
+          <Trackpoint>
+            <Time>2019-03-04T20:43:50.000Z</Time>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>140</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:43:51.000Z</Time>
@@ -520,7 +619,7 @@
               <LongitudeDegrees>-3.5129584</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>10955.399023999997</DistanceMeters>
+            <DistanceMeters>393.129879</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:43:53.000Z</Time>
@@ -529,7 +628,7 @@
               <LongitudeDegrees>-3.512967</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>11356.051232999997</DistanceMeters>
+            <DistanceMeters>400.652209</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:43:55.000Z</Time>
@@ -538,7 +637,10 @@
               <LongitudeDegrees>-3.5129813</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>11763.707050999996</DistanceMeters>
+            <DistanceMeters>407.655818</DistanceMeters>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>141</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:43:57.000Z</Time>
@@ -547,7 +649,7 @@
               <LongitudeDegrees>-3.5129964</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>12178.660845999995</DistanceMeters>
+            <DistanceMeters>414.953795</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:43:59.000Z</Time>
@@ -556,7 +658,13 @@
               <LongitudeDegrees>-3.5130106</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>12600.760391999995</DistanceMeters>
+            <DistanceMeters>422.09954600000003</DistanceMeters>
+          </Trackpoint>
+          <Trackpoint>
+            <Time>2019-03-04T20:44:00.000Z</Time>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>145</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:44:01.000Z</Time>
@@ -565,7 +673,7 @@
               <LongitudeDegrees>-3.5130236</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>13031.530001999994</DistanceMeters>
+            <DistanceMeters>430.76961000000006</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:44:03.000Z</Time>
@@ -574,7 +682,7 @@
               <LongitudeDegrees>-3.513043</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>13470.622842999994</DistanceMeters>
+            <DistanceMeters>439.0928410000001</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:44:05.000Z</Time>
@@ -583,7 +691,10 @@
               <LongitudeDegrees>-3.5130618</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>13917.889318999994</DistanceMeters>
+            <DistanceMeters>447.26647600000007</DistanceMeters>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>143</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:44:07.000Z</Time>
@@ -592,7 +703,7 @@
               <LongitudeDegrees>-3.513078</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>14371.894792999994</DistanceMeters>
+            <DistanceMeters>454.00547400000005</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:44:09.000Z</Time>
@@ -601,7 +712,13 @@
               <LongitudeDegrees>-3.5130843</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>14832.423170999995</DistanceMeters>
+            <DistanceMeters>460.52837800000003</DistanceMeters>
+          </Trackpoint>
+          <Trackpoint>
+            <Time>2019-03-04T20:44:10.000Z</Time>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>140</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:44:11.000Z</Time>
@@ -610,7 +727,7 @@
               <LongitudeDegrees>-3.5130854</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>15299.882425999995</DistanceMeters>
+            <DistanceMeters>467.45925500000004</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:44:13.000Z</Time>
@@ -619,7 +736,7 @@
               <LongitudeDegrees>-3.5130829</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>15774.696963999995</DistanceMeters>
+            <DistanceMeters>474.814538</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:44:15.000Z</Time>
@@ -628,7 +745,10 @@
               <LongitudeDegrees>-3.5130817</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>16257.009761999996</DistanceMeters>
+            <DistanceMeters>482.31279800000004</DistanceMeters>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>143</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:44:17.000Z</Time>
@@ -637,7 +757,7 @@
               <LongitudeDegrees>-3.5130816</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>16746.397620999996</DistanceMeters>
+            <DistanceMeters>489.38785900000005</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:44:19.000Z</Time>
@@ -646,7 +766,13 @@
               <LongitudeDegrees>-3.5130875</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>17243.017162999997</DistanceMeters>
+            <DistanceMeters>496.619542</DistanceMeters>
+          </Trackpoint>
+          <Trackpoint>
+            <Time>2019-03-04T20:44:20.000Z</Time>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>143</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:44:21.000Z</Time>
@@ -655,7 +781,7 @@
               <LongitudeDegrees>-3.5130996</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>17747.746951999998</DistanceMeters>
+            <DistanceMeters>504.72978900000004</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:44:23.000Z</Time>
@@ -664,7 +790,7 @@
               <LongitudeDegrees>-3.5131189</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>18260.371139</DistanceMeters>
+            <DistanceMeters>512.624187</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:44:25.000Z</Time>
@@ -673,7 +799,10 @@
               <LongitudeDegrees>-3.5131407</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>18781.206020999998</DistanceMeters>
+            <DistanceMeters>520.834882</DistanceMeters>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>144</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:44:27.000Z</Time>
@@ -682,7 +811,7 @@
               <LongitudeDegrees>-3.5131602</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>19309.379768</DistanceMeters>
+            <DistanceMeters>528.173747</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:44:29.000Z</Time>
@@ -691,7 +820,13 @@
               <LongitudeDegrees>-3.5131733</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>19844.964629</DistanceMeters>
+            <DistanceMeters>535.584861</DistanceMeters>
+          </Trackpoint>
+          <Trackpoint>
+            <Time>2019-03-04T20:44:30.000Z</Time>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>144</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:44:31.000Z</Time>
@@ -700,7 +835,7 @@
               <LongitudeDegrees>-3.5131844</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>20387.535162</DistanceMeters>
+            <DistanceMeters>542.5705330000001</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:44:33.000Z</Time>
@@ -709,7 +844,7 @@
               <LongitudeDegrees>-3.5131952</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>20937.354467</DistanceMeters>
+            <DistanceMeters>549.8193050000001</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:44:35.000Z</Time>
@@ -718,7 +853,10 @@
               <LongitudeDegrees>-3.5132131</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>21494.634767</DistanceMeters>
+            <DistanceMeters>557.2803000000001</DistanceMeters>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>145</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:44:37.000Z</Time>
@@ -727,7 +865,7 @@
               <LongitudeDegrees>-3.5132307</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>22059.372503</DistanceMeters>
+            <DistanceMeters>564.7377360000002</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:44:39.000Z</Time>
@@ -736,7 +874,13 @@
               <LongitudeDegrees>-3.5132493</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>22632.138886</DistanceMeters>
+            <DistanceMeters>572.7663830000001</DistanceMeters>
+          </Trackpoint>
+          <Trackpoint>
+            <Time>2019-03-04T20:44:40.000Z</Time>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>144</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:44:41.000Z</Time>
@@ -745,7 +889,7 @@
               <LongitudeDegrees>-3.5132749</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>23213.583447</DistanceMeters>
+            <DistanceMeters>581.4445610000001</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:44:43.000Z</Time>
@@ -754,7 +898,7 @@
               <LongitudeDegrees>-3.5133072</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>23803.95665</DistanceMeters>
+            <DistanceMeters>590.3732030000001</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:44:45.000Z</Time>
@@ -763,7 +907,10 @@
               <LongitudeDegrees>-3.5133623</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>24401.199868</DistanceMeters>
+            <DistanceMeters>597.2432180000001</DistanceMeters>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>143</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:44:47.000Z</Time>
@@ -772,7 +919,7 @@
               <LongitudeDegrees>-3.5134325</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>25003.831563</DistanceMeters>
+            <DistanceMeters>602.631695</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:44:49.000Z</Time>
@@ -781,7 +928,13 @@
               <LongitudeDegrees>-3.5135216</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>25612.760524</DistanceMeters>
+            <DistanceMeters>608.9289610000001</DistanceMeters>
+          </Trackpoint>
+          <Trackpoint>
+            <Time>2019-03-04T20:44:50.000Z</Time>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>144</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:44:51.000Z</Time>
@@ -790,7 +943,7 @@
               <LongitudeDegrees>-3.5136087</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>26227.918577</DistanceMeters>
+            <DistanceMeters>615.1580530000001</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:44:53.000Z</Time>
@@ -799,7 +952,7 @@
               <LongitudeDegrees>-3.5136949</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>26849.16986</DistanceMeters>
+            <DistanceMeters>621.2512830000001</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:44:55.000Z</Time>
@@ -808,7 +961,10 @@
               <LongitudeDegrees>-3.5137905</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>27477.176942000002</DistanceMeters>
+            <DistanceMeters>628.0070820000001</DistanceMeters>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>144</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:44:57.000Z</Time>
@@ -817,7 +973,7 @@
               <LongitudeDegrees>-3.5138876</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>28112.041532000003</DistanceMeters>
+            <DistanceMeters>634.8645900000001</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:44:59.000Z</Time>
@@ -826,7 +982,13 @@
               <LongitudeDegrees>-3.5139844</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>28753.793015000003</DistanceMeters>
+            <DistanceMeters>641.7514830000001</DistanceMeters>
+          </Trackpoint>
+          <Trackpoint>
+            <Time>2019-03-04T20:45:00.000Z</Time>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>148</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:45:01.000Z</Time>
@@ -835,7 +997,7 @@
               <LongitudeDegrees>-3.5140671</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>29401.587858000003</DistanceMeters>
+            <DistanceMeters>647.7948430000001</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:45:03.000Z</Time>
@@ -844,7 +1006,7 @@
               <LongitudeDegrees>-3.51415</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>30055.439709000002</DistanceMeters>
+            <DistanceMeters>653.8518510000001</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:45:05.000Z</Time>
@@ -853,7 +1015,10 @@
               <LongitudeDegrees>-3.5142366</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>30715.675725</DistanceMeters>
+            <DistanceMeters>660.2360160000002</DistanceMeters>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>149</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:45:07.000Z</Time>
@@ -862,7 +1027,7 @@
               <LongitudeDegrees>-3.5143191</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>31381.905739</DistanceMeters>
+            <DistanceMeters>666.2300140000002</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:45:09.000Z</Time>
@@ -871,7 +1036,13 @@
               <LongitudeDegrees>-3.5144033</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>32054.357809</DistanceMeters>
+            <DistanceMeters>672.4520700000002</DistanceMeters>
+          </Trackpoint>
+          <Trackpoint>
+            <Time>2019-03-04T20:45:10.000Z</Time>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>147</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:45:11.000Z</Time>
@@ -880,7 +1051,7 @@
               <LongitudeDegrees>-3.5144864</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>32732.919242</DistanceMeters>
+            <DistanceMeters>678.5614330000002</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:45:13.000Z</Time>
@@ -889,7 +1060,7 @@
               <LongitudeDegrees>-3.5145773</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>33418.197415</DistanceMeters>
+            <DistanceMeters>685.2781730000002</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:45:15.000Z</Time>
@@ -898,7 +1069,10 @@
               <LongitudeDegrees>-3.5146788</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>34110.950597</DistanceMeters>
+            <DistanceMeters>692.7531820000002</DistanceMeters>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>149</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:45:17.000Z</Time>
@@ -907,7 +1081,7 @@
               <LongitudeDegrees>-3.5147828</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>34811.430113</DistanceMeters>
+            <DistanceMeters>700.4795160000001</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:45:19.000Z</Time>
@@ -916,7 +1090,13 @@
               <LongitudeDegrees>-3.5148907</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>35520.035298</DistanceMeters>
+            <DistanceMeters>708.6051850000001</DistanceMeters>
+          </Trackpoint>
+          <Trackpoint>
+            <Time>2019-03-04T20:45:20.000Z</Time>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>147</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:45:21.000Z</Time>
@@ -925,7 +1105,7 @@
               <LongitudeDegrees>-3.5149971</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>36236.944352000006</DistanceMeters>
+            <DistanceMeters>716.9090540000001</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:45:23.000Z</Time>
@@ -934,7 +1114,7 @@
               <LongitudeDegrees>-3.5151035</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>36962.10129500001</DistanceMeters>
+            <DistanceMeters>725.1569430000001</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:45:25.000Z</Time>
@@ -943,7 +1123,10 @@
               <LongitudeDegrees>-3.5152134</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>37696.03167900001</DistanceMeters>
+            <DistanceMeters>733.9303840000001</DistanceMeters>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>148</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:45:27.000Z</Time>
@@ -952,7 +1135,7 @@
               <LongitudeDegrees>-3.5153226</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>38438.63002700001</DistanceMeters>
+            <DistanceMeters>742.5983480000001</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:45:29.000Z</Time>
@@ -961,7 +1144,13 @@
               <LongitudeDegrees>-3.5154323</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>39189.92776300001</DistanceMeters>
+            <DistanceMeters>751.2977360000001</DistanceMeters>
+          </Trackpoint>
+          <Trackpoint>
+            <Time>2019-03-04T20:45:30.000Z</Time>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>149</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:45:31.000Z</Time>
@@ -970,7 +1159,7 @@
               <LongitudeDegrees>-3.5155416</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>39949.83962700001</DistanceMeters>
+            <DistanceMeters>759.9118640000002</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:45:33.000Z</Time>
@@ -979,7 +1168,7 @@
               <LongitudeDegrees>-3.5156571</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>40718.81258400001</DistanceMeters>
+            <DistanceMeters>768.9729570000002</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:45:35.000Z</Time>
@@ -988,7 +1177,10 @@
               <LongitudeDegrees>-3.515776</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>41497.26126100001</DistanceMeters>
+            <DistanceMeters>778.4486770000002</DistanceMeters>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>149</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:45:37.000Z</Time>
@@ -997,7 +1189,7 @@
               <LongitudeDegrees>-3.5158936</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>42285.09923700001</DistanceMeters>
+            <DistanceMeters>787.8379760000003</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:45:39.000Z</Time>
@@ -1006,7 +1198,13 @@
               <LongitudeDegrees>-3.5160038</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>43081.79769100001</DistanceMeters>
+            <DistanceMeters>796.6984540000003</DistanceMeters>
+          </Trackpoint>
+          <Trackpoint>
+            <Time>2019-03-04T20:45:40.000Z</Time>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>151</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:45:41.000Z</Time>
@@ -1015,7 +1213,7 @@
               <LongitudeDegrees>-3.5161089</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>43887.11477000001</DistanceMeters>
+            <DistanceMeters>805.3170790000003</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:45:43.000Z</Time>
@@ -1024,7 +1222,7 @@
               <LongitudeDegrees>-3.5162134</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>44701.094601000004</DistanceMeters>
+            <DistanceMeters>813.9798310000002</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:45:45.000Z</Time>
@@ -1033,7 +1231,10 @@
               <LongitudeDegrees>-3.5163113</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>45523.113927000006</DistanceMeters>
+            <DistanceMeters>822.0193260000002</DistanceMeters>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>147</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:45:47.000Z</Time>
@@ -1042,7 +1243,7 @@
               <LongitudeDegrees>-3.5164074</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>46353.205163000006</DistanceMeters>
+            <DistanceMeters>830.0912360000002</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:45:49.000Z</Time>
@@ -1051,7 +1252,13 @@
               <LongitudeDegrees>-3.5165045</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>47191.287386</DistanceMeters>
+            <DistanceMeters>838.0822230000002</DistanceMeters>
+          </Trackpoint>
+          <Trackpoint>
+            <Time>2019-03-04T20:45:50.000Z</Time>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>146</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:45:51.000Z</Time>
@@ -1060,7 +1267,7 @@
               <LongitudeDegrees>-3.5166049</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>48037.357947000004</DistanceMeters>
+            <DistanceMeters>846.0705610000002</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:45:53.000Z</Time>
@@ -1069,7 +1276,7 @@
               <LongitudeDegrees>-3.516711</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>48891.256258</DistanceMeters>
+            <DistanceMeters>853.8983110000003</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:45:55.000Z</Time>
@@ -1078,7 +1285,10 @@
               <LongitudeDegrees>-3.5168092</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>49752.088336</DistanceMeters>
+            <DistanceMeters>860.8320780000003</DistanceMeters>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>148</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:45:57.000Z</Time>
@@ -1087,7 +1297,7 @@
               <LongitudeDegrees>-3.5169061</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>50619.970910000004</DistanceMeters>
+            <DistanceMeters>867.8825740000002</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:45:59.000Z</Time>
@@ -1096,7 +1306,13 @@
               <LongitudeDegrees>-3.5169966</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>51495.026831</DistanceMeters>
+            <DistanceMeters>875.0559210000002</DistanceMeters>
+          </Trackpoint>
+          <Trackpoint>
+            <Time>2019-03-04T20:46:00.000Z</Time>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>144</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:46:01.000Z</Time>
@@ -1105,7 +1321,7 @@
               <LongitudeDegrees>-3.5170881</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>52377.443182</DistanceMeters>
+            <DistanceMeters>882.4163510000002</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:46:03.000Z</Time>
@@ -1114,7 +1330,7 @@
               <LongitudeDegrees>-3.5171769</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>53266.926156</DistanceMeters>
+            <DistanceMeters>889.4829740000002</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:46:05.000Z</Time>
@@ -1123,7 +1339,10 @@
               <LongitudeDegrees>-3.5172635</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>54162.656215</DistanceMeters>
+            <DistanceMeters>895.7300590000002</DistanceMeters>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>147</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:46:07.000Z</Time>
@@ -1132,7 +1351,7 @@
               <LongitudeDegrees>-3.5173371</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>55063.81461</DistanceMeters>
+            <DistanceMeters>901.1583950000002</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:46:09.000Z</Time>
@@ -1141,7 +1360,13 @@
               <LongitudeDegrees>-3.5174056</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>55971.217131000005</DistanceMeters>
+            <DistanceMeters>907.4025210000002</DistanceMeters>
+          </Trackpoint>
+          <Trackpoint>
+            <Time>2019-03-04T20:46:10.000Z</Time>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>147</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:46:11.000Z</Time>
@@ -1150,7 +1375,7 @@
               <LongitudeDegrees>-3.5174723</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>56885.664729000004</DistanceMeters>
+            <DistanceMeters>914.4475980000002</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:46:13.000Z</Time>
@@ -1159,7 +1384,7 @@
               <LongitudeDegrees>-3.5175459</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>57807.491998000005</DistanceMeters>
+            <DistanceMeters>921.8272690000002</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:46:15.000Z</Time>
@@ -1168,7 +1393,10 @@
               <LongitudeDegrees>-3.5176197</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>58736.796154</DistanceMeters>
+            <DistanceMeters>929.3041560000003</DistanceMeters>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>136</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:46:17.000Z</Time>
@@ -1177,7 +1405,7 @@
               <LongitudeDegrees>-3.5176989</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>59673.665440000004</DistanceMeters>
+            <DistanceMeters>936.8692860000002</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:46:19.000Z</Time>
@@ -1186,7 +1414,13 @@
               <LongitudeDegrees>-3.5177875</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>60618.69497700001</DistanceMeters>
+            <DistanceMeters>945.0295370000002</DistanceMeters>
+          </Trackpoint>
+          <Trackpoint>
+            <Time>2019-03-04T20:46:20.000Z</Time>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>134</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:46:21.000Z</Time>
@@ -1195,7 +1429,7 @@
               <LongitudeDegrees>-3.5178752</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>61571.743502000005</DistanceMeters>
+            <DistanceMeters>953.0485250000003</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:46:23.000Z</Time>
@@ -1204,7 +1438,7 @@
               <LongitudeDegrees>-3.5179638</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>62533.13358</DistanceMeters>
+            <DistanceMeters>961.3900780000002</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:46:25.000Z</Time>
@@ -1213,7 +1447,7 @@
               <LongitudeDegrees>-3.5180517</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>63503.015534</DistanceMeters>
+            <DistanceMeters>969.8819540000003</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:46:27.000Z</Time>
@@ -1222,7 +1456,7 @@
               <LongitudeDegrees>-3.5181416</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>64481.885432999996</DistanceMeters>
+            <DistanceMeters>978.8698990000003</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:46:29.000Z</Time>
@@ -1231,7 +1465,7 @@
               <LongitudeDegrees>-3.5182227</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>65469.111102999996</DistanceMeters>
+            <DistanceMeters>987.2256700000003</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:46:31.000Z</Time>
@@ -1240,7 +1474,10 @@
               <LongitudeDegrees>-3.5182958</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>66463.990331</DistanceMeters>
+            <DistanceMeters>994.8792280000002</DistanceMeters>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>135</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:46:33.000Z</Time>
@@ -1249,7 +1486,7 @@
               <LongitudeDegrees>-3.5183643</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>67466.207038</DistanceMeters>
+            <DistanceMeters>1002.2167070000003</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:46:35.000Z</Time>
@@ -1258,7 +1495,13 @@
               <LongitudeDegrees>-3.5184357</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>68475.897793</DistanceMeters>
+            <DistanceMeters>1009.6907550000003</DistanceMeters>
+          </Trackpoint>
+          <Trackpoint>
+            <Time>2019-03-04T20:46:36.000Z</Time>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>138</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:46:37.000Z</Time>
@@ -1267,7 +1510,7 @@
               <LongitudeDegrees>-3.5185127</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>69493.85706</DistanceMeters>
+            <DistanceMeters>1017.9592670000003</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:46:39.000Z</Time>
@@ -1276,7 +1519,7 @@
               <LongitudeDegrees>-3.5185987</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>70520.92246799999</DistanceMeters>
+            <DistanceMeters>1027.0654080000004</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:46:41.000Z</Time>
@@ -1285,7 +1528,10 @@
               <LongitudeDegrees>-3.5186846</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>71557.09761199998</DistanceMeters>
+            <DistanceMeters>1036.1751440000005</DistanceMeters>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>138</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:46:43.000Z</Time>
@@ -1294,7 +1540,7 @@
               <LongitudeDegrees>-3.5187672</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>72602.22060299998</DistanceMeters>
+            <DistanceMeters>1045.1229910000004</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:46:45.000Z</Time>
@@ -1303,7 +1549,13 @@
               <LongitudeDegrees>-3.5188369</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>73654.73722399998</DistanceMeters>
+            <DistanceMeters>1052.5166210000004</DistanceMeters>
+          </Trackpoint>
+          <Trackpoint>
+            <Time>2019-03-04T20:46:46.000Z</Time>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>135</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:46:47.000Z</Time>
@@ -1312,7 +1564,7 @@
               <LongitudeDegrees>-3.5188992</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>74713.76890099999</DistanceMeters>
+            <DistanceMeters>1059.0316770000004</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:46:49.000Z</Time>
@@ -1321,7 +1573,7 @@
               <LongitudeDegrees>-3.5189534</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>75778.20478799999</DistanceMeters>
+            <DistanceMeters>1064.4358870000003</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:46:51.000Z</Time>
@@ -1330,7 +1582,10 @@
               <LongitudeDegrees>-3.5190188</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>76848.638098</DistanceMeters>
+            <DistanceMeters>1070.4333100000003</DistanceMeters>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>137</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:46:53.000Z</Time>
@@ -1339,7 +1594,7 @@
               <LongitudeDegrees>-3.519093</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>77925.995933</DistanceMeters>
+            <DistanceMeters>1077.3578350000003</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:46:55.000Z</Time>
@@ -1348,7 +1603,13 @@
               <LongitudeDegrees>-3.51918</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>79011.420609</DistanceMeters>
+            <DistanceMeters>1085.4246760000003</DistanceMeters>
+          </Trackpoint>
+          <Trackpoint>
+            <Time>2019-03-04T20:46:56.000Z</Time>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>141</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:46:57.000Z</Time>
@@ -1357,7 +1618,7 @@
               <LongitudeDegrees>-3.5192664</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>80106.07837199999</DistanceMeters>
+            <DistanceMeters>1094.6577630000004</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:46:59.000Z</Time>
@@ -1366,7 +1627,7 @@
               <LongitudeDegrees>-3.5193487</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>81210.11713599999</DistanceMeters>
+            <DistanceMeters>1104.0387640000004</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:47:01.000Z</Time>
@@ -1375,7 +1636,10 @@
               <LongitudeDegrees>-3.5194341</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>82323.66544999999</DistanceMeters>
+            <DistanceMeters>1113.5483140000003</DistanceMeters>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>142</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:47:03.000Z</Time>
@@ -1384,7 +1648,7 @@
               <LongitudeDegrees>-3.5195045</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>83445.50932499999</DistanceMeters>
+            <DistanceMeters>1121.8438750000003</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:47:05.000Z</Time>
@@ -1393,7 +1657,13 @@
               <LongitudeDegrees>-3.519567</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>84574.418647</DistanceMeters>
+            <DistanceMeters>1128.9093220000002</DistanceMeters>
+          </Trackpoint>
+          <Trackpoint>
+            <Time>2019-03-04T20:47:06.000Z</Time>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>143</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:47:07.000Z</Time>
@@ -1402,7 +1672,7 @@
               <LongitudeDegrees>-3.5196223</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>85709.41703899999</DistanceMeters>
+            <DistanceMeters>1134.9983920000002</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:47:09.000Z</Time>
@@ -1411,7 +1681,7 @@
               <LongitudeDegrees>-3.5196874</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>86850.766863</DistanceMeters>
+            <DistanceMeters>1141.3498240000001</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:47:11.000Z</Time>
@@ -1420,7 +1690,10 @@
               <LongitudeDegrees>-3.5197462</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>87998.467526</DistanceMeters>
+            <DistanceMeters>1147.700663</DistanceMeters>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>143</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:47:13.000Z</Time>
@@ -1429,7 +1702,7 @@
               <LongitudeDegrees>-3.5197892</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>89152.720963</DistanceMeters>
+            <DistanceMeters>1154.253437</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:47:15.000Z</Time>
@@ -1438,7 +1711,13 @@
               <LongitudeDegrees>-3.5198092</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>90313.080335</DistanceMeters>
+            <DistanceMeters>1160.3593720000001</DistanceMeters>
+          </Trackpoint>
+          <Trackpoint>
+            <Time>2019-03-04T20:47:16.000Z</Time>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>141</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:47:17.000Z</Time>
@@ -1447,7 +1726,7 @@
               <LongitudeDegrees>-3.5198066</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>91479.93889300001</DistanceMeters>
+            <DistanceMeters>1166.8585580000001</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:47:19.000Z</Time>
@@ -1456,7 +1735,7 @@
               <LongitudeDegrees>-3.5197902</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>92653.27601200002</DistanceMeters>
+            <DistanceMeters>1173.337119</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:47:21.000Z</Time>
@@ -1465,7 +1744,10 @@
               <LongitudeDegrees>-3.5197655</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>93833.07156900002</DistanceMeters>
+            <DistanceMeters>1179.795557</DistanceMeters>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>142</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:47:23.000Z</Time>
@@ -1474,7 +1756,7 @@
               <LongitudeDegrees>-3.519751</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>95020.15903600003</DistanceMeters>
+            <DistanceMeters>1187.0874669999998</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:47:25.000Z</Time>
@@ -1483,7 +1765,13 @@
               <LongitudeDegrees>-3.5197365</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>96214.10913400003</DistanceMeters>
+            <DistanceMeters>1193.9500979999998</DistanceMeters>
+          </Trackpoint>
+          <Trackpoint>
+            <Time>2019-03-04T20:47:26.000Z</Time>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>144</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:47:27.000Z</Time>
@@ -1492,7 +1780,7 @@
               <LongitudeDegrees>-3.5197253</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>97415.32208900002</DistanceMeters>
+            <DistanceMeters>1201.2129549999997</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:47:29.000Z</Time>
@@ -1501,7 +1789,7 @@
               <LongitudeDegrees>-3.5197055</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>98622.76774600003</DistanceMeters>
+            <DistanceMeters>1207.4456569999998</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:47:31.000Z</Time>
@@ -1510,7 +1798,10 @@
               <LongitudeDegrees>-3.5196864</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>99836.30495600002</DistanceMeters>
+            <DistanceMeters>1213.5372099999997</DistanceMeters>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>144</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:47:33.000Z</Time>
@@ -1519,7 +1810,7 @@
               <LongitudeDegrees>-3.5196649</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>101056.11368200002</DistanceMeters>
+            <DistanceMeters>1219.8087259999998</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:47:35.000Z</Time>
@@ -1528,7 +1819,13 @@
               <LongitudeDegrees>-3.5196528</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>102282.62938300002</DistanceMeters>
+            <DistanceMeters>1226.5157009999998</DistanceMeters>
+          </Trackpoint>
+          <Trackpoint>
+            <Time>2019-03-04T20:47:36.000Z</Time>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>147</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:47:37.000Z</Time>
@@ -1537,7 +1834,7 @@
               <LongitudeDegrees>-3.519638</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>103516.42899000001</DistanceMeters>
+            <DistanceMeters>1233.7996069999997</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:47:39.000Z</Time>
@@ -1546,7 +1843,7 @@
               <LongitudeDegrees>-3.5196195</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>104756.18060400001</DistanceMeters>
+            <DistanceMeters>1239.7516139999998</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:47:41.000Z</Time>
@@ -1555,7 +1852,10 @@
               <LongitudeDegrees>-3.5195898</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>106001.175583</DistanceMeters>
+            <DistanceMeters>1244.9949789999998</DistanceMeters>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>153</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:47:43.000Z</Time>
@@ -1564,7 +1864,7 @@
               <LongitudeDegrees>-3.5195503</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>107250.896935</DistanceMeters>
+            <DistanceMeters>1249.7213519999998</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:47:45.000Z</Time>
@@ -1573,7 +1873,13 @@
               <LongitudeDegrees>-3.5195022</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>108505.72660699999</DistanceMeters>
+            <DistanceMeters>1254.8296719999998</DistanceMeters>
+          </Trackpoint>
+          <Trackpoint>
+            <Time>2019-03-04T20:47:46.000Z</Time>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>158</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:47:47.000Z</Time>
@@ -1582,7 +1888,7 @@
               <LongitudeDegrees>-3.5194485</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>109766.04719599998</DistanceMeters>
+            <DistanceMeters>1260.320589</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:47:49.000Z</Time>
@@ -1591,7 +1897,7 @@
               <LongitudeDegrees>-3.5193785</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>111033.36331999999</DistanceMeters>
+            <DistanceMeters>1267.316124</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:47:51.000Z</Time>
@@ -1600,7 +1906,10 @@
               <LongitudeDegrees>-3.5192969</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>112308.27588599999</DistanceMeters>
+            <DistanceMeters>1274.912566</DistanceMeters>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>158</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:47:53.000Z</Time>
@@ -1609,7 +1918,7 @@
               <LongitudeDegrees>-3.5192091</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>113590.94492699999</DistanceMeters>
+            <DistanceMeters>1282.6690409999999</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:47:55.000Z</Time>
@@ -1618,7 +1927,13 @@
               <LongitudeDegrees>-3.519127</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>114880.56038</DistanceMeters>
+            <DistanceMeters>1289.615453</DistanceMeters>
+          </Trackpoint>
+          <Trackpoint>
+            <Time>2019-03-04T20:47:56.000Z</Time>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>155</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:47:57.000Z</Time>
@@ -1627,7 +1942,7 @@
               <LongitudeDegrees>-3.5190526</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>116176.591302</DistanceMeters>
+            <DistanceMeters>1296.030922</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:47:59.000Z</Time>
@@ -1636,7 +1951,7 @@
               <LongitudeDegrees>-3.5189763</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>117478.989298</DistanceMeters>
+            <DistanceMeters>1302.397996</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:48:01.000Z</Time>
@@ -1645,7 +1960,10 @@
               <LongitudeDegrees>-3.5189031</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>118787.727118</DistanceMeters>
+            <DistanceMeters>1308.7378199999998</DistanceMeters>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>154</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:48:03.000Z</Time>
@@ -1654,7 +1972,7 @@
               <LongitudeDegrees>-3.518829</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>120103.027074</DistanceMeters>
+            <DistanceMeters>1315.2999559999998</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:48:05.000Z</Time>
@@ -1663,7 +1981,13 @@
               <LongitudeDegrees>-3.5187523</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>121424.642446</DistanceMeters>
+            <DistanceMeters>1321.6153719999998</DistanceMeters>
+          </Trackpoint>
+          <Trackpoint>
+            <Time>2019-03-04T20:48:06.000Z</Time>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>156</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:48:07.000Z</Time>
@@ -1672,7 +1996,7 @@
               <LongitudeDegrees>-3.5186696</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>122752.688149</DistanceMeters>
+            <DistanceMeters>1328.0457029999998</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:48:09.000Z</Time>
@@ -1681,7 +2005,7 @@
               <LongitudeDegrees>-3.5185808</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>124087.44889999999</DistanceMeters>
+            <DistanceMeters>1334.7607509999998</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:48:11.000Z</Time>
@@ -1690,7 +2014,10 @@
               <LongitudeDegrees>-3.5184928</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>125429.160549</DistanceMeters>
+            <DistanceMeters>1341.7116489999999</DistanceMeters>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>157</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:48:13.000Z</Time>
@@ -1699,7 +2026,7 @@
               <LongitudeDegrees>-3.5184096</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>126777.585394</DistanceMeters>
+            <DistanceMeters>1348.4248449999998</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:48:15.000Z</Time>
@@ -1708,7 +2035,13 @@
               <LongitudeDegrees>-3.5183257</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>128132.70876699999</DistanceMeters>
+            <DistanceMeters>1355.1233729999997</DistanceMeters>
+          </Trackpoint>
+          <Trackpoint>
+            <Time>2019-03-04T20:48:16.000Z</Time>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>156</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:48:17.000Z</Time>
@@ -1717,7 +2050,7 @@
               <LongitudeDegrees>-3.5182455</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>129494.09783599999</DistanceMeters>
+            <DistanceMeters>1361.3890689999996</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:48:19.000Z</Time>
@@ -1726,7 +2059,7 @@
               <LongitudeDegrees>-3.518162</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>130861.90988199999</DistanceMeters>
+            <DistanceMeters>1367.8120459999996</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:48:21.000Z</Time>
@@ -1735,7 +2068,10 @@
               <LongitudeDegrees>-3.5180709</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>132236.640827</DistanceMeters>
+            <DistanceMeters>1374.7309449999996</DistanceMeters>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>156</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:48:23.000Z</Time>
@@ -1744,7 +2080,7 @@
               <LongitudeDegrees>-3.5179733</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>133618.624156</DistanceMeters>
+            <DistanceMeters>1381.9833289999995</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:48:25.000Z</Time>
@@ -1753,7 +2089,13 @@
               <LongitudeDegrees>-3.5178702</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>135008.273985</DistanceMeters>
+            <DistanceMeters>1389.6498289999995</DistanceMeters>
+          </Trackpoint>
+          <Trackpoint>
+            <Time>2019-03-04T20:48:26.000Z</Time>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>157</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:48:27.000Z</Time>
@@ -1762,7 +2104,7 @@
               <LongitudeDegrees>-3.5177693</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>136405.446516</DistanceMeters>
+            <DistanceMeters>1397.1725309999995</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:48:29.000Z</Time>
@@ -1771,7 +2113,7 @@
               <LongitudeDegrees>-3.5176687</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>137810.371159</DistanceMeters>
+            <DistanceMeters>1404.9246429999994</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:48:31.000Z</Time>
@@ -1780,7 +2122,10 @@
               <LongitudeDegrees>-3.5175619</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>139223.35316</DistanceMeters>
+            <DistanceMeters>1412.9820009999994</DistanceMeters>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>158</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:48:33.000Z</Time>
@@ -1789,7 +2134,7 @@
               <LongitudeDegrees>-3.5174607</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>140644.126123</DistanceMeters>
+            <DistanceMeters>1420.7729629999994</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:48:35.000Z</Time>
@@ -1798,7 +2143,13 @@
               <LongitudeDegrees>-3.5173548</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>142073.05651199998</DistanceMeters>
+            <DistanceMeters>1428.9303889999994</DistanceMeters>
+          </Trackpoint>
+          <Trackpoint>
+            <Time>2019-03-04T20:48:36.000Z</Time>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>157</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:48:37.000Z</Time>
@@ -1807,7 +2158,7 @@
               <LongitudeDegrees>-3.5172524</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>143509.65333399997</DistanceMeters>
+            <DistanceMeters>1436.5968219999995</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:48:39.000Z</Time>
@@ -1816,7 +2167,7 @@
               <LongitudeDegrees>-3.517148</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>144953.88061799997</DistanceMeters>
+            <DistanceMeters>1444.2272839999996</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:48:41.000Z</Time>
@@ -1825,7 +2176,10 @@
               <LongitudeDegrees>-3.517045</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>146405.44967099998</DistanceMeters>
+            <DistanceMeters>1451.5690529999997</DistanceMeters>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>156</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:48:43.000Z</Time>
@@ -1834,7 +2188,7 @@
               <LongitudeDegrees>-3.5169427</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>147864.37933599998</DistanceMeters>
+            <DistanceMeters>1458.9296649999997</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:48:45.000Z</Time>
@@ -1843,7 +2197,13 @@
               <LongitudeDegrees>-3.5168452</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>149330.24553</DistanceMeters>
+            <DistanceMeters>1465.8661939999997</DistanceMeters>
+          </Trackpoint>
+          <Trackpoint>
+            <Time>2019-03-04T20:48:46.000Z</Time>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>155</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:48:47.000Z</Time>
@@ -1852,7 +2212,7 @@
               <LongitudeDegrees>-3.5167505</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>150802.82284399998</DistanceMeters>
+            <DistanceMeters>1472.5773139999997</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:48:49.000Z</Time>
@@ -1861,7 +2221,7 @@
               <LongitudeDegrees>-3.5166568</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>152282.04091999997</DistanceMeters>
+            <DistanceMeters>1479.2180759999997</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:48:51.000Z</Time>
@@ -1870,7 +2230,10 @@
               <LongitudeDegrees>-3.5165654</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>153767.86588899998</DistanceMeters>
+            <DistanceMeters>1485.8249689999996</DistanceMeters>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>156</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:48:53.000Z</Time>
@@ -1879,7 +2242,7 @@
               <LongitudeDegrees>-3.5164732</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>155260.682071</DistanceMeters>
+            <DistanceMeters>1492.8161819999996</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:48:55.000Z</Time>
@@ -1888,7 +2251,13 @@
               <LongitudeDegrees>-3.5163888</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>156760.15716</DistanceMeters>
+            <DistanceMeters>1499.4750889999996</DistanceMeters>
+          </Trackpoint>
+          <Trackpoint>
+            <Time>2019-03-04T20:48:56.000Z</Time>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>157</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:48:57.000Z</Time>
@@ -1897,7 +2266,7 @@
               <LongitudeDegrees>-3.5162959</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>158266.718938</DistanceMeters>
+            <DistanceMeters>1506.5617779999995</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:48:59.000Z</Time>
@@ -1906,7 +2275,7 @@
               <LongitudeDegrees>-3.5161976</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>159780.62981</DistanceMeters>
+            <DistanceMeters>1513.9108719999995</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:49:01.000Z</Time>
@@ -1915,7 +2284,10 @@
               <LongitudeDegrees>-3.5160873</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>161302.65013700002</DistanceMeters>
+            <DistanceMeters>1522.0203269999995</DistanceMeters>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>157</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:49:03.000Z</Time>
@@ -1924,7 +2296,7 @@
               <LongitudeDegrees>-3.515976</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>162833.07229</DistanceMeters>
+            <DistanceMeters>1530.4221529999995</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:49:05.000Z</Time>
@@ -1933,7 +2305,13 @@
               <LongitudeDegrees>-3.5158684</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>164371.762091</DistanceMeters>
+            <DistanceMeters>1538.6898009999995</DistanceMeters>
+          </Trackpoint>
+          <Trackpoint>
+            <Time>2019-03-04T20:49:06.000Z</Time>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>159</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:49:07.000Z</Time>
@@ -1942,7 +2320,7 @@
               <LongitudeDegrees>-3.5157675</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>165918.28234900002</DistanceMeters>
+            <DistanceMeters>1546.5202579999996</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:49:09.000Z</Time>
@@ -1951,7 +2329,7 @@
               <LongitudeDegrees>-3.5156673</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>167472.372949</DistanceMeters>
+            <DistanceMeters>1554.0905999999995</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:49:11.000Z</Time>
@@ -1960,7 +2338,10 @@
               <LongitudeDegrees>-3.5155672</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>169033.929246</DistanceMeters>
+            <DistanceMeters>1561.5562969999996</DistanceMeters>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>161</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:49:13.000Z</Time>
@@ -1969,7 +2350,7 @@
               <LongitudeDegrees>-3.5154567</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>170603.64997300002</DistanceMeters>
+            <DistanceMeters>1569.7207269999997</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:49:15.000Z</Time>
@@ -1978,7 +2359,13 @@
               <LongitudeDegrees>-3.515341</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>172182.01554100003</DistanceMeters>
+            <DistanceMeters>1578.3655679999997</DistanceMeters>
+          </Trackpoint>
+          <Trackpoint>
+            <Time>2019-03-04T20:49:16.000Z</Time>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>166</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:49:17.000Z</Time>
@@ -1987,7 +2374,7 @@
               <LongitudeDegrees>-3.5152221</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>173769.07839600003</DistanceMeters>
+            <DistanceMeters>1587.0628549999997</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:49:19.000Z</Time>
@@ -1996,7 +2383,7 @@
               <LongitudeDegrees>-3.5151075</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>175364.62178000002</DistanceMeters>
+            <DistanceMeters>1595.5433839999996</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:49:21.000Z</Time>
@@ -2005,7 +2392,10 @@
               <LongitudeDegrees>-3.5150005</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>176968.18613100002</DistanceMeters>
+            <DistanceMeters>1603.5643509999995</DistanceMeters>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>167</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:49:23.000Z</Time>
@@ -2014,7 +2404,7 @@
               <LongitudeDegrees>-3.5148951</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>178580.11936600003</DistanceMeters>
+            <DistanceMeters>1611.9332349999995</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:49:25.000Z</Time>
@@ -2023,7 +2413,13 @@
               <LongitudeDegrees>-3.5147913</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>180200.25025600003</DistanceMeters>
+            <DistanceMeters>1620.1308899999995</DistanceMeters>
+          </Trackpoint>
+          <Trackpoint>
+            <Time>2019-03-04T20:49:26.000Z</Time>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>165</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:49:27.000Z</Time>
@@ -2032,7 +2428,7 @@
               <LongitudeDegrees>-3.5146848</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>181828.52108200002</DistanceMeters>
+            <DistanceMeters>1628.2708259999995</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:49:29.000Z</Time>
@@ -2041,7 +2437,7 @@
               <LongitudeDegrees>-3.5145762</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>183465.01571600002</DistanceMeters>
+            <DistanceMeters>1636.4946339999995</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:49:31.000Z</Time>
@@ -2050,7 +2446,10 @@
               <LongitudeDegrees>-3.5144688</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>185109.554238</DistanceMeters>
+            <DistanceMeters>1644.5385219999994</DistanceMeters>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>163</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:49:33.000Z</Time>
@@ -2059,7 +2458,7 @@
               <LongitudeDegrees>-3.5143611</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>186762.366952</DistanceMeters>
+            <DistanceMeters>1652.8127139999995</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:49:35.000Z</Time>
@@ -2068,7 +2467,13 @@
               <LongitudeDegrees>-3.5142552</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>188423.28049</DistanceMeters>
+            <DistanceMeters>1660.9135379999996</DistanceMeters>
+          </Trackpoint>
+          <Trackpoint>
+            <Time>2019-03-04T20:49:36.000Z</Time>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>164</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:49:37.000Z</Time>
@@ -2077,7 +2482,7 @@
               <LongitudeDegrees>-3.5141499</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>190092.308272</DistanceMeters>
+            <DistanceMeters>1669.0277819999997</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:49:39.000Z</Time>
@@ -2086,7 +2491,7 @@
               <LongitudeDegrees>-3.5140454</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>191769.34571599998</DistanceMeters>
+            <DistanceMeters>1677.0374439999996</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:49:41.000Z</Time>
@@ -2095,7 +2500,10 @@
               <LongitudeDegrees>-3.5139491</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>193453.64483399998</DistanceMeters>
+            <DistanceMeters>1684.2991179999997</DistanceMeters>
+            <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
+              <Value>163</Value>
+            </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:49:43.000Z</Time>
@@ -2104,7 +2512,7 @@
               <LongitudeDegrees>-3.5138639</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>195144.47741199998</DistanceMeters>
+            <DistanceMeters>1690.8325779999998</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:49:45.000Z</Time>
@@ -2113,7 +2521,7 @@
               <LongitudeDegrees>-3.5137916</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>196840.64767799998</DistanceMeters>
+            <DistanceMeters>1696.1702659999999</DistanceMeters>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:49:49.000Z</Time>
@@ -2122,7 +2530,7 @@
               <LongitudeDegrees>-3.5137316</LongitudeDegrees>
             </Position>
             <AltitudeMeters>0.0</AltitudeMeters>
-            <DistanceMeters>198541.07585199998</DistanceMeters>
+            <DistanceMeters>1700.428174</DistanceMeters>
           </Trackpoint>
         </Track>
       </Lap>

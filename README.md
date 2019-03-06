@@ -1,9 +1,9 @@
 # Huawei TCX Converter
 A makeshift python tool that generates TCX files from Huawei HiTrack files.
 
-Users of Huawei Watches/Bands sync their fitness data with the Huawei Health App. It is notoriously difficult to get the data out of this app, but [through some cunning](https://forum.xda-developers.com/smartwatch/huawei-watch/huawei-watch-gt-export-data-health-t3874330) you can find `HiTrack` files which seem to contain some run data. This program allows you to take these files and generate `.TCX` files for use in your tracking app of choice (i.e. Strava).
+Users of Huawei Watches/Bands sync their fitness data with the Huawei Health App. It is notoriously difficult to get the data out of this app, but [through some cunning](https://forum.xda-developers.com/smartwatch/huawei-watch/huawei-watch-gt-export-data-health-t3874330) you can find `HiTrack` files which seem to contain some run data. This program allows you to take these files and generate `.TCX` files for use in your tracking app of choice (i.e. Strava). These TCX files will contain timestamped GPS Lat/Long and Heart-Rate data.
 
-## How to get the HiTrack Files - Android only
+## How to get the HiTrack Files
 
 If you have a **rooted** phone you can simply navigate to: `data/data/com.huawei.health/files/` where you should find a number of files prefixed `HiTrack`.
 
@@ -27,15 +27,16 @@ I have copied the `Huawei_TCX_Converter.py` file to the directory containing my 
 
 This gives me the output:
 
-    ---- Filtering data ----
+    ---- Input File ----
+    reading: OKAY
     filtering: OKAY
+    processing gps: OKAY
+    processing heart-rate: OKAY
 
-    ---- Information extracted from file ----
+    ---- Details ----
     start: 2019-03-04 20:42:00
-    end: 2019-03-04 20:49:49
     duration: 00:07:49
-    data points: 235
-    distance (approx): 1700 m
+    distance: 1700m
 
     ---- XML file ----
     generating: OKAY
