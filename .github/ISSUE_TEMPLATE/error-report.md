@@ -1,14 +1,11 @@
 ---
 name: Error report
-about: Report any problems so that I can have a look a them and get the code working
-  for you!
+about: Report any problems you encounter!
 title: "[BUG]"
 labels: ''
 assignees: aricooperdavis
 
 ---
-
-N.B. I won't troubleshoot your Python installation here, only issues with the code. If you're struggling with Python I recommend using [anaconda](https://www.anaconda.com/distribution/).
 
 **Input**
 Tell me what you typed in to produce the error.
