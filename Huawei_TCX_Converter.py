@@ -48,18 +48,20 @@ def read_file(input_file):
     try:
         gps_data = []
         hr_data = []
+        cad_data = []
         first_gps = True
         first_hr = True
+        first_cad = True
         with open(input_file) as f:
-            #    lbs   |   p-m   |   b-p-m   |   h-r   |   rs
-            # --------------------------------------------------
-            # location |  pace   |     ?     |  pulse  | speed
+            #    lbs   |   p-m   |   b-p-m   |   h-r   |   rs   |   s-r   |
+            # -------------------------------------------------------------
+            # location |  pace   |     ?     |  pulse  | speed  | cadence |
             for line in f:
                 # Loop over file line by line
                 if line[0:6] == 'tp=lbs':
                     # Get location data
                     holding_list = []
-                    for x in [6,3,4,0,0]: #time, lat, long, [dist], [hr]
+                    for x in [6,3,4,0,0,0]: #time, lat, long, [dist], [hr], [cad]
                         if x == 0:
                             holding_list.append('') # Fill in blanks with blank
                         else:
@@ -73,13 +75,14 @@ def read_file(input_file):
                                 divisor = 0.1**(9-oom)
                             else:
                                 divisor = 1
+                            first_gps = False
                     holding_list[0] = holding_list[0]/divisor
                     gps_data.append(holding_list)
 
                 if line[0:6] == 'tp=h-r':
                     # Get heart-rate data
                     holding_list = []
-                    for x in [2,0,0,0,3]: #time, [lat], [long], [dist], hr
+                    for x in [2,0,0,0,3,0]: #time, [lat], [long], [dist], hr, [cad]
                         if x == 0:
                             holding_list.append('') # Fill in blanks with blank
                         elif x == 2:
@@ -95,25 +98,62 @@ def read_file(input_file):
                                 divisor = 0.1**(9-oom)
                             else:
                                 divisor = 1
+                            first_hr = False
                     holding_list[0] = holding_list[0]/divisor
                     hr_data.append(holding_list)
+
+                if line[0:6] == 'tp=s-r':
+                    # Get cadence data
+                    holding_list = []
+                    for x in [2,0,0,0,0,3]: #time, [lat], [long], [dist], [hr], cad
+                        if x == 0:
+                            holding_list.append('') # Fill in blanks with blank
+                        elif x == 2:
+                            holding_list.append(int(float(line.split('=')[x].split(';')[0])))
+                        else:
+                            holding_list.append(int(line.split('=')[x].split(';')[0]))
+                    if first_cad:
+                            # normalise time order of magnitude to unix timestamp
+                            oom = int(math.log10(holding_list[0]))
+                            if oom > 9:
+                                divisor = 10**(oom-9)
+                            elif oom < 9:
+                                divisor = 0.1**(9-oom)
+                            else:
+                                divisor = 1
+                            first_cad = False
+                    holding_list[0] = holding_list[0]/divisor
+                    cad_data.append(holding_list)
+
     except:
         print('FAILED')
         exit()
 
     print('OKAY')
-    return gps_data, hr_data
+    return {'gps': gps_data, 'hr': hr_data, 'cad': cad_data}
 
 def filter_data(data):
     print('filtering: ', end='')
+
     original_data = data
     try:
-        # filters data before processing to remove aberrations
-        for line in data:
+        # filters gps data before processing to remove aberrations
+        for line in data['gps']:
             # filter lines where GPS was lost (defaults to (90, -80))
-            #time, lat, long, [dist], [hr]
+            # time, lat, long, [dist], [hr], [cad]
             if line[1] == 90.0 and line[2] == -80.0:
-                data.remove(line)
+                data['gps'].remove(line)
+
+        for line in data['hr']:
+            #filter lines where heart rate is too low/high
+            if line[4] < 1 or line[4] > 254:
+                data['hr'].remove(line)
+
+        for line in data['cad']:
+            #filter lines where cadence is too low/high
+            if line[5] < 1 or line[5] > 254:
+                data['cad'].remove(line)
+
         print('OKAY')
 
     except:
@@ -178,7 +218,7 @@ def process_gps(data):
     print('processing gps: ', end='')
     try:
         # Loop through data line by line
-        for n, entry in enumerate(data):
+        for n, entry in enumerate(data['gps']):
             # Calculate distances between points based on vincenty distances
             # TODO: Improve point-to-point distance calculation
             if n == 0:
@@ -186,7 +226,7 @@ def process_gps(data):
                 entry[3] = 0
             else:
                 entry[3] = (vincenty((float(entry[1]),float(entry[2])),
-                    (float(data[n-1][1]),float(data[n-1][2])))+data[n-1][3])
+                    (float(data['gps'][n-1][1]),float(data['gps'][n-1][2])))+data['gps'][n-1][3])
 
     except:
         print('FAILED')
@@ -196,11 +236,11 @@ def process_gps(data):
 
     return data
 
-def merge_data(gps_data, hr_data):
-    print('processing heart-rate: ', end='')
+def merge_data(data):
+    print('processing heart-rate/cadence: ', end='')
     # Sort data array chronologically
     try:
-        data = gps_data+hr_data #time, lat, long, dist, hr
+        data = data['gps']+data['hr']+data['cad'] #time, lat, long, dist, hr, cad
         gettime = operator.itemgetter(0)
         data = sorted(data, key=gettime)
 
@@ -209,15 +249,12 @@ def merge_data(gps_data, hr_data):
             if n == 0:
                 pass
             else:
-                if entry[0] == data[n-1][0]: #if timestamp is same as previous entry
-                    if entry[4]: #and there is heart-rate data
-                        data[n-1][4] = entry[4] #copy heart-rate to previous entry
-                        data.remove(entry) #and delete this one
-                    else: #but if there is no heart rate data here
-                        data[n-1][1] = entry[1] #copy lat to previous
-                        data[n-1][2] = entry[2] #long to previous
-                        data[n-1][3] = entry[3] #dist to previous
-                        data.remove(entry) #and delete this one
+                if entry[0] == data[n-1][0]: #if timestamp is same as previous
+                    for x in range(1,6):
+                        if entry[x]:
+                            data[n-1][x] = entry[x] #copy all data back to previous
+                    data.remove(entry) #and delete current
+
     except:
         print('FAILED')
         exit()
@@ -258,7 +295,7 @@ def generate_xml(data, stats, options):
         TrainingCenterDatabase.set('xmlns', 'http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2')
         TrainingCenterDatabase.set('xmlns:xsd', 'http://www.w3.org/2001/XMLSchema')
         TrainingCenterDatabase.set('xmlns:xsi', 'http://www.w3.org/2001/XMLSchema-instance')
-        #TrainingCenterDatabase.set('xmlns:tc2', 'http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2')
+        TrainingCenterDatabase.set('xmlns:ns3', 'http://www.garmin.com/xmlschemas/ActivityExtension/v2')
         ## Activities
         Activities = ET.SubElement(TrainingCenterDatabase,'Activities')
 
@@ -317,6 +354,17 @@ def generate_xml(data, stats, options):
                 HeartRateBpm.set('xsi:type','HeartRateInBeatsPerMinute_t')
                 Value = ET.SubElement(HeartRateBpm, 'Value')
                 Value.text = str(line[4])
+
+            if line[5]:
+                if options['sport'] == 'Biking':
+                    Cadence = ET.SubElement(Trackpoint, 'Cadence')
+                    Cadence.text = str(line[5])
+                elif options['sport'] == 'Running':
+                    Extensions = ET.SubElement(Trackpoint, 'Extensions')
+                    TPX = ET.SubElement(Extensions, 'TPX')
+                    TPX.set('xmlns','http://www.garmin.com/xmlschemas/ActivityExtension/v2')
+                    RunCadence = ET.SubElement(TPX, 'RunCadence')
+                    RunCadence.text = str(line[5])
 
         #### Creator
         # TODO: See if we can scrape this data from other files in the .tar
@@ -415,10 +463,10 @@ def validate_xml(filename, xmlschema_found):
         return
 
 input_file, options = parse_arguments()
-gps_data, hr_data = read_file(input_file)
-if options['filter']: gps_data = filter_data(gps_data)
-gps_data = process_gps(gps_data)
-data = merge_data(gps_data, hr_data)
+data = read_file(input_file)
+if options['filter']: data = filter_data(data)
+data = process_gps(data)
+data = merge_data(data)
 stats = file_details(data)
 TrainingCenterDatabase = generate_xml(data, stats, options)
 filename = save_xml(TrainingCenterDatabase, input_file)
