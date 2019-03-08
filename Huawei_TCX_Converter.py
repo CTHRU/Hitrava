@@ -236,6 +236,26 @@ def process_gps(data):
 
     return data
 
+def file_details(data):
+    # Get stats from data
+    start_time = data['gps'][0][0]
+    duration = data['gps'][-1][0]-start_time
+    if data['gps'][-1][3]: distance = data['gps'][-1][3] #distance is zero if no gps data
+    else: distance = 0
+    stats = {'start_time': start_time, 'duration': duration, 'distance': distance}
+
+    print('\n---- Details ----')
+    print('start: '+str(dt.utcfromtimestamp(stats['start_time'])))
+    print('duration: '+str(dt.utcfromtimestamp(stats['duration']).strftime('%H:%M:%S')))
+    print('distance: '+str(int(stats['distance'])), end='m\n')
+
+    # Format stats for saving
+    stats['start_time'] = dt.utcfromtimestamp(stats['start_time']).isoformat()+'.000Z'
+    stats['duration'] = str(stats['duration'])
+    stats['distance'] = str(int(stats['distance']))
+
+    return stats
+
 def merge_data(data):
     print('processing heart-rate/cadence: ', end='')
     # Sort data array chronologically
@@ -261,27 +281,6 @@ def merge_data(data):
 
     print('OKAY')
     return data
-
-def file_details(data):
-    # Get stats from data
-    start_time = data[0][0]
-    duration = data[-1][0]-data[0][0]
-    if data[-1][3]: distance = data[-1][3] #distance is zero if no gps data
-    else: distance = 0
-    stats = {'start_time': start_time, 'duration': duration, 'distance': distance}
-
-    print('\n---- Details ----')
-    print('start: '+str(dt.utcfromtimestamp(stats['start_time'])))
-    print('duration: '+str(dt.utcfromtimestamp(stats['duration']).strftime('%H:%M:%S')))
-    print('distance: '+str(int(stats['distance'])), end='m\n')
-
-    # Format stats for saving
-    stats['start_time'] = dt.utcfromtimestamp(stats['start_time']).isoformat()+'.000Z'
-    stats['duration'] = str(stats['duration'])
-    stats['distance'] = str(int(stats['distance']))
-
-    return stats
-
 
 def generate_xml(data, stats, options):
     print('sport: '+str(options['sport']))
@@ -466,8 +465,8 @@ input_file, options = parse_arguments()
 data = read_file(input_file)
 if options['filter']: data = filter_data(data)
 data = process_gps(data)
-data = merge_data(data)
 stats = file_details(data)
+data = merge_data(data)
 TrainingCenterDatabase = generate_xml(data, stats, options)
 filename = save_xml(TrainingCenterDatabase, input_file)
 if options['validate']: validate_xml(filename, xmlschema_found)
