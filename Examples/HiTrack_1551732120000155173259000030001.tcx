@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><TrainingCenterDatabase xmlns="http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2 http://www.garmin.com/xmlschemas/TrainingCenterDatabasev2.xsd">
+<?xml version="1.0" encoding="UTF-8"?><TrainingCenterDatabase xmlns="http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2" xmlns:ns3="http://www.garmin.com/xmlschemas/ActivityExtension/v2" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2 http://www.garmin.com/xmlschemas/TrainingCenterDatabasev2.xsd">
   <Activities>
     <Activity Sport="Running">
       <Id>2019-03-04T20:42:00.000Z</Id>
@@ -47,6 +47,14 @@
             <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
               <Value>105</Value>
             </HeartRateBpm>
+          </Trackpoint>
+          <Trackpoint>
+            <Time>2019-03-04T20:42:05.000Z</Time>
+            <Extensions>
+              <TPX xmlns="http://www.garmin.com/xmlschemas/ActivityExtension/v2">
+                <RunCadence>71</RunCadence>
+              </TPX>
+            </Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:42:07.000Z</Time>
@@ -373,6 +381,14 @@
             </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
+            <Time>2019-03-04T20:43:05.000Z</Time>
+            <Extensions>
+              <TPX xmlns="http://www.garmin.com/xmlschemas/ActivityExtension/v2">
+                <RunCadence>176</RunCadence>
+              </TPX>
+            </Extensions>
+          </Trackpoint>
+          <Trackpoint>
             <Time>2019-03-04T20:43:07.000Z</Time>
             <Position>
               <LatitudeDegrees>50.7247658</LatitudeDegrees>
@@ -695,6 +711,14 @@
             <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
               <Value>143</Value>
             </HeartRateBpm>
+          </Trackpoint>
+          <Trackpoint>
+            <Time>2019-03-04T20:44:05.000Z</Time>
+            <Extensions>
+              <TPX xmlns="http://www.garmin.com/xmlschemas/ActivityExtension/v2">
+                <RunCadence>190</RunCadence>
+              </TPX>
+            </Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:44:07.000Z</Time>
@@ -1021,6 +1045,14 @@
             </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
+            <Time>2019-03-04T20:45:05.000Z</Time>
+            <Extensions>
+              <TPX xmlns="http://www.garmin.com/xmlschemas/ActivityExtension/v2">
+                <RunCadence>179</RunCadence>
+              </TPX>
+            </Extensions>
+          </Trackpoint>
+          <Trackpoint>
             <Time>2019-03-04T20:45:07.000Z</Time>
             <Position>
               <LatitudeDegrees>50.7278417</LatitudeDegrees>
@@ -1343,6 +1375,14 @@
             <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
               <Value>147</Value>
             </HeartRateBpm>
+          </Trackpoint>
+          <Trackpoint>
+            <Time>2019-03-04T20:46:05.000Z</Time>
+            <Extensions>
+              <TPX xmlns="http://www.garmin.com/xmlschemas/ActivityExtension/v2">
+                <RunCadence>178</RunCadence>
+              </TPX>
+            </Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:46:07.000Z</Time>
@@ -1696,6 +1736,14 @@
             </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
+            <Time>2019-03-04T20:47:11.000Z</Time>
+            <Extensions>
+              <TPX xmlns="http://www.garmin.com/xmlschemas/ActivityExtension/v2">
+                <RunCadence>188</RunCadence>
+              </TPX>
+            </Extensions>
+          </Trackpoint>
+          <Trackpoint>
             <Time>2019-03-04T20:47:13.000Z</Time>
             <Position>
               <LatitudeDegrees>50.7255757</LatitudeDegrees>
@@ -2020,6 +2068,14 @@
             </HeartRateBpm>
           </Trackpoint>
           <Trackpoint>
+            <Time>2019-03-04T20:48:11.000Z</Time>
+            <Extensions>
+              <TPX xmlns="http://www.garmin.com/xmlschemas/ActivityExtension/v2">
+                <RunCadence>178</RunCadence>
+              </TPX>
+            </Extensions>
+          </Trackpoint>
+          <Trackpoint>
             <Time>2019-03-04T20:48:13.000Z</Time>
             <Position>
               <LatitudeDegrees>50.7242432</LatitudeDegrees>
@@ -2342,6 +2398,14 @@
             <HeartRateBpm xsi:type="HeartRateInBeatsPerMinute_t">
               <Value>161</Value>
             </HeartRateBpm>
+          </Trackpoint>
+          <Trackpoint>
+            <Time>2019-03-04T20:49:11.000Z</Time>
+            <Extensions>
+              <TPX xmlns="http://www.garmin.com/xmlschemas/ActivityExtension/v2">
+                <RunCadence>113</RunCadence>
+              </TPX>
+            </Extensions>
           </Trackpoint>
           <Trackpoint>
             <Time>2019-03-04T20:49:13.000Z</Time>
