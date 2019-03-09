@@ -49,9 +49,11 @@ def read_file(input_file):
         gps_data = []
         hr_data = []
         cad_data = []
+        alti_data = []
         first_gps = True
         first_hr = True
         first_cad = True
+        first_alti = True
         with open(input_file) as f:
             #    lbs   |   p-m   |   b-p-m   |   h-r   |   rs   |   s-r   |
             # -------------------------------------------------------------
@@ -61,7 +63,7 @@ def read_file(input_file):
                 if line[0:6] == 'tp=lbs':
                     # Get location data
                     holding_list = []
-                    for x in [6,3,4,0,0,0]: #time, lat, long, [dist], [hr], [cad]
+                    for x in [6,3,4,0,0,0,0]: #time, lat, long, [alti], [dist], [hr], [cad]
                         if x == 0:
                             holding_list.append('') # Fill in blanks with blank
                         else:
@@ -82,7 +84,7 @@ def read_file(input_file):
                 if line[0:6] == 'tp=h-r':
                     # Get heart-rate data
                     holding_list = []
-                    for x in [2,0,0,0,3,0]: #time, [lat], [long], [dist], hr, [cad]
+                    for x in [2,0,0,0,0,3,0]: #time, [lat], [long], [alti], [dist], hr, [cad]
                         if x == 0:
                             holding_list.append('') # Fill in blanks with blank
                         elif x == 2:
@@ -105,7 +107,7 @@ def read_file(input_file):
                 if line[0:6] == 'tp=s-r':
                     # Get cadence data
                     holding_list = []
-                    for x in [2,0,0,0,0,3]: #time, [lat], [long], [dist], [hr], cad
+                    for x in [2,0,0,0,0,0,3]: #time, [lat], [long], [alti], [dist], [hr], cad
                         if x == 0:
                             holding_list.append('') # Fill in blanks with blank
                         elif x == 2:
@@ -125,12 +127,35 @@ def read_file(input_file):
                     holding_list[0] = holding_list[0]/divisor
                     cad_data.append(holding_list)
 
+                if line[0:7] == 'tp=alti':
+                    # Get altitude data
+                    holding_list = []
+                    for x in [2,0,0,3,0,0,0]: #time, [lat], [long], [alti], [dist], [hr], cad
+                        if x == 0:
+                            holding_list.append('') # Fill in blanks with blank
+                        elif x == 2:
+                            holding_list.append(int(float(line.split('=')[x].split(';')[0])))
+                        else:
+                            holding_list.append(float(line.split('=')[x].split(';')[0]))
+                    if first_alti:
+                            # normalise time order of magnitude to unix timestamp
+                            oom = int(math.log10(holding_list[0]))
+                            if oom > 9:
+                                divisor = 10**(oom-9)
+                            elif oom < 9:
+                                divisor = 0.1**(9-oom)
+                            else:
+                                divisor = 1
+                            first_alti = False
+                    holding_list[0] = holding_list[0]/divisor
+                    alti_data.append(holding_list)
+
     except:
         print('FAILED')
         exit()
 
     print('OKAY')
-    return {'gps': gps_data, 'hr': hr_data, 'cad': cad_data}
+    return {'gps': gps_data, 'alti':alti_data, 'hr': hr_data, 'cad': cad_data}
 
 def filter_data(data):
     print('filtering: ', end='')
@@ -146,14 +171,15 @@ def filter_data(data):
 
         for line in data['hr']:
             #filter lines where heart rate is too low/high
-            if line[4] < 1 or line[4] > 254:
+            if line[5] < 1 or line[5] > 254:
                 data['hr'].remove(line)
 
         for line in data['cad']:
             #filter lines where cadence is too low/high
-            if line[5] < 1 or line[5] > 254:
+            if line[6] < 1 or line[6] > 254:
                 data['cad'].remove(line)
 
+        #no need to filter altitude data
         print('OKAY')
 
     except:
@@ -222,11 +248,11 @@ def process_gps(data):
             # Calculate distances between points based on vincenty distances
             # TODO: Improve point-to-point distance calculation
             if n == 0:
-                #time, lat, long, [dist], [hr]
-                entry[3] = 0
+                #time, lat, long, [alti], [dist], [hr], [cad]
+                entry[4] = 0
             else:
-                entry[3] = (vincenty((float(entry[1]),float(entry[2])),
-                    (float(data['gps'][n-1][1]),float(data['gps'][n-1][2])))+data['gps'][n-1][3])
+                entry[4] = (vincenty((float(entry[1]),float(entry[2])),
+                    (float(data['gps'][n-1][1]),float(data['gps'][n-1][2])))+data['gps'][n-1][4])
 
     except:
         print('FAILED')
@@ -238,21 +264,30 @@ def process_gps(data):
 
 def file_details(data):
     # Get stats from data
-    start_time = data['gps'][0][0]
-    duration = data['gps'][-1][0]-start_time
-    if data['gps'][-1][3]: distance = data['gps'][-1][3] #distance is zero if no gps data
-    else: distance = 0
-    stats = {'start_time': start_time, 'duration': duration, 'distance': distance}
+    #time, lat, long, [alti], [dist], [hr], [cad]
+    try:
+        start_time = data['gps'][0][0]
+        duration = data['gps'][-1][0]-start_time
+        if data['gps'][-1][3]: distance = data['gps'][-1][3] #distance is zero if no gps data
+        else: distance = 0
+        getalti = operator.itemgetter(3)
+        altitude = sorted(data['alti'], key=getalti)[-1][3]-sorted(data['alti'], key=getalti)[0][3]
 
-    print('\n---- Details ----')
-    print('start: '+str(dt.utcfromtimestamp(stats['start_time'])))
-    print('duration: '+str(dt.utcfromtimestamp(stats['duration']).strftime('%H:%M:%S')))
-    print('distance: '+str(int(stats['distance'])), end='m\n')
+        stats = {'start_time': start_time, 'duration': duration, 'distance': distance, 'altitude': altitude}
 
-    # Format stats for saving
-    stats['start_time'] = dt.utcfromtimestamp(stats['start_time']).isoformat()+'.000Z'
-    stats['duration'] = str(stats['duration'])
-    stats['distance'] = str(int(stats['distance']))
+        print('\n---- Details ----')
+        print('start: '+str(dt.utcfromtimestamp(stats['start_time'])))
+        print('duration: '+str(dt.utcfromtimestamp(stats['duration']).strftime('%H:%M:%S')))
+        print('distance: '+str(int(stats['distance'])), end='m\n')
+        print('altitude: '+str(stats['altitude']), end='m\n')
+
+        # Format stats for saving
+        stats['start_time'] = dt.utcfromtimestamp(stats['start_time']).isoformat()+'.000Z'
+        stats['duration'] = str(stats['duration'])
+        stats['distance'] = str(int(stats['distance']))
+    except:
+        print('Something went wrong :-(')
+        exit()
 
     return stats
 
@@ -260,7 +295,7 @@ def merge_data(data):
     print('processing heart-rate/cadence: ', end='')
     # Sort data array chronologically
     try:
-        data = data['gps']+data['hr']+data['cad'] #time, lat, long, dist, hr, cad
+        data = data['gps']+data['alti']+data['hr']+data['cad'] #time, lat, long, alti, dist, hr, cad
         gettime = operator.itemgetter(0)
         data = sorted(data, key=gettime)
 
@@ -270,7 +305,7 @@ def merge_data(data):
                 pass
             else:
                 if entry[0] == data[n-1][0]: #if timestamp is same as previous
-                    for x in range(1,6):
+                    for x in range(1,7):
                         if entry[x]:
                             data[n-1][x] = entry[x] #copy all data back to previous
                     data.remove(entry) #and delete current
@@ -328,42 +363,49 @@ def generate_xml(data, stats, options):
             line[0] = dt.utcfromtimestamp(line[0]).isoformat()+'.000Z' #time
             line[1] = str(line[1]) #lat
             line[2] = str(line[2]) #long
-            line[3] = str(line[3]) #distance
-            line[4] = str(line[4]) #heart-rate
+            line[3] = str(line[3]) #alti
+            line[4] = str(line[4]) #distance
+            line[5] = str(line[5]) #heart-rate
+            line[6] = str(line[6]) #cadence
 
             Trackpoint = ET.SubElement(Track,'Trackpoint')
             Time = ET.SubElement(Trackpoint,'Time')
-            Time.text = str(line[0])
+            Time.text = line[0]
+
             if line[1]:
                 Position = ET.SubElement(Trackpoint,'Position')
                 LatitudeDegrees = ET.SubElement(Position,'LatitudeDegrees')
                 LatitudeDegrees.text = line[1]
                 LongitudeDegrees = ET.SubElement(Position,'LongitudeDegrees')
                 LongitudeDegrees.text = line[2]
+
+            if line[3]:
                 AltitudeMeters = ET.SubElement(Trackpoint,'AltitudeMeters')
-                AltitudeMeters.text = '0.0'
+                AltitudeMeters.text = line[3]
                 # TODO: Some (all?) Huawei devices don't collect Altitude data,
                 # but in that case can we call on some open API to estimate it?
+
+            if line[1]:
                 DistanceMeters = ET.SubElement(Trackpoint,'DistanceMeters')
-                DistanceMeters.text = line[3]
+                DistanceMeters.text = line[4]
                 # TODO: Do any Huawei devices collect this?
 
-            if line[4]:
+            if line[5]:
                 HeartRateBpm = ET.SubElement(Trackpoint,'HeartRateBpm')
                 HeartRateBpm.set('xsi:type','HeartRateInBeatsPerMinute_t')
                 Value = ET.SubElement(HeartRateBpm, 'Value')
-                Value.text = str(line[4])
+                Value.text = line[5]
 
-            if line[5]:
+            if line[6]:
                 if options['sport'] == 'Biking':
                     Cadence = ET.SubElement(Trackpoint, 'Cadence')
-                    Cadence.text = str(line[5])
+                    Cadence.text = line[6]
                 elif options['sport'] == 'Running':
                     Extensions = ET.SubElement(Trackpoint, 'Extensions')
                     TPX = ET.SubElement(Extensions, 'TPX')
                     TPX.set('xmlns','http://www.garmin.com/xmlschemas/ActivityExtension/v2')
                     RunCadence = ET.SubElement(TPX, 'RunCadence')
-                    RunCadence.text = str(line[5])
+                    RunCadence.text = line[6]
 
         #### Creator
         # TODO: See if we can scrape this data from other files in the .tar
