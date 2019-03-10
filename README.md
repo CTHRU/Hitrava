@@ -53,6 +53,9 @@ This gives me the output:
 
 I've included both the HiTrack file and the resultant TCX file in the Examples folder for you to have a go with. You can also [visualise the data online](https://www.mygpsfiles.com/app/#3gcQ1H3M).
 
+### Next steps
+Some users have recommended the [TCX Converter](http://www.tcxconverter.com/TCX_Converter/TCX_Converter_ENG.html) tool to add altitude data to your TCX files once they've been converted. This may overwrite altitude data extracted from your device, if it collects this.
+
 ## Comparison
 This is an image of the GPS trace from the .tcx file. The command line output above also lists the start time as 2019-03-04 20:42:00, the distance as 1.70km, and the duration as 00:07:49.
 
@@ -61,9 +64,6 @@ This is an image of the GPS trace from the .tcx file. The command line output ab
 For comparison, below is the data visable on the Huawei Health App. You can see that the distance is off by about 80m, and the duration off by 1 second, but the GPS trace is spot on.
 
 ![Huawei Health App example route](https://raw.githubusercontent.com/aricooperdavis/Huawei-TCX-Converter/master/Examples/Huawei_Health.png)
-
-### Next steps
-Some users have recommended the [TCX Converter](http://www.tcxconverter.com/TCX_Converter/TCX_Converter_ENG.html) tool to add altitude data to your TCX files once they've been converted. This may overwrite altitude data extracted from your device, if it collects this.
 
 ## Contributing
 This is a very early alpha version of this tool, so please help me by making it better! There are some scripts in the Development Tools folder that I find useful for debugging. I'll accept any improvements, but if you're looking for inspiration you could start with this to-do list:
