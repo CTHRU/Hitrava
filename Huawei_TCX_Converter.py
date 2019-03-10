@@ -264,14 +264,18 @@ def process_gps(data):
 
 def file_details(data):
     # Get stats from data
-    #time, lat, long, [alti], [dist], [hr], [cad]
+    # time, lat, long, [alti], [dist], [hr], [cad]
     try:
         start_time = data['gps'][0][0]
         duration = data['gps'][-1][0]-start_time
-        if data['gps'][-1][3]: distance = data['gps'][-1][3] #distance is zero if no gps data
-        else: distance = 0
-        getalti = operator.itemgetter(3)
-        altitude = sorted(data['alti'], key=getalti)[-1][3]-sorted(data['alti'], key=getalti)[0][3]
+        if data['gps'][-1][4]:
+            distance = data['gps'][-1][4] #distance is zero if no gps data
+        else:
+            distance = 0
+        if data['alti']:
+            getalti = operator.itemgetter(3)
+            altitude = sorted(data['alti'], key=getalti)[-1][3]-sorted(data['alti'], key=getalti)[0][3]
+        else: altitude = 0
 
         stats = {'start_time': start_time, 'duration': duration, 'distance': distance, 'altitude': altitude}
 
@@ -285,6 +289,7 @@ def file_details(data):
         stats['start_time'] = dt.utcfromtimestamp(stats['start_time']).isoformat()+'.000Z'
         stats['duration'] = str(stats['duration'])
         stats['distance'] = str(int(stats['distance']))
+
     except:
         print('Something went wrong :-(')
         exit()
