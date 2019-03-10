@@ -70,12 +70,12 @@ This is a very early alpha version of this tool, so please help me by making it 
 * ~~Remove reliance on using the original filename~~
 * ~~Enable changing sport type from running (default) to biking~~
 * ~~Read timestamped heart-rate, cadence, and altitude data where available~~
+* ~~See if we really need to add the unused data elements (e.g. Calories) to the TCX (edit: we do as there is no minOccurs in the schema)~~
 * Check that this works for files other than those generated using the Huawei Band 2 Pro:
   * Confirmed working on a [file from a Huawei Watch GT](https://forum.xda-developers.com/smartwatch/huawei-watch/huawei-watch-gt-export-data-health-t3874330#post79042345)
 * Improve the distance measurement method (currently using [Viscenty's Formulae](https://en.wikipedia.org/wiki/Vincenty%27s_formulae))
 * Try and work out what `tp=b-p-m` is
 * Add interpolated heart-rate/pace/average speed data to each location element
 * Work on splitting data into `Laps`/`Tracks` rather than shoving it all into one
-* See if you really need to add the unused data elements (e.g. Calories) to the TCX
 * Try to call on an open API to get altitude data for location points that don't have it
 * Inspect other files in `com.huawei.health` to see if we can get any more relevant data out of them
