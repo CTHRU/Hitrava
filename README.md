@@ -68,12 +68,13 @@ Some users have recommended the [TCX Converter](http://www.tcxconverter.com/TCX_
 ## Contributing
 This is a very early alpha version of this tool, so please help me by making it better! There are some scripts in the Development Tools folder that I find useful for debugging. I'll accept any improvements, but if you're looking for inspiration you could start with this to-do list:
 * ~~Remove reliance on using the original filename~~
+* ~~Enable changing sport type from running (default) to biking~~
+* ~~Read timestamped heart-rate, cadence, and altitude data where available~~
 * Check that this works for files other than those generated using the Huawei Band 2 Pro:
   * Confirmed working on a [file from a Huawei Watch GT](https://forum.xda-developers.com/smartwatch/huawei-watch/huawei-watch-gt-export-data-health-t3874330#post79042345)
 * Improve the distance measurement method (currently using [Viscenty's Formulae](https://en.wikipedia.org/wiki/Vincenty%27s_formulae))
 * Try and work out what `tp=b-p-m` is
 * Add interpolated heart-rate/pace/average speed data to each location element
-* ~~Look into files from different sports, and enable changing sports type~~
 * Work on splitting data into `Laps`/`Tracks` rather than shoving it all into one
 * See if you really need to add the unused data elements (e.g. Calories) to the TCX
 * Try to call on an open API to get altitude data for location points that don't have it
