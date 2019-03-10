@@ -4,6 +4,7 @@ A makeshift python tool that generates TCX files from Huawei HiTrack files.
 Users of Huawei Watches/Bands sync their fitness data with the Huawei Health App. It is [notoriously difficult](https://uk.community.huawei.com/software-17/huawei-health-integration-with-other-services-1198/index3.html) to get the data out of this app, but [through some cunning](https://forum.xda-developers.com/smartwatch/huawei-watch/huawei-watch-gt-export-data-health-t3874330) you can find `HiTrack` files which seem to contain some run data. This program allows you to take these files and generate `.TCX` files for use in your tracking app of choice (e.g. Strava). The outputted `.TCX` files will contain timestamped GPS, altitude, heart-rate, and cadence data where available.
 
 ## How to get the HiTrack Files
+- Open the Huawei Health app and open the exercise that you want to convert to view it's trajectory. This ensures that its HiTrack file is generated.
 
 If you have a **rooted** phone you can simply navigate to: `data/data/com.huawei.health/files/` where you should find a number of files prefixed `HiTrack`.
 
@@ -60,6 +61,9 @@ This is an image of the GPS trace from the .tcx file. The command line output ab
 For comparison, below is the data visable on the Huawei Health App. You can see that the distance is off by about 80m, and the duration off by 1 second, but the GPS trace is spot on.
 
 ![Huawei Health App example route](https://raw.githubusercontent.com/aricooperdavis/Huawei-TCX-Converter/master/Examples/Huawei_Health.png)
+
+### Next steps
+Some users have recommended the [TCX Converter](http://www.tcxconverter.com/TCX_Converter/TCX_Converter_ENG.html) tool to add altitude data to your TCX files once they've been converted. This may overwrite altitude data extracted from your device, if it collects this.
 
 ## Contributing
 This is a very early alpha version of this tool, so please help me by making it better! There are some scripts in the Development Tools folder that I find useful for debugging. I'll accept any improvements, but if you're looking for inspiration you could start with this to-do list:
