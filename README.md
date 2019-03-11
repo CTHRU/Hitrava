@@ -28,9 +28,9 @@ Other command line arguments:
 You can rename your HiTrack files if you wish, but for clarity in the examples below I leave mine exactly as I found it.
 
 ### Illustration
-I have copied the `Huawei_TCX_Converter.py` file to the directory containing my HiTrack file (`HiTrack_1551732120000155173259000030001` ). Now I can run the tool as follows:
+I have copied the `Huawei-TCX-Converter.py` file to the directory containing my HiTrack file (`HiTrack_1551732120000155173259000030001` ). Now I can run the tool as follows:
 
-    python Huawei_TCX_Converter.py HiTrack_1551732120000155173259000030001 -f -v
+    python Huawei-TCX-Converter.py HiTrack_1551732120000155173259000030001 -f -v
 
 This gives me the output:
 
