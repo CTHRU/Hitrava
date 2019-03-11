@@ -19,7 +19,7 @@ If you have an **unrooted** phone then:
 ## How to use the Huawei TCX Converter
 You need [`python 3`](https://www.python.org/downloads/) to use this tool.
 
-Download the [Huawei TCX Converter](https://raw.githubusercontent.com/aricooperdavis/Huawei-TCX-Converter/master/Huawei_TCX_Converter.py) and save it as a Python script in the same folder as your HiTrack file.
+Download the [Huawei TCX Converter](https://raw.githubusercontent.com/aricooperdavis/Huawei-TCX-Converter/master/Huawei-TCX-Converter.py) and save it as a Python script in the same folder as your HiTrack file.
 
 The tool is run on the command line by passing it the name of your file as a command line argument.
 Other command line arguments:
