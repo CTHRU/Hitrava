@@ -38,13 +38,13 @@ This gives me the output:
     reading: OKAY
     filtering: OKAY
     processing gps: OKAY
-    processing heart-rate: OKAY
+    processing heart-rate/cadence: OKAY
 
     ---- Details ----
+    sport: Running
     start: 2019-03-04 20:42:00
     duration: 00:07:49
     distance: 1700m
-    sport: Running
 
     ---- XML file ----
     generating: OKAY
