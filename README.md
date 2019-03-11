@@ -1,3 +1,5 @@
+<img align="left" width="80" height="80" src="./Development Tools/icon.png" alt="Huawei TCX Converter icon">
+
 # Huawei TCX Converter
 A makeshift python tool that generates TCX files from Huawei HiTrack files.
 
