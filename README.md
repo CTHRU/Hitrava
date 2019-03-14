@@ -73,6 +73,9 @@ This is a very early alpha version of this tool, so please help me by making it 
 * ~~Enable changing sport type from running (default) to biking~~
 * ~~Read timestamped heart-rate, cadence, and altitude data where available~~
 * ~~See if we really need to add the unused data elements (e.g. Calories) to the TCX (edit: we do as there is no minOccurs in the schema)~~
+* Add a GUI to make life easier for users who aren't familiar with the command line
+* Build for common platforms so that users don't need to install python independently (Android?)
+* Work with API's (i.e. Strava/Garmin) for automating tcx upload
 * Check that this works for files other than those generated using the Huawei Band 2 Pro:
   * Confirmed working on a [file from a Huawei Watch GT](https://forum.xda-developers.com/smartwatch/huawei-watch/huawei-watch-gt-export-data-health-t3874330#post79042345)
 * Improve the distance measurement method (currently using [Viscenty's Formulae](https://en.wikipedia.org/wiki/Vincenty%27s_formulae))
