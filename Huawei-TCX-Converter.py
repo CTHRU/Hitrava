@@ -317,23 +317,22 @@ def file_details(data, options):
     Returns
     -------
     stats : dictionary of strings
-        {'start_time': string, 'duration': string, 'distance': string, 'altitude': string}
+        {'start_time': string, 'duration': string, 'distance': string}
     """
     # time, lat, long, [alti], [dist], [hr], [cad]
     try:
-        start_time = data['gps'][0][0]
-        duration = data['gps'][-1][0]-start_time
-        if data['gps'][-1][4]:
+        if data['gps']:
             distance = data['gps'][-1][4] #distance is zero if no gps data
         else:
             distance = 0
-        if data['alti']:
-            getalti = operator.itemgetter(3)
-            altitude = sorted(data['alti'], key=getalti)[-1][3]-sorted(data['alti'], key=getalti)[0][3]
-        else: altitude = 0
-        stats = {'start_time': start_time, 'duration': duration, 'distance': distance, 'altitude': altitude}
 
         data = merge_data(data)
+
+        # time, lat, long, [alti], [dist], [hr], [cad]
+        start_time = data[0][0]
+        duration = data[-1][0]-start_time
+
+        stats = {'start_time': start_time, 'duration': duration, 'distance': distance}
 
         print('\n---- Details ----')
         print('sport: '+str(options['sport']))
