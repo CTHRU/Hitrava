@@ -93,15 +93,7 @@ def read_file(input_file):
                             holding_list.append('') # Fill in blanks with blank
                         else:
                             holding_list.append(float(line.split('=')[x].split(';')[0]))
-                    if not data['gps']: # Determine normalisation of timestamp for this data type
-                            oom = int(math.log10(holding_list[0]))
-                            if oom > 9:
-                                divisor = 10**(oom-9)
-                            elif oom < 9:
-                                divisor = 0.1**(9-oom)
-                            else:
-                                divisor = 1
-                    holding_list[0] = holding_list[0]/divisor # Normalise timestamp
+                    holding_list[0] = _normalize_timestamp(holding_list[0])
                     data['gps'].append(holding_list)
 
                 elif line[0:6] == 'tp=h-r': # Heart-rate lines
@@ -112,15 +104,7 @@ def read_file(input_file):
                             holding_list.append(int(float(line.split('=')[x].split(';')[0])))
                         else:
                             holding_list.append(int(line.split('=')[x].split(';')[0]))
-                    if not data['hr']:
-                            oom = int(math.log10(holding_list[0]))
-                            if oom > 9:
-                                divisor = 10**(oom-9)
-                            elif oom < 9:
-                                divisor = 0.1**(9-oom)
-                            else:
-                                divisor = 1
-                    holding_list[0] = holding_list[0]/divisor
+                    holding_list[0] = _normalize_timestamp(holding_list[0])
                     data['hr'].append(holding_list)
 
                 elif line[0:6] == 'tp=s-r': # Cadence lines
@@ -131,15 +115,7 @@ def read_file(input_file):
                             holding_list.append(int(float(line.split('=')[x].split(';')[0])))
                         else:
                             holding_list.append(int(line.split('=')[x].split(';')[0]))
-                    if not data['cad']:
-                            oom = int(math.log10(holding_list[0]))
-                            if oom > 9:
-                                divisor = 10**(oom-9)
-                            elif oom < 9:
-                                divisor = 0.1**(9-oom)
-                            else:
-                                divisor = 1
-                    holding_list[0] = holding_list[0]/divisor
+                    holding_list[0] = _normalize_timestamp(holding_list[0])
                     data['cad'].append(holding_list)
 
                 elif line[0:7] == 'tp=alti': # Altitude lines
@@ -150,15 +126,7 @@ def read_file(input_file):
                             holding_list.append(int(float(line.split('=')[x].split(';')[0])))
                         else:
                             holding_list.append(float(line.split('=')[x].split(';')[0]))
-                    if not data['alti']:
-                            oom = int(math.log10(holding_list[0]))
-                            if oom > 9:
-                                divisor = 10**(oom-9)
-                            elif oom < 9:
-                                divisor = 0.1**(9-oom)
-                            else:
-                                divisor = 1
-                    holding_list[0] = holding_list[0]/divisor
+                    holding_list[0] = _normalize_timestamp(holding_list[0])
                     data['alti'].append(holding_list)
 
     except:
@@ -639,6 +607,21 @@ def validate_xml(filename, xmlschema_found):
             print('FAILED')
     else:
         print('FAILED: xmlschema not found')
+
+def _normalize_timestamp(timestamp: float) -> float:
+    """ Normalize the timestamp
+
+    Timestamps taken from different devices can have different values. Most common are seconds
+    (i.e. t=1.543646826E9) or microseconds (i.e. t=1.55173212E12).
+    This method implements a generic normalization function that transform all values to valid
+    unix timestamps (integer with 10 digits).
+    """
+    oom = int(math.log10(timestamp))
+    if oom == 9:
+        return timestamp
+
+    divisor = 10 ** (oom - 9) if oom > 9 else 0.1 ** (9 - oom)
+    return timestamp / divisor
 
 # Call all functions (considering user options)
 input_file, options = parse_arguments()
