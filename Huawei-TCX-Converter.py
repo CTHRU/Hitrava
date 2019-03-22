@@ -172,7 +172,7 @@ def filter_data(data):
 
         for line in data['alti']:
             # Altitude is too low/high (dead sea/everest)
-            if line[4] < 1000 or line[4] > 10000:
+            if line[3] < 1000 or line[3] > 10000:
                 data['alti'].remove(line)
 
         print('OKAY')
