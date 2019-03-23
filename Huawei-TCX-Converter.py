@@ -1,4 +1,4 @@
-# Huawei_TCX_Converter
+# Huawei-TCX-Converter.py
 # Ari Cooper-Davis, 2019 - github.com/aricooperdavis/Huawei-TCX-Converter
 
 # Import resources from Standard Library
@@ -623,15 +623,19 @@ def _normalize_timestamp(timestamp: float) -> float:
     divisor = 10 ** (oom - 9) if oom > 9 else 0.1 ** (9 - oom)
     return timestamp / divisor
 
-# Call all functions (considering user options)
-input_file, options = parse_arguments()
-data = read_file(input_file)
-if options['filter']: data = filter_data(data)
-data = process_gps(data)
-data, stats = file_details(data, options)
-TrainingCenterDatabase = generate_xml(data, stats, options)
-filename = save_xml(TrainingCenterDatabase, input_file)
-if options['validate']: validate_xml(filename, xmlschema_found)
+def main():
+    # Call all functions (considering user options)
+    input_file, options = parse_arguments()
+    data = read_file(input_file)
+    if options['filter']: data = filter_data(data)
+    data = process_gps(data)
+    data, stats = file_details(data, options)
+    TrainingCenterDatabase = generate_xml(data, stats, options)
+    filename = save_xml(TrainingCenterDatabase, input_file)
+    if options['validate']: validate_xml(filename, xmlschema_found)
 
-# Whitespace improves formatting
-print('\n')
+    # Whitespace improves formatting
+    print('\n')
+
+if __name__ == '__main__':
+    main()
