@@ -72,11 +72,24 @@ def read_file(input_file):
 
     Returns
     -------
-    input_file : string
-        HiTrack filename
-    options: dict of lists of lists
+    data: dict of lists of lists
         {'gps': list of lists, 'alti': list of lists, 'hr': list of lists, 'cad': list of lists}
     """
+
+    def _normalize_timestamp(timestamp: float) -> float:
+        """ Normalize the timestamp
+
+        Timestamps taken from different devices can have different values. Most common are seconds
+        (i.e. t=1.543646826E9) or microseconds (i.e. t=1.55173212E12).
+        This method implements a generic normalization function that transform all values to valid
+        unix timestamps (integer with 10 digits).
+        """
+        oom = int(math.log10(timestamp))
+        if oom == 9:
+            return timestamp
+
+        divisor = 10 ** (oom - 9) if oom > 9 else 0.1 ** (9 - oom)
+        return timestamp / divisor
 
     print('---- Input File ----')
     print('reading: ', end='')
@@ -183,61 +196,9 @@ def filter_data(data):
 
     return data
 
-def vincenty(point1, point2):
-    # WGS 84
-    a = 6378137
-    f = 1 / 298.257223563
-    b = 6356752.314245
-    MAX_ITERATIONS = 200
-    CONVERGENCE_THRESHOLD = 1e-12
-    if point1[0] == point2[0] and point1[1] == point2[1]:
-        return 0.0
-    U1 = math.atan((1 - f) * math.tan(math.radians(point1[0])))
-    U2 = math.atan((1 - f) * math.tan(math.radians(point2[0])))
-    L = math.radians(point2[1] - point1[1])
-    Lambda = L
-    sinU1 = math.sin(U1)
-    cosU1 = math.cos(U1)
-    sinU2 = math.sin(U2)
-    cosU2 = math.cos(U2)
-    for iteration in range(MAX_ITERATIONS):
-        sinLambda = math.sin(Lambda)
-        cosLambda = math.cos(Lambda)
-        sinSigma = math.sqrt((cosU2 * sinLambda) ** 2 +
-                             (cosU1 * sinU2 - sinU1 * cosU2 * cosLambda) ** 2)
-        if sinSigma == 0:
-            return 0.0
-        cosSigma = sinU1 * sinU2 + cosU1 * cosU2 * cosLambda
-        sigma = math.atan2(sinSigma, cosSigma)
-        sinAlpha = cosU1 * cosU2 * sinLambda / sinSigma
-        cosSqAlpha = 1 - sinAlpha ** 2
-        try:
-            cos2SigmaM = cosSigma - 2 * sinU1 * sinU2 / cosSqAlpha
-        except ZeroDivisionError:
-            cos2SigmaM = 0
-        C = f / 16 * cosSqAlpha * (4 + f * (4 - 3 * cosSqAlpha))
-        LambdaPrev = Lambda
-        Lambda = L + (1 - C) * f * sinAlpha * (sigma + C * sinSigma *
-                                               (cos2SigmaM + C * cosSigma *
-                                                (-1 + 2 * cos2SigmaM ** 2)))
-        if abs(Lambda - LambdaPrev) < CONVERGENCE_THRESHOLD:
-            break
-    else:
-        print('Error: unable to calculate distance between GPS points')
-        return None  # TODO: Improve handling of convergence failure
-    uSq = cosSqAlpha * (a ** 2 - b ** 2) / (b ** 2)
-    A = 1 + uSq / 16384 * (4096 + uSq * (-768 + uSq * (320 - 175 * uSq)))
-    B = uSq / 1024 * (256 + uSq * (-128 + uSq * (74 - 47 * uSq)))
-    deltaSigma = B * sinSigma * (cos2SigmaM + B / 4 * (cosSigma *
-                 (-1 + 2 * cos2SigmaM ** 2) - B / 6 * cos2SigmaM *
-                 (-3 + 4 * sinSigma ** 2) * (-3 + 4 * cos2SigmaM ** 2)))
-    s = b * A * (sigma - deltaSigma)
-
-    return round(s, 6)
-
 def process_gps(data):
     """
-    Determine distance between gps points
+    Add distance information to all gps tagged data points
 
     Parameters
     ----------
@@ -250,6 +211,75 @@ def process_gps(data):
         {'gps': list of lists, 'alti': list of lists, 'hr': list of lists, 'cad': list of lists}
     """
 
+    def _vincenty(point1, point2):
+        """
+        Determine distance between two coordinates
+
+        Parameters
+        ----------
+        point1 : Tuple
+            [Latitude of first point, Longitude of first point]
+        point2: Tuple
+            [Latitude of second point, Longitude of second point]
+
+        Returns
+        -------
+        s : float
+            distance in m between point1 and point2
+
+        """
+
+        # WGS 84
+        a = 6378137
+        f = 1 / 298.257223563
+        b = 6356752.314245
+        MAX_ITERATIONS = 200
+        CONVERGENCE_THRESHOLD = 1e-12
+        if point1[0] == point2[0] and point1[1] == point2[1]:
+            return 0.0
+        U1 = math.atan((1 - f) * math.tan(math.radians(point1[0])))
+        U2 = math.atan((1 - f) * math.tan(math.radians(point2[0])))
+        L = math.radians(point2[1] - point1[1])
+        Lambda = L
+        sinU1 = math.sin(U1)
+        cosU1 = math.cos(U1)
+        sinU2 = math.sin(U2)
+        cosU2 = math.cos(U2)
+        for iteration in range(MAX_ITERATIONS):
+            sinLambda = math.sin(Lambda)
+            cosLambda = math.cos(Lambda)
+            sinSigma = math.sqrt((cosU2 * sinLambda) ** 2 +
+                                 (cosU1 * sinU2 - sinU1 * cosU2 * cosLambda) ** 2)
+            if sinSigma == 0:
+                return 0.0
+            cosSigma = sinU1 * sinU2 + cosU1 * cosU2 * cosLambda
+            sigma = math.atan2(sinSigma, cosSigma)
+            sinAlpha = cosU1 * cosU2 * sinLambda / sinSigma
+            cosSqAlpha = 1 - sinAlpha ** 2
+            try:
+                cos2SigmaM = cosSigma - 2 * sinU1 * sinU2 / cosSqAlpha
+            except ZeroDivisionError:
+                cos2SigmaM = 0
+            C = f / 16 * cosSqAlpha * (4 + f * (4 - 3 * cosSqAlpha))
+            LambdaPrev = Lambda
+            Lambda = L + (1 - C) * f * sinAlpha * (sigma + C * sinSigma *
+                                                   (cos2SigmaM + C * cosSigma *
+                                                    (-1 + 2 * cos2SigmaM ** 2)))
+            if abs(Lambda - LambdaPrev) < CONVERGENCE_THRESHOLD:
+                break
+        else:
+            print('Error: unable to calculate distance between GPS points')
+            return None  # TODO: Improve handling of convergence failure
+        uSq = cosSqAlpha * (a ** 2 - b ** 2) / (b ** 2)
+        A = 1 + uSq / 16384 * (4096 + uSq * (-768 + uSq * (320 - 175 * uSq)))
+        B = uSq / 1024 * (256 + uSq * (-128 + uSq * (74 - 47 * uSq)))
+        deltaSigma = B * sinSigma * (cos2SigmaM + B / 4 * (cosSigma *
+                     (-1 + 2 * cos2SigmaM ** 2) - B / 6 * cos2SigmaM *
+                     (-3 + 4 * sinSigma ** 2) * (-3 + 4 * cos2SigmaM ** 2)))
+        s = b * A * (sigma - deltaSigma)
+
+        return round(s, 6)
+
     print('processing gps: ', end='')
     try:
         # Loop through data line by line
@@ -260,7 +290,7 @@ def process_gps(data):
                 entry[4] = 0
             else:
                 # TODO: Try other point-to-point distance calculations
-                entry[4] = (vincenty((float(entry[1]),float(entry[2])),
+                entry[4] = (_vincenty((float(entry[1]),float(entry[2])),
                     (float(data['gps'][n-1][1]),float(data['gps'][n-1][2])))+data['gps'][n-1][4])
 
     except:
@@ -284,6 +314,8 @@ def file_details(data, options):
 
     Returns
     -------
+    data : dictionary of lists of lists
+        {'gps': list of lists, 'alti': list of lists, 'hr': list of lists, 'cad': list of lists}
     stats : dictionary of strings
         {'start_time': string, 'duration': string, 'distance': string}
     """
@@ -369,6 +401,8 @@ def generate_xml(data, stats, options):
         {'gps': list of lists, 'alti': list of lists, 'hr': list of lists, 'cad': list of lists}
     stats : dictionary of strings
         {'start_time': string, 'duration': string, 'distance': string, 'altitude': string}
+    options: dictionary of boolean/string
+        {'filter': boolean, 'validate': boolean, 'sport': string}
 
     Returns
     -------
@@ -607,21 +641,6 @@ def validate_xml(filename, xmlschema_found):
             print('FAILED')
     else:
         print('FAILED: xmlschema not found')
-
-def _normalize_timestamp(timestamp: float) -> float:
-    """ Normalize the timestamp
-
-    Timestamps taken from different devices can have different values. Most common are seconds
-    (i.e. t=1.543646826E9) or microseconds (i.e. t=1.55173212E12).
-    This method implements a generic normalization function that transform all values to valid
-    unix timestamps (integer with 10 digits).
-    """
-    oom = int(math.log10(timestamp))
-    if oom == 9:
-        return timestamp
-
-    divisor = 10 ** (oom - 9) if oom > 9 else 0.1 ** (9 - oom)
-    return timestamp / divisor
 
 def main():
     # Call all functions (considering user options)
