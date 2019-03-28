@@ -13,7 +13,7 @@ try:
 except ModuleNotFoundError:
     xmlschema_found = False
 
-def parse_arguments():
+def parse_arguments() -> tuple:
     """
     Parses command line arguments for filename and options
 
@@ -61,7 +61,7 @@ def parse_arguments():
 
     return input_file, options
 
-def read_file(input_file):
+def read_file(input_file: str) -> dict:
     """
     Read the file and extract relevant data
 
@@ -149,7 +149,7 @@ def read_file(input_file):
     print('OKAY')
     return data
 
-def filter_data(data):
+def filter_data(data: dict) ->  dict:
     """
     Remove unwanted/aberrant lines from data
 
@@ -196,7 +196,7 @@ def filter_data(data):
 
     return data
 
-def process_gps(data):
+def process_gps(data: dict) -> dict:
     """
     Add distance information to all gps tagged data points
 
@@ -211,7 +211,7 @@ def process_gps(data):
         {'gps': list of lists, 'alti': list of lists, 'hr': list of lists, 'cad': list of lists}
     """
 
-    def _vincenty(point1, point2):
+    def _vincenty(point1: list, point2: list) -> float:
         """
         Determine distance between two coordinates
 
@@ -301,7 +301,7 @@ def process_gps(data):
 
     return data
 
-def file_details(data, options):
+def file_details(data: dict, options: dict) -> tuple:
     """
     Determine metadata, print to command-line, and format for saving
 
@@ -351,7 +351,7 @@ def file_details(data, options):
 
     return data, stats
 
-def merge_data(data):
+def merge_data(data: dict) -> list:
     """
     Merge different data types into one list
 
@@ -391,14 +391,14 @@ def merge_data(data):
     print('OKAY')
     return data
 
-def generate_xml(data, stats, options):
+def generate_xml(data: list, stats: dict, options: dict) -> ET.Element:
     """
     Generate xml file from extracted data and user options
 
     Parameters
     ----------
-    data : dictionary of lists of lists
-        {'gps': list of lists, 'alti': list of lists, 'hr': list of lists, 'cad': list of lists}
+    data : list of lists
+        [[time, lat, long, alti, dist, hr, cad],[...]]
     stats : dictionary of strings
         {'start_time': string, 'duration': string, 'distance': string, 'altitude': string}
     options: dictionary of boolean/string
@@ -406,7 +406,7 @@ def generate_xml(data, stats, options):
 
     Returns
     -------
-    TrainingCenterDatabase : ElementTree.Element
+    TrainingCenterDatabase : ET.Element
     """
 
     print('\n---- XML file ----')
@@ -543,13 +543,13 @@ def generate_xml(data, stats, options):
 
     return TrainingCenterDatabase
 
-def indent(elem, level=0):
+def indent(elem: ET.Element, level: int = 0):
     """
     Adds whitespace to xml files to improve readability
 
     Parameters
     ----------
-    elem : ElementTree.Element or ElementTree.SubElement
+    elem : ET.Element or ET.SubElement
         Text information to indent
 
     level : int
@@ -575,13 +575,13 @@ def indent(elem, level=0):
         if level and (not elem.tail or not elem.tail.strip()):
             elem.tail = i
 
-def save_xml(TrainingCenterDatabase, input_file):
+def save_xml(TrainingCenterDatabase: ET.Element, input_file: str) -> str:
     """
     Saves TCX file as XML
 
     Parameters
     ----------
-    TrainingCenterDatabase : ElementTree.Element
+    TrainingCenterDatabase : ET.Element
         XML data structure to save
 
     input_file : string
@@ -607,7 +607,7 @@ def save_xml(TrainingCenterDatabase, input_file):
 
     return new_filename
 
-def validate_xml(filename, xmlschema_found):
+def validate_xml(filename: str, xmlschema_found: bool):
     """
     Validates saved TCX (XML) file
 
