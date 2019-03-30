@@ -142,6 +142,9 @@ def read_file(input_file: str) -> dict:
                     holding_list[0] = _normalize_timestamp(holding_list[0])
                     data['alti'].append(holding_list)
 
+        # Sort GPS data by date for distance computation
+        data['gps'] = sorted(data['gps'], key=lambda x : x[0])
+
     except:
         print('FAILED')
         exit()
