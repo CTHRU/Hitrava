@@ -32,7 +32,7 @@ You can rename your HiTrack files if you wish, but for clarity in the examples b
 ### Illustration
 I have copied the `Huawei-TCX-Converter.py` file to the directory containing my HiTrack file (`HiTrack_1551732120000155173259000030001` ). Now I can run the tool as follows:
 
-    python Huawei-TCX-Converter.py HiTrack_1551732120000155173259000030001 -f -v
+    python Huawei-TCX-Converter.py HiTrack_1551732120000155173259000030001 -v
 
 This gives me the output:
 
