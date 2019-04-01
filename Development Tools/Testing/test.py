@@ -24,7 +24,7 @@ sys.stdout = open('logfile', 'w')
 files = ['HiTrack_1', 'HiTrack_2', 'HiTrack_3']
 for file in files:
 
-    sys.argv = ['', '-f', '-v', file]
+    sys.argv = ['', '-v', file]
     # Stop testing if the converter fails and report the error
     try:
         converter.main()

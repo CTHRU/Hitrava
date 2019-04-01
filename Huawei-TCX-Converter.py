@@ -30,11 +30,11 @@ def parse_arguments() -> tuple:
     """
 
     print('\n')
-    options = {'filter': False, 'validate': False, 'sport': 'Running'}
+    options = {'filter': True, 'validate': False, 'sport': 'Running'}
     input_file = ''
     for argument in sys.argv[1:]:
         if argument == '-f':
-            options['filter'] = True
+            options['filter'] = False
         elif argument == '-v':
             options['validate'] = True
         elif argument == '-b':
