@@ -24,7 +24,7 @@ Download the [Huawei TCX Converter](https://raw.githubusercontent.com/aricooperd
 The tool is run on the command line by passing it the name of your file as a command line argument.
 Other command line arguments:
 * `-v` - validate the final TCX file in order to check that the conversion has worked (requires [xmlschema](https://pypi.org/project/xmlschema/) and an internet connection to download the TCX schema to check against)
-* `-f` - attempt to filter out any records in which GPS signal was lost
+* `-f` - do not attempt to filter out any aberrant records (such as loss of GPS signal)
 * `-b` - change sport to Biking
 
 You can rename your HiTrack files if you wish, but for clarity in the examples below I leave mine exactly as I found it.
