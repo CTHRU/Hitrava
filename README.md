@@ -78,6 +78,7 @@ This is a very early alpha version of this tool, so please help me by making it 
 * Work with API's (i.e. Strava/Garmin) for automating tcx upload
 * Check that this works for files other than those generated using the Huawei Band 2 Pro:
   * Confirmed working on a [file from a Huawei Watch GT](https://forum.xda-developers.com/smartwatch/huawei-watch/huawei-watch-gt-export-data-health-t3874330#post79042345)
+  * Confirmed working on a [file from a Huawei Band 3 Pro](https://github.com/aricooperdavis/Huawei-TCX-Converter/pull/5)
 * Improve the distance measurement method (currently using [Viscenty's Formulae](https://en.wikipedia.org/wiki/Vincenty%27s_formulae))
 * Try and work out what `tp=b-p-m` is
 * Add interpolated heart-rate/pace/average speed data to each location element
