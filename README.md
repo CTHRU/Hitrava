@@ -86,3 +86,4 @@ This is a very early alpha version of this tool, so please help me by making it 
 * Work on splitting data into `Laps`/`Tracks` rather than shoving it all into one
 * Try to call on an open API to get altitude data for location points that don't have it
 * Inspect other files in `com.huawei.health` to see if we can get any more relevant data out of them
+  * iOS users may have some success looking at the [SQLite databases included in backups](https://forum.xda-developers.com/showpost.php?p=79445408&postcount=34) from their devices.
