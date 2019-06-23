@@ -344,7 +344,7 @@ def file_details(data: dict, options: dict) -> tuple:
         print('distance: '+str(int(stats['distance'])), end='m\n')
 
         # Format stats for saving
-        stats['start_time'] = dt.utcfromtimestamp(stats['start_time']).isoformat()+'.000Z'
+        stats['start_time'] = dt.utcfromtimestamp(stats['start_time']).isoformat('T', 'seconds')+'.000Z'
         stats['duration'] = str(stats['duration'])
         stats['distance'] = str(int(stats['distance']))
 
@@ -453,7 +453,7 @@ def generate_xml(data: list, stats: dict, options: dict) -> ET.Element:
         distance_holder = 0
         for line in data:
             # format data for saving
-            line[0] = dt.utcfromtimestamp(line[0]).isoformat()+'.000Z' #time
+            line[0] = dt.utcfromtimestamp(line[0]).isoformat('T', 'seconds')+'.000Z' #time
             line[1] = str(line[1]) #lat
             line[2] = str(line[2]) #long
             line[3] = str(line[3]) #alti
