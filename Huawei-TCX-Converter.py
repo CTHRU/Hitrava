@@ -39,6 +39,8 @@ def parse_arguments() -> tuple:
             options['validate'] = True
         elif argument == '-b':
             options['sport'] = 'Biking'
+        elif argument == '-s':
+            options['sport'] = 'Swimming'
         elif argument[0] == '-':
             print('Error: invalid input argument \''+argument+'\'')
             exit()

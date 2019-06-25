@@ -26,6 +26,7 @@ Other command line arguments:
 * `-v` - validate the final TCX file in order to check that the conversion has worked (requires [xmlschema](https://pypi.org/project/xmlschema/) and an internet connection to download the TCX schema to check against)
 * `-f` - do not attempt to filter out any aberrant records (such as loss of GPS signal)
 * `-b` - change sport to Biking
+* `-s` - change sport to Swimming
 
 You can rename your HiTrack files if you wish, but for clarity in the examples below I leave mine exactly as I found it.
 
