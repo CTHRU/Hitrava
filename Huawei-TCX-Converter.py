@@ -6,6 +6,8 @@ import xml.etree.cElementTree as ET # TCX (type of XML) construction
 import math, operator, sys # Distance calcs, sorting by timestamp, arguments
 from datetime import datetime as dt # Time formatting
 # Import external resources
+from typing import List, Union
+
 try:
     import xmlschema # Validation
     import tempfile, urllib.request # Downloading and storing validation schema
@@ -96,8 +98,15 @@ def read_file(input_file: str) -> dict:
     print('---- Input File ----')
     print('reading: ', end='')
     try:
-        data = {'gps': [], 'alti': [], 'hr': [], 'cad': []}
+        """ The lap list will contain lap data will contain start-stop times between pauzes identified in 
+            the location records. These are required to generate the laps in the output TCX file later.
+        """
+        data = {'gps': [], 'alti': [], 'hr': [], 'cad': [], 'lap': []}
         with open(input_file) as f:
+            lap_start_stop = []
+            lap_start_stop.append(0)  # Start time of lap
+            lap_start_stop.append(0)  # Stop time of lap
+
             for line in f:
                 # Loop over file line by line
                 holding_list = []
@@ -108,8 +117,32 @@ def read_file(input_file: str) -> dict:
                             holding_list.append('') # Fill in blanks with blank
                         else:
                             holding_list.append(float(line.split('=')[x].split(';')[0]))
-                    holding_list[0] = _normalize_timestamp(holding_list[0])
-                    data['gps'].append(holding_list)
+                    """ Do not try to normalize time for 'Pauze' records.
+                         E.g. tp=lbs;k=<a number>;lat=90.0;lon=-80.0;alt=0.0;t=0.0;
+                         Recognized by time = 0, lat = 90, long = -80
+                    """
+                    if holding_list[0] != 0 and holding_list[1] != 90 and holding_list[2] != -80:
+                        holding_list[0] = _normalize_timestamp(holding_list[0])
+                        data['gps'].append(holding_list)
+                        if lap_start_stop[0] == 0:
+                            # First valid time for new lap. Store it in start time (index 0).
+                            lap_start_stop[0] = holding_list[0]
+                        if lap_start_stop[1] < holding_list[0]:
+                            # Later stop time for current lap. Store it in stop time (index 1).
+                            lap_start_stop[1] = holding_list[0]
+                    else:
+                        """ Pauze record detected.
+                             E.g. tp=lbs;k=<a number>;lat=90.0;lon=-80.0;alt=0.0;t=0.0;
+                             Recognized by time = 0, lat = 90, long = -80
+                             Add the record to the gps data list. When generating the TCX XML this record can be
+                             used to create a new 'lap' with start time the time of the next record (if any, e.g.
+                             when workout was first pauzed and then stopped without resuming.)
+                             Store lap record in data and create a new one. 
+                        """
+                        data['lap'].append(lap_start_stop)
+                        lap_start_stop = []
+                        lap_start_stop.append(0)
+                        lap_start_stop.append(0)
 
                 elif line[0:6] == 'tp=h-r': # Heart-rate lines
                     for x in [2,0,0,0,0,3,0]: #time, [lat], [long], [alti], [dist], hr, [cad]
@@ -144,6 +177,12 @@ def read_file(input_file: str) -> dict:
                     holding_list[0] = _normalize_timestamp(holding_list[0])
                     data['alti'].append(holding_list)
 
+        """ Save (last) lap data. When the exercise wasn't pauzed and/or no pauze/stop record is generated as the last
+            location record, store the single lap record here.
+        """
+        if lap_start_stop[0] != 0:
+            data['lap'].append(lap_start_stop)
+
         # Sort GPS data by date for distance computation
         data['gps'] = sorted(data['gps'], key=lambda x : x[0])
 
@@ -173,11 +212,6 @@ def filter_data(data: dict) ->  dict:
     original_data = data # Back-up data pre-filtering in case of failure
 
     try:
-        for line in data['gps']:
-            # GPS is lost (defaults to (90, -80))
-            if line[1] == 90.0 and line[2] == -80.0:
-                data['gps'].remove(line)
-
         for line in data['hr']:
             # Heart-rate is too low/high (type is xsd:unsignedbyte)
             if line[5] < 1 or line[5] > 254:
@@ -279,8 +313,8 @@ def process_gps(data: dict) -> dict:
         A = 1 + uSq / 16384 * (4096 + uSq * (-768 + uSq * (320 - 175 * uSq)))
         B = uSq / 1024 * (256 + uSq * (-128 + uSq * (74 - 47 * uSq)))
         deltaSigma = B * sinSigma * (cos2SigmaM + B / 4 * (cosSigma *
-                     (-1 + 2 * cos2SigmaM ** 2) - B / 6 * cos2SigmaM *
-                     (-3 + 4 * sinSigma ** 2) * (-3 + 4 * cos2SigmaM ** 2)))
+                                                           (-1 + 2 * cos2SigmaM ** 2) - B / 6 * cos2SigmaM *
+                                                           (-3 + 4 * sinSigma ** 2) * (-3 + 4 * cos2SigmaM ** 2)))
         s = b * A * (sigma - deltaSigma)
 
         return round(s, 6)
@@ -296,7 +330,7 @@ def process_gps(data: dict) -> dict:
             else:
                 # TODO: Try other point-to-point distance calculations
                 entry[4] = (_vincenty((float(entry[1]),float(entry[2])),
-                    (float(data['gps'][n-1][1]),float(data['gps'][n-1][2])))+data['gps'][n-1][4])
+                                      (float(data['gps'][n-1][1]),float(data['gps'][n-1][2])))+data['gps'][n-1][4])
 
     except:
         print('FAILED')
@@ -313,7 +347,7 @@ def file_details(data: dict, options: dict) -> tuple:
     Parameters
     ----------
     data : dictionary of lists of lists
-        {'gps': list of lists, 'alti': list of lists, 'hr': list of lists, 'cad': list of lists}
+        {'gps': list of lists, 'alti': list of lists, 'hr': list of lists, 'cad': list of lists, 'lap': list of lists}
     options: dictionary of boolean/string
         {'filter': boolean, 'validate': boolean, 'sport': string}
 
@@ -321,8 +355,8 @@ def file_details(data: dict, options: dict) -> tuple:
     -------
     data : dictionary of lists of lists
         {'gps': list of lists, 'alti': list of lists, 'hr': list of lists, 'cad': list of lists}
-    stats : dictionary of strings
-        {'start_time': string, 'duration': string, 'distance': string}
+    lap stats: list of lists
+        {'start_time': float, 'stop_time' :float, 'duration' :float, 'distance': float}
     """
     # time, lat, long, [alti], [dist], [hr], [cad]
     try:
@@ -330,6 +364,9 @@ def file_details(data: dict, options: dict) -> tuple:
             distance = data['gps'][-1][4] #distance is zero if no gps data
         else:
             distance = 0
+
+        # Calculate lap stats before data merge (which will remove the lap data)
+        lap_stats = calculate_lap_stats(data)
 
         data = merge_data(data)
 
@@ -354,7 +391,51 @@ def file_details(data: dict, options: dict) -> tuple:
         print('Something went wrong :-(')
         exit()
 
-    return data, stats
+    return data, lap_stats
+
+
+def calculate_lap_stats(data: dict) -> list:
+    """"
+    Add lap stats to the 'lap' data in the data dictionary
+
+    The lap stats will be appended to each lap record. A lap record will contain
+    (lap_start_time, lap_stop_time, lap_duration, lap distance)
+
+    Parameters
+    ----------
+    data : dictionary of lists of lists
+        {'gps': list of lists, 'alti': list of lists, 'hr': list of lists, 'cad': list of lists, 'lap' list of lists}
+
+
+    Returns
+    -------
+    lap_stats : list of lists
+    """
+
+    lap_stats = []
+
+    try:
+        for n, lap_data in enumerate(data['lap']):
+            # Append lap duration
+            lap_data.append(lap_data[1] - lap_data[0])
+            # Append lap distance. Calculate lap distance via lookup in gps data between lap start and stop times
+            for m, gps_data in enumerate(data['gps']):
+                if gps_data[0] == lap_data[0]:  # gps record for start of lap found
+                    start_distance = gps_data[4]
+                elif gps_data[0] == lap_data[1]:  # gps record for end of lap found
+                    lap_data.append(gps_data[4] - start_distance)
+                    break
+
+            # Add calculated lap stats to result list
+            lap_stats.append(lap_data)
+
+    except:
+        print('generate_lap_stats FAILED')
+        exit()
+
+    print('generate_lap_stats OKAY')
+    return lap_stats
+
 
 def merge_data(data: dict) -> list:
     """
@@ -396,7 +477,8 @@ def merge_data(data: dict) -> list:
     print('OKAY')
     return data
 
-def generate_xml(data: list, stats: dict, options: dict) -> ET.Element:
+
+def generate_xml(data: list, lap_stats: list, options: dict) -> ET.Element:
     """
     Generate xml file from extracted data and user options
 
@@ -404,8 +486,8 @@ def generate_xml(data: list, stats: dict, options: dict) -> ET.Element:
     ----------
     data : list of lists
         [[time, lat, long, alti, dist, hr, cad],[...]]
-    stats : dictionary of strings
-        {'start_time': string, 'duration': string, 'distance': string, 'altitude': string}
+    lap_stats : list of lists
+        {'start_time': float, 'stop_time': float, 'duration': float, 'distance': float}
     options: dictionary of boolean/string
         {'filter': boolean, 'validate': boolean, 'sport': string}
 
@@ -432,75 +514,78 @@ def generate_xml(data: list, stats: dict, options: dict) -> ET.Element:
         Activity = ET.SubElement(Activities,'Activity')
         Activity.set('Sport',options['sport'])
         Id = ET.SubElement(Activity,'Id')
-        Id.text = stats['start_time'] # The StartTime timestamp
+        Id.text = dt.utcfromtimestamp(lap_stats[0][0]).isoformat('T', 'seconds')+'.000Z'  # The StartTime timestamp
 
         #### Lap
-        # TODO: Work out how to split exercises up into laps (by distance?)
-        Lap = ET.SubElement(Activity,'Lap')
-        Lap.set('StartTime',stats['start_time'])
-        TotalTimeSeconds = ET.SubElement(Lap,'TotalTimeSeconds')
-        TotalTimeSeconds.text = str(stats['duration'])
-        DistanceMeters = ET.SubElement(Lap,'DistanceMeters')
-        DistanceMeters.text = stats['distance']
-        Calories = ET.SubElement(Lap,'Calories')
-        Calories.text = '0' # TODO: Can we nullify or get rid of this?
-                            # Or is this present in data from some devices?
-        Intensity = ET.SubElement(Lap,'Intensity')
-        Intensity.text = 'Active' # TODO: Can we nullify or get rid of this?
-        TriggerMethod = ET.SubElement(Lap,'TriggerMethod')
-        TriggerMethod.text = 'Manual' # TODO: How are Laps (or Tracks?) split?
-        Track = ET.SubElement(Lap,'Track')
+        for n, stats in enumerate(lap_stats):
+            Lap = ET.SubElement(Activity,'Lap')
+            Lap.set('StartTime',dt.utcfromtimestamp(stats[0]).isoformat('T', 'seconds')+'.000Z')
+            TotalTimeSeconds = ET.SubElement(Lap,'TotalTimeSeconds')
+            TotalTimeSeconds.text = str(int(stats[2]))
+            DistanceMeters = ET.SubElement(Lap,'DistanceMeters')
+            DistanceMeters.text = str(int(stats[3]))
+            Calories = ET.SubElement(Lap,'Calories')
+            Calories.text = '0' # TODO: Can we nullify or get rid of this?
+            # Or is this present in data from some devices?
+            Intensity = ET.SubElement(Lap,'Intensity')
+            Intensity.text = 'Active' # TODO: Can we nullify or get rid of this?
+            TriggerMethod = ET.SubElement(Lap,'TriggerMethod')
+            TriggerMethod.text = 'Manual' # TODO: How are Laps (or Tracks?) split?
+            Track = ET.SubElement(Lap,'Track')
 
-        ##### Track
-        distance_holder = 0
-        for line in data:
-            # format data for saving
-            line[0] = dt.utcfromtimestamp(line[0]).isoformat('T', 'seconds')+'.000Z' #time
-            line[1] = str(line[1]) #lat
-            line[2] = str(line[2]) #long
-            line[3] = str(line[3]) #alti
-            line[4] = str(line[4]) #distance
-            line[5] = str(line[5]) #heart-rate
-            line[6] = str(line[6]) #cadence
+            ##### Track
+            distance_holder = 0
+            for line in data:
+                # Only add lines between start and stop time of current lap
+                if (line[0] < stats[0]) or (line[0] > stats[1]):
+                    continue
+                # format data for saving
+                formattedline_0 = dt.utcfromtimestamp(line[0]).isoformat('T', 'seconds')+'.000Z'  #time
+                formattedline_1 = str(line[1]) #lat
+                formattedline_2 = str(line[2]) #long
+                formattedline_3 = str(line[3]) #alti
+                formattedline_4 = str(line[4]) #distance
+                formattedline_5 = str(line[5]) #heart-rate
+                formattedline_6 = str(line[6]) #cadence
 
-            Trackpoint = ET.SubElement(Track,'Trackpoint')
-            Time = ET.SubElement(Trackpoint,'Time')
-            Time.text = line[0]
+                Trackpoint = ET.SubElement(Track,'Trackpoint')
+                Time = ET.SubElement(Trackpoint,'Time')
+                Time.text = formattedline_0
 
-            if line[1]:
-                Position = ET.SubElement(Trackpoint,'Position')
-                LatitudeDegrees = ET.SubElement(Position,'LatitudeDegrees')
-                LatitudeDegrees.text = line[1]
-                LongitudeDegrees = ET.SubElement(Position,'LongitudeDegrees')
-                LongitudeDegrees.text = line[2]
+                if formattedline_1:
+                    Position = ET.SubElement(Trackpoint,'Position')
+                    LatitudeDegrees = ET.SubElement(Position,'LatitudeDegrees')
+                    LatitudeDegrees.text = formattedline_1
+                    LongitudeDegrees = ET.SubElement(Position,'LongitudeDegrees')
+                    LongitudeDegrees.text = formattedline_2
 
-            if line[3]:
-                AltitudeMeters = ET.SubElement(Trackpoint,'AltitudeMeters')
-                AltitudeMeters.text = line[3]
-                # TODO: Some (all?) Huawei devices don't collect Altitude data,
-                # but in that case can we call on some open API to estimate it?
+                if formattedline_3:
+                    AltitudeMeters = ET.SubElement(Trackpoint,'AltitudeMeters')
+                    AltitudeMeters.text = formattedline_3
+                    # TODO: Some (all?) Huawei devices don't collect Altitude data,
+                    # but in that case can we call on some open API to estimate it?
 
-            if line[1]:
-                DistanceMeters = ET.SubElement(Trackpoint,'DistanceMeters')
-                DistanceMeters.text = line[4]
-                # TODO: Do any Huawei devices collect this?
+                if formattedline_1:
+                    DistanceMeters = ET.SubElement(Trackpoint,'DistanceMeters')
+                    DistanceMeters.text = formattedline_4
+                    # TODO: Do any Huawei devices collect this?
 
-            if line[5]:
-                HeartRateBpm = ET.SubElement(Trackpoint,'HeartRateBpm')
-                HeartRateBpm.set('xsi:type','HeartRateInBeatsPerMinute_t')
-                Value = ET.SubElement(HeartRateBpm, 'Value')
-                Value.text = line[5]
+                if formattedline_5:
+                    HeartRateBpm = ET.SubElement(Trackpoint,'HeartRateBpm')
+                    HeartRateBpm.set('xsi:type','HeartRateInBeatsPerMinute_t')
+                    Value = ET.SubElement(HeartRateBpm, 'Value')
+                    Value.text = formattedline_5
 
-            if line[6]:
-                if options['sport'] == 'Biking':
-                    Cadence = ET.SubElement(Trackpoint, 'Cadence')
-                    Cadence.text = line[6]
-                elif options['sport'] == 'Running':
-                    Extensions = ET.SubElement(Trackpoint, 'Extensions')
-                    TPX = ET.SubElement(Extensions, 'TPX')
-                    TPX.set('xmlns','http://www.garmin.com/xmlschemas/ActivityExtension/v2')
-                    RunCadence = ET.SubElement(TPX, 'RunCadence')
-                    RunCadence.text = line[6]
+                if formattedline_6:
+                    if options['sport'] == 'Biking':
+                        Cadence = ET.SubElement(Trackpoint, 'Cadence')
+                        Cadence.text = formattedline_6
+                    elif options['sport'] == 'Running':
+                        Extensions = ET.SubElement(Trackpoint, 'Extensions')
+                        TPX = ET.SubElement(Extensions, 'TPX')
+                        TPX.set('xmlns','http://www.garmin.com/xmlschemas/ActivityExtension/v2')
+                        RunCadence = ET.SubElement(TPX, 'RunCadence')
+                        RunCadence.text = formattedline_6
 
         #### Creator
         # TODO: See if we can scrape this data from other files in the .tar
@@ -653,8 +738,8 @@ def main():
     data = read_file(input_file)
     if options['filter']: data = filter_data(data)
     data = process_gps(data)
-    data, stats = file_details(data, options)
-    TrainingCenterDatabase = generate_xml(data, stats, options)
+    data, lap_stats = file_details(data, options)
+    TrainingCenterDatabase = generate_xml(data, lap_stats, options)
     filename = save_xml(TrainingCenterDatabase, input_file)
     if options['validate']: validate_xml(filename, xmlschema_found)
 
