@@ -169,7 +169,7 @@ actual lap times versus the ones shown in the Huawei Health app.</li>
 <li>* There is no direct upload functionality to upload the converted activities to Strava in this version.</li>
 <li>* This program is dependent on the availability of the temporary/intermediate 'HiTrack' files in the Huawei Health app.</li>
 <li>* This program is dependent on the Huawei Backup to take an unencrypted backup of the Huawei Health app data.</li>
-<li>* This program was not tested on Python versions prior to version 3.7.3</li>
+<li>* This program was not tested on Python versions prior to version 3.7.3.</li>
 
 ## Comparison
 This is an image of the GPS trace from the .tcx file. The command line output above also lists the start time as 2019-03-04 20:42:00, the distance as 1.70km, and the duration as 00:07:49.
