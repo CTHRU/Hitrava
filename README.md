@@ -163,7 +163,7 @@ strides/minute. As a consequence, imported step frequency information from previ
 after importing the TCX file.</li>
 <li>* Distance calculation may be incorrect in this version when GPS signal is lost during a longer period or there is no
 GPS signal at all.</li>
-<li>* Due to the very nature of the available speed data (minimum resoltion is 1 dm/s) for swimming activities, swimming
+<li>* Due to the very nature of the available speed data (minimum resolution is 1 dm/s) for swimming activities, swimming
 distances are an estimation (unless the --pool_length option is used) and there might be a second difference in the
 actual lap times versus the ones shown in the Huawei Health app.</li>
 <li>* There is no direct upload functionality to upload the converted activities to Strava in this version.</li>
