@@ -21,43 +21,155 @@ You need [`python 3`](https://www.python.org/downloads/) to use this tool.
 
 Download the [Huawei TCX Converter](https://raw.githubusercontent.com/aricooperdavis/Huawei-TCX-Converter/master/Huawei-TCX-Converter.py) and save it as a Python script in the same folder as your HiTrack file.
 
-The tool is run on the command line by passing it the name of your file as a command line argument.
-Other command line arguments:
-* `-v` - validate the final TCX file in order to check that the conversion has worked (requires [xmlschema](https://pypi.org/project/xmlschema/) and an internet connection to download the TCX schema to check against)
-* `-f` - do not attempt to filter out any aberrant records (such as loss of GPS signal)
-* `-b` - change sport to Biking
-* `-s` - change sport to Swimming
+### Command Line Arguments Overview
+>usage: Huawei-TCX-Converter.py [-h] [-f FILE] [-s {Walk,Run,Cycle,Swim}] [-t TAR]
+                     [--pool_length POOL_LENGTH] [--from_date FROM_DATE]
+                     [--output_dir OUTPUT_DIR] [--validate_xml]
+                     [--log_level {INFO,DEBUG}]`
+>
+>optional arguments:
+>
+>  -h, --help            show this help message and exit
+>
+>  --output_dir OUTPUT_DIR
+>                        The path to the directory to store the output files.
+>                        The default directory is ./output.
+>
+>  --validate_xml        Validate generated TCX XML file(s). NOTE: requires
+>                        xmlschema library and an internet connection to
+>                        retrieve the TCX XSD.
+>
+>  --log_level {INFO,DEBUG}
+>                        Set the logging level.
+>
+>FILE options:
+>  -f FILE, --file FILE  The filename of a single HiTrack file to convert.
+>
+>  -s {Walk,Run,Cycle,Swim}, --sport {Walk,Run,Cycle,Swim}
+>                        Force sport in the converted TCX XML file.
+>
+>TAR options:
+>  -t TAR, --tar TAR     The filename of an (unencrypted) tarball with HiTrack
+>                        files to convert.
+>
+>  --from_date FROM_DATE
+>                        Only convert HiTrack files in the tarball if the
+>                        activity started on FROM_DATE or later. Format YYYY-
+>                        MM-DD
+>
+>SWIM options:
+>  --pool_length POOL_LENGTH
+>                        The pool length in meters to use for swimming
+>                        activities. If the option is not set, the estimated
+>                        pool length derived from the available speed data in
+>                        the HiTrack file will be used. Note that the available
+>                        speed data has a minimum resolution of 1 dm/s.`
 
-You can rename your HiTrack files if you wish, but for clarity in the examples below I leave mine exactly as I found it.
+### Usage Examples
+
+#### Single file conversion examples
+The example below converts extracted file HiTrack_12345678901212345678912 to HiTrack_12345678901212345678912.tcx in 
+the ./output directory
+
+>python Huawei-TCX-Converter --file HiTrack_12345678901212345678912
+
+The next example converts extracted file HiTrack_12345678901212345678912 to HiTrack_12345678901212345678912.tcx in 
+the /my_output_dir directory. The program logging level is set to display debug messages. The converted file is validated against the TCX XSD schema (requires installed xmlschema 
+library and an intenet connection). 
+
+>python Huawei-TCX-Converter --file HiTrack_12345678901212345678912 --output_dir /my_output_dir --validate_xml --log_level DEBUG
+
+The following example converts an extracted file HiTrack_12345678901212345678912 to HiTrack_12345678901212345678912.tcx 
+in the ./output directory and forces the sport to walking. 
+
+>python Huawei-TCX-Converter --file HiTrack_12345678901212345678912 --sport Walk
+
+The next example converts an indoor swimming activity in an extracted file HiTrack_12345678901212345678912 to 
+HiTrack_12345678901212345678912.tcx. The length of the pool in meters is specified to have a more accurate swimming data
+calculation.  
+
+>python Huawei-TCX-Converter --file HiTrack_12345678901212345678912 --pool_length 25
+
+#### Direct tar file conversion examples
+** NOTE ** It seems that in recent version of the Huawei Health app, the temporary files are cleaned up / deleted each 
+time a detailed report of another activity is requested in the app. Nevertheless, the tar option can be used to convert 
+any HiTrack file that is present in the backup.
+
+The first example extracts and converts any HiTrack file found in tar file com.huawei.health.tar into the ./output 
+directory. The output directory will contain both the extracted HiTrack file and the converted TCX XML file. 
+
+>python Huawei-TCX-Converter --tar com.huawei.health.tar
+
+In the example below, only activities in the com.huawei.health.tar tarball that were started on August 20th, 2019 or 
+later will be extracted and converted to the ./output directory.
+
+>python Huawei-TCX-Converter --tar com.huawei.health.tar --from_date 20190820
+ 
 
 ### Illustration
 I have copied the `Huawei-TCX-Converter.py` file to the directory containing my HiTrack file (`HiTrack_1551732120000155173259000030001` ). Now I can run the tool as follows:
 
-    python Huawei-TCX-Converter.py HiTrack_1551732120000155173259000030001 -v
-
-This gives me the output:
-
-    ---- Input File ----
-    reading: OKAY
-    filtering: OKAY
-    processing gps: OKAY
-    processing heart-rate/cadence: OKAY
-
-    ---- Details ----
-    sport: Running
-    start: 2019-03-04 20:42:00
-    duration: 00:07:49
-    distance: 1700m
-
-    ---- XML file ----
-    generating: OKAY
-    saving: OKAY
-    validating: OKAY
+    python Huawei-TCX-Converter.py --file HiTrack_1551732120000155173259000030001
 
 I've included both the HiTrack file and the resultant TCX file in the Examples folder for you to have a go with. You can also [visualise the data online](https://www.mygpsfiles.com/app/#3gcQ1H3M).
 
-### Next steps
-Some users have recommended the [TCX Converter](http://www.tcxconverter.com/TCX_Converter/TCX_Converter_ENG.html) tool to add altitude data to your TCX files once they've been converted. This may overwrite altitude data extracted from your device, if it collects this.
+## Release Notes
+### Version 2.0 Build 1908.2201
+#### New features and changes
+<li>
+    <p>
+    * Support for swimming activities<br>In this version duration and distances are supported. SWOLF data is available 
+    from the HiTrack files but is not exported (yet) since we don't have the information how to pass it in the TCX 
+    format or if Strava supports it natively.
+    </p>
+</li>
+<li>
+    <p>
+    * Direct conversion from tarball<br>It is now possible to convert activities directly from the tarball without the 
+need to extract them.
+    </p>
+</li>
+<li>
+    <p>
+    * Auto activity type detection<br>Auto detection of running, cycling or swimming activities. There is no auto 
+distinction (yet) between walking and running activities. For now, walking activities will be detected as running. The 
+activity type can be changed in Strava directly after importing the file. 
+    </p>
+</li>
+<li>
+    <p>
+    * Extended program logging<br>Ability to log only information messages or to have a more extensive debug logging.
+    </p>
+</li>
+<li>
+    <p>
+    * Restructured and new command line options<br>This includes new options for direct tarball processing (--tar and 
+    --from_date), file processing (--file), forcing the sport type (--sport), setting the pool length for swim
+    activities (--pool_length) and general options to set the directory for extracted and converted files 
+    (--output_dir), the logging detail (--log_level) and the optional validation of converted TCX XML files 
+    (--validate_xml)   
+    </p>
+</li>
+<li>
+    * The source code underwent a restructuring to facilitate the new features. 
+
+#### Solved issues
+<li>* Step frequency corrected.<br>Strava displays steps/minute in app but reads the value in the imported file as 
+strides/minute. As a consequence, imported step frequency information from previous versions was 2 times the real value.</li>
+
+#### Known Limitations
+<li>* Auto distinction between walking and running activities is not included in this version.</li>
+<li>* For walking and swimming activities, in this version the correct sport type must be manually in Strava directly 
+after importing the TCX file.</li>
+<li>* Distance calculation may be incorrect in this version when GPS signal is lost during a longer period or there is no
+GPS signal at all.</li>
+<li>* Due to the very nature of the available speed data (minimum resolution is 1 dm/s) for swimming activities, swimming
+distances are an estimation (unless the --pool_length option is used) and there might be a second difference in the
+actual lap times versus the ones shown in the Huawei Health app.</li>
+<li>* There is no direct upload functionality to upload the converted activities to Strava in this version.</li>
+<li>* This program is dependent on the availability of the temporary/intermediate 'HiTrack' files in the Huawei Health app.</li>
+<li>* This program is dependent on the Huawei Backup to take an unencrypted backup of the Huawei Health app data.</li>
+<li>* This program was not tested on Python versions prior to version 3.7.3.</li>
 
 ## Comparison
 This is an image of the GPS trace from the .tcx file. The command line output above also lists the start time as 2019-03-04 20:42:00, the distance as 1.70km, and the duration as 00:07:49.
