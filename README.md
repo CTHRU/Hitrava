@@ -114,6 +114,24 @@ I have copied the `Huawei-TCX-Converter.py` file to the directory containing my 
 I've included both the HiTrack file and the resultant TCX file in the Examples folder for you to have a go with. You can also [visualise the data online](https://www.mygpsfiles.com/app/#3gcQ1H3M).
 
 ## Release Notes
+### Version 2.0 Build 1908.2901
+#### New features and changes
+<li>
+    <p>
+    Changed the auto-detected activity type from 'Walk' to 'Run' for walking or running activities. Please note that the
+    known limitation from the previous version still exists: no auto-distinction between walking and running activities,
+    they both are detected as running activities.  
+    </p>
+</li>
+
+#### Solved issues
+
+<li>
+    <p>
+    Error parsing altitude data from tp=alti records in Hitrack file
+    </p>
+</li>
+
 ### Version 2.0 Build 1908.2201
 #### New features and changes
 <li>
@@ -159,7 +177,7 @@ strides/minute. As a consequence, imported step frequency information from previ
 
 #### Known Limitations
 <li>* Auto distinction between walking and running activities is not included in this version.</li>
-<li>* For walking and swimming activities, in this version the correct sport type must be manually in Strava directly 
+<li>* For walking and swimming activities, in this version the correct sport type must be manually changed in Strava directly 
 after importing the TCX file.</li>
 <li>* Distance calculation may be incorrect in this version when GPS signal is lost during a longer period or there is no
 GPS signal at all.</li>
