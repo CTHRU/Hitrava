@@ -30,7 +30,7 @@ PROGRAM_NAME = 'Huawei-TCX-Converter'
 PROGRAM_MAJOR_VERSION = '2'
 PROGRAM_MINOR_VERSION = '0'
 PROGRAM_MAJOR_BUILD = '1908'
-PROGRAM_MINOR_BUILD = '2201'
+PROGRAM_MINOR_BUILD = '2901'
 
 OUTPUT_DIR = './output'
 
@@ -158,7 +158,6 @@ class HiActivity:
         # Calculate distance from last location and add cumulative distance to record (required for export)
         if self.data_dict:  # First location has no distance
             # Get the last location record that was added
-            #last_location = self.data_dict[sorted(self.data_dict.keys())[-1]]
             last_location = self._get_last_location()
             location_data['distance'] = self._vincenty((last_location['lat'], last_location['lon']),
                                                        (location_data['lat'], location_data['lon'])) + \
@@ -285,7 +284,7 @@ class HiActivity:
             alti_data = dict(data)
             # Use unique keys. Update keys k -> t and v -> hr
             alti_data['t'] = _convert_hitrack_timestamp(float(alti_data.pop('k')))
-            alti_data['alti'] = int(alti_data.pop('v'))
+            alti_data['alti'] = float(alti_data.pop('v'))
 
             # Ignore invalid heart rate data (for export)
             if alti_data['alti'] < -1000 or alti_data['alti'] > 10000:
@@ -352,7 +351,7 @@ class HiActivity:
                 # tp=s-r record with v > 0. Not swimming nor cycling, but walking or running. Add step frequency data.
                 if self.activity_type == self.TYPE_UNKNOWN:
                     # TODO add distinction between walking and running here?
-                    self.set_activity_type(self.TYPE_WALK)
+                    self.set_activity_type(self.TYPE_RUN)
                 self._add_data_detail(step_freq_data)
         except Exception as e:
                 logging.error('One or more required data fields (k, v) missing or invalid in step frequency data %s\n%s',
