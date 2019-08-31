@@ -114,6 +114,17 @@ I have copied the `Huawei-TCX-Converter.py` file to the directory containing my 
 I've included both the HiTrack file and the resultant TCX file in the Examples folder for you to have a go with. You can also [visualise the data online](https://www.mygpsfiles.com/app/#3gcQ1H3M).
 
 ## Release Notes
+### Version 2.0 Build 1908.3101
+#### Solved issues
+
+<li>
+    <p>
+    [BUG #26] Solved issue causing only a part of the activity to be converted. It was detected in a case where the
+    activity track contained multiple loops over the same track (and/or on some devices, the records in the Hitrack
+    file are not in chronological order).
+    </p>
+</li>
+
 ### Version 2.0 Build 1908.2901
 #### New features and changes
 <li>
@@ -128,7 +139,7 @@ I've included both the HiTrack file and the resultant TCX file in the Examples f
 
 <li>
     <p>
-    Error parsing altitude data from tp=alti records in Hitrack file
+    [BUG #25] Error parsing altitude data from tp=alti records in Hitrack file
     </p>
 </li>
 
