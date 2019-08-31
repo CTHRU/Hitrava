@@ -2,6 +2,7 @@
 # Ari Cooper-Davis / Christoph Vanthuyne , 2019 - github.com/aricooperdavis/Huawei-TCX-Converter
 
 import argparse
+import collections
 import csv
 import datetime
 import logging
@@ -18,6 +19,8 @@ from datetime import datetime as dts
 from datetime import timedelta as dts_delta
 
 # External libraries that require installation
+from typing import List, Any
+
 try:
     import xmlschema  # (only) needed to validate the generated TCX XML.
 except:
@@ -30,7 +33,7 @@ PROGRAM_NAME = 'Huawei-TCX-Converter'
 PROGRAM_MAJOR_VERSION = '2'
 PROGRAM_MINOR_VERSION = '0'
 PROGRAM_MAJOR_BUILD = '1908'
-PROGRAM_MINOR_BUILD = '2901'
+PROGRAM_MINOR_BUILD = '3101'
 
 OUTPUT_DIR = './output'
 
@@ -62,7 +65,7 @@ class HiActivity:
 
         # Create an empty segment and segment list
         self._current_segment = None
-        self.segment_list = []
+        self._segment_list: List = None
 
         # Create an empty detail data dictionary. key = timestamp, value = dict{t, lat, lon, alt, hr)
         self.data_dict = {}
@@ -84,31 +87,34 @@ class HiActivity:
 
     def _add_segment_start(self, segment_start: datetime):
         if self._current_segment:
-            logging.error('Request to start segment when there is already a current segment active')
+            logging.error('Request to start segment at %s when there is already a current segment active',
+                          segment_start)
             return
 
         logging.debug('Adding segment start at %s', segment_start)
 
         # No current segment, create one
         self._current_segment = {'start': segment_start, 'stop': None}
+        # Add it to the segment list (note: if no explicit stop record is found, the segment will exist and stay 'open')
+        if not self._segment_list:
+            self._segment_list = []
+        self._segment_list.append(self._current_segment)
         if not self.start:
             # Set activity start
             self.start = segment_start
 
-    def _add_segment_stop(self, segment_stop: datetime):
+    def _add_segment_stop(self, segment_stop: datetime, segment_distance: int = -1):
         logging.debug('Adding segment stop at %s', segment_stop)
         if not self._current_segment:
-            logging.error('Request to stop segment when there is no current segment active')
+            logging.error('Request to stop segment at %s when there is no current segment active', segment_stop)
             return
 
         # Set stop of current segment, add it to the segment list and clear the current segment
         self._current_segment['stop'] = segment_stop
         self._current_segment['duration'] = int((segment_stop - self._current_segment['start']).total_seconds())
-        if not self.activity_type == self.TYPE_SWIM:
-            # Calculate distance based on distance data directly for non-swimming activities
-            self._current_segment['distance'] = self.data_dict[segment_stop]['distance'] - \
-                                                self.data_dict[self._current_segment['start']]['distance']
-        self.segment_list.append(self._current_segment)
+        if not segment_distance == -1:
+            self._current_segment['distance'] = segment_distance
+
         self._current_segment = None
 
         # Update activity stop
@@ -127,8 +133,8 @@ class HiActivity:
         - When tracking an activity with a tracking the device, the records in the HiTrack file seem to be ordered by
           record type. This seems not to be the case when using a mobile phone only, where records seem to be added in
           order of the timestamp they occurred.
-        Assumption: proper activity stop and/or activity segment stop relies on the presence of the records
-        tp=lbs;lat=90;lon=-80;alt=0.
+        - Location records are NOT ordered by timestamp when the activity contains loops of the same track.
+        - Pause and stop records are identified by tp=lbs;lat=90;lon=-80;alt=0;t=<valid epoch time value or zero>
         """
 
         logging.debug('Adding location data %s', data)
@@ -140,11 +146,6 @@ class HiActivity:
             # All raw values are floats (timestamp will be converted later)
             for keys in location_data:
                 location_data[keys] = float(location_data[keys])
-
-            # Detect pause or stop records (lat = 90, long = -80, alt = 0) and handle segment data creation
-            if location_data['lat'] == 90 and location_data['lon'] == -80:
-                self._add_segment_stop(sorted(self.data_dict.keys())[-1])  # Use timestamp of last (location) record
-                return
         except Exception as e:
             logging.error('One or more required data fields (t, lat, lon) missing or invalid in location data %s\n%s',
                           data,
@@ -152,22 +153,14 @@ class HiActivity:
             raise Exception('One or more required data fields (t, lat, lon) missing or invalid in location data %s',
                             data)
 
-        # Regular location record.
-        # Convert the timestamp to a datetime
-        location_data['t'] = _convert_hitrack_timestamp(location_data['t'])
-        # Calculate distance from last location and add cumulative distance to record (required for export)
-        if self.data_dict:  # First location has no distance
-            # Get the last location record that was added
-            last_location = self._get_last_location()
-            location_data['distance'] = self._vincenty((last_location['lat'], last_location['lon']),
-                                                       (location_data['lat'], location_data['lon'])) + \
-                                        last_location['distance']
+        if location_data['t'] == 0 and location_data['lat'] == 90 and location_data['lon'] == -80:
+            # Pause/stop record without a valid epoch timestamp. Set it to the last timestamp recorded.
+            location_data['t'] = self.stop
         else:
-            location_data['distance'] = 0
+            # Regular location record or pause/stop record with valid epoch timestamp.
+            # Convert the timestamp to a datetime
+            location_data['t'] = _convert_hitrack_timestamp(location_data['t'])
 
-        # If we don't have a segment, create one.
-        if not self._current_segment:
-            self._add_segment_start(location_data['t'])
         # Add location data
         self._add_data_detail(location_data)
 
@@ -332,7 +325,8 @@ class HiActivity:
                 if not self.activity_type == self.TYPE_CYCLE:
                     self.set_activity_type(self.TYPE_CYCLE)
                 else:
-                    logging.warning("Activity type Cycle auto detected earlier. This step frequency record is ignored.")
+                    logging.warning('Activity type Cycle auto detected earlier. Step frequency record  %s is ignored.',
+                                    data)
                 return  # Do not process the zero (cycle) records any further
             elif step_freq_data['s-r'] < 0 or self.activity_type == self.TYPE_SWIM:
                 # Swimming can be detected by step frequency records with value < 0.
@@ -386,7 +380,7 @@ class HiActivity:
                 # Add the current segment directly to the segment list here. Because there's no 'last record' indication
                 # like with the tp=lbs records, the last segment will have no stop date. This will be dealt with when
                 # the swim data is requested via the _get_sim_data() function.
-                self.segment_list.append(self._current_segment)
+                self._segment_list.append(self._current_segment)
             else:
                 last_swolf = self.data_dict[sorted(self.data_dict.keys())[-1]]
                 if last_swolf['swf'] != swolf_data['swf']:
@@ -400,7 +394,7 @@ class HiActivity:
                     # Add the current segment directly to the segment list here. Because there's no 'last record'
                     # indication like with the tp=lbs records, the last segment will have no stop date. This will be
                     # dealt with when the swim data is requested via the _get_sim_data() function.
-                    self.segment_list.append(self._current_segment)
+                    self._segment_list.append(self._current_segment)
 
         except Exception as e:
             logging.error('One or more required data fields (k, v) missing or invalid in SWOLF data %s\n%s',
@@ -435,7 +429,6 @@ class HiActivity:
         # Add stroke frequency data
         self._add_data_detail(stroke_freq_data)
 
-    # TODO Do distance calculation for walking/running/cycling activities based on the speed records when GPS signal is lost for a longer time period or there is no GPS data at all
     def add_speed_data(self, data: []):
         """ Add speed data (in decimeter/second) from a tp=rs record in a HiTrack file """
 
@@ -467,6 +460,68 @@ class HiActivity:
         else:
             #
             self.data_dict[data['t']].update(data)
+
+        # Records are NOT necessarily in chronological order.
+        # Update start of the activity when a record with an earlier timestamp is added.
+        if not self.start or self.start > data['t']:
+            self.start = data['t']
+        # Update stop of the activity when a record with a later timestamp is added.
+        if not self.stop or self.stop < data['t']:
+            self.stop = data['t']
+
+    # TODO Do distance calculation for walking/running/cycling activities based on the speed records when GPS signal is
+    # TODO lost for a longer time period or there is no GPS data at all.
+    def get_segment_list(self) -> list:
+        """" Returns the segment list.
+            - For swimming activities, the segments were identified during parsing of the SWOLF data.
+            - For walking, running and cycling activities, the segments must be calculated once based on the parsed
+              location data. Because the location data is not (always) in chronological order (e.g. loops in the track),
+              for these activities
+        """
+
+        if self._segment_list:
+            return self._segment_list
+
+        # 1-time calculation for walk, run, cycle activities of segments, their duration and distance +
+        # location duration
+
+        # Sort the data dictionary by timestamp
+        self.data_dict = collections.OrderedDict(sorted(self.data_dict.items()))
+
+        # Do calculations
+        last_location = None
+
+        # Start first segment at earliest data found while adding the data
+        self._add_segment_start(self.start)
+
+        for key, data in self.data_dict.items():
+            if 'lat' in data:   # This is a location record
+                if last_location:
+                    # Detect pause or stop records (lat = 90, long = -80, alt = 0) and handle segment data creation
+                    if data['lat'] == 90 and data['lon'] == -80:
+                        # Use timestamp and distance of last (location) record
+                        self._add_segment_stop(last_location['t'], last_location['distance'])
+                    else:
+                        # Regular location record. If no current segment, create one
+                        if not self._current_segment:
+                            self._add_segment_start(data['t'])
+                        # Calculate and set the accumulative distance of the location record
+                        data['distance'] = self._vincenty((last_location['lat'], last_location['lon']),
+                                                          (data['lat'], data['lon'])) + \
+                                           last_location['distance']
+                        last_location = data
+                else:
+                    # First location. Set distance 0
+                    data['distance'] = 0
+                    last_location = data
+
+        # Close last segment if it is still open
+        if self._current_segment:
+            # If the segment is open (no stop record for end of activity), use timestamp and distance of last location
+            # record.
+            self._add_segment_stop(self.stop)
+
+        return self._segment_list
 
     def get_segment_data(self, segment: dict) -> list:
         """" Returns a filtered and sorted data set containing all raw parsed data from the requested segment """
@@ -510,7 +565,7 @@ class HiActivity:
 
         swim_data = []
 
-        for n, segment in enumerate(self.segment_list):
+        for n, segment in enumerate(self._segment_list):
             segment_data = self.get_segment_data(segment)
             first_lap_record = segment_data[0]
             last_lap_record = segment_data[-1]
@@ -602,7 +657,7 @@ class HiTrackFile:
             for line_number, line in enumerate(csv_reader, start=1):
                 data_list.clear()
                 if line[0] == 'tp=lbs':  # Location line format: tp=lbs;k=_;lat=_;lon=_;alt=_;t=_
-                    for data_index in [5, 2, 3]:  # Parse parameters t, lat, long parameters (alt not parsed)
+                    for data_index in [5, 2, 3]:  # Parse parameters t, lat, lon parameters (alt not parsed)
                         # data_list.append(line[data_index].split('=')[1])   # Parse values after the '=' character
                         data_list.append(line[data_index].split('='))  # Parse key value pairs
                     self.activity.add_location_data(data_list)
@@ -835,7 +890,7 @@ class TcxActivity:
 
     def _generate_walk_run_cycle_xml_data(self, el_activity):
         # **** Lap (a lap in the TCX XML corresponds to a segment in the HiActivity)
-        for n, segment in enumerate(self.hi_activity.segment_list):
+        for n, segment in enumerate(self.hi_activity.get_segment_list()):
             el_lap = xml_et.SubElement(el_activity, 'Lap')
             el_lap.set('StartTime', segment['start'].isoformat('T', 'seconds') + '.000Z')
             el_total_time_seconds = xml_et.SubElement(el_lap, 'TotalTimeSeconds')
@@ -1125,4 +1180,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
