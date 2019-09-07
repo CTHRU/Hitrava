@@ -31,11 +31,12 @@ except:
 # Global Constants
 PROGRAM_NAME = 'Huawei-TCX-Converter'
 PROGRAM_MAJOR_VERSION = '2'
-PROGRAM_MINOR_VERSION = '0'
-PROGRAM_MAJOR_BUILD = '1908'
-PROGRAM_MINOR_BUILD = '3101'
+PROGRAM_MINOR_VERSION = '1'
+PROGRAM_MAJOR_BUILD = '1909'
+PROGRAM_MINOR_BUILD = '0701'
 
 OUTPUT_DIR = './output'
+GPS_TIMEOUT = dts_delta(seconds=10)
 
 
 class HiActivity:
@@ -497,10 +498,17 @@ class HiActivity:
         for key, data in self.data_dict.items():
             if 'lat' in data:   # This is a location record
                 if last_location:
-                    # Detect pause or stop records (lat = 90, long = -80, alt = 0) and handle segment data creation
                     if data['lat'] == 90 and data['lon'] == -80:
+                        # Pause or stop records (lat = 90, long = -80, alt = 0) and handle segment data creation
                         # Use timestamp and distance of last (location) record
                         self._add_segment_stop(last_location['t'], last_location['distance'])
+                    elif 'lat' not in last_location:
+                        # GPS was lost and is now back. Set distance to last known distance and use this record as the
+                        # last known location.
+                        logging.debug('GPS signal returned at %s in %s. Calculating distance using location data.',
+                                      data['t'], self.activity_id)
+                        data['distance'] = last_location['distance']
+                        last_location = data
                     else:
                         # Regular location record. If no current segment, create one
                         if not self._current_segment:
@@ -513,6 +521,14 @@ class HiActivity:
                 else:
                     # First location. Set distance 0
                     data['distance'] = 0
+                    last_location = data
+            elif last_location and 'rs' in data:
+                time_delta = data['t'] - last_location['t']
+                if 'lat' not in last_location or time_delta > GPS_TIMEOUT:
+                    # GPS signal lost for more than the GPS timeout period. Calculate distance based on speed records
+                    logging.debug('GPS signal lost between %s and %s in %s. Calculting distance using speed data (%s dm/s)',
+                                  last_location['t'], data['t'], self.activity_id, data['rs'])
+                    data['distance'] = last_location['distance'] + (data['rs'] * time_delta.seconds / 10)
                     last_location = data
 
         # Close last segment if it is still open
