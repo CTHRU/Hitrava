@@ -114,6 +114,23 @@ I have copied the `Huawei-TCX-Converter.py` file to the directory containing my 
 I've included both the HiTrack file and the resultant TCX file in the Examples folder for you to have a go with. You can also [visualise the data online](https://www.mygpsfiles.com/app/#3gcQ1H3M).
 
 ## Release Notes
+### Version 2.1 Build 1909.0701
+#### New features and changes
+<li>
+    <p>
+    More accurate distance calculation in case of GPS loss during an activity is now supported for walking, running and 
+    cycling activities. The real-time speed data in the Hitrack file is used to determine the distance during GPS loss.
+    See also #21.
+    </p>
+</li>
+
+#### Known Limitations
+<li>
+Walking, Running and Cycling activities without any GPS data at all can't be converted (yet) and the conversion will
+fail with an error. This might be related to issue #18 (O m distance) reported in pre-version 2. Possible use-case: 
+You use your fitness band (that has no GPS) without your phone during an activity. To be solved in a future update.
+</li>
+
 ### Version 2.0 Build 1908.3101
 #### Solved issues
 
