@@ -31,9 +31,9 @@ except:
 # Global Constants
 PROGRAM_NAME = 'Huawei-TCX-Converter'
 PROGRAM_MAJOR_VERSION = '2'
-PROGRAM_MINOR_VERSION = '1'
+PROGRAM_MINOR_VERSION = '2'
 PROGRAM_MAJOR_BUILD = '1909'
-PROGRAM_MINOR_BUILD = '0701'
+PROGRAM_MINOR_BUILD = '0801'
 
 OUTPUT_DIR = './output'
 GPS_TIMEOUT = dts_delta(seconds=10)
@@ -117,9 +117,6 @@ class HiActivity:
             self._current_segment['distance'] = segment_distance
 
         self._current_segment = None
-
-        # Update activity stop
-        self.stop = segment_stop
 
     # TODO Verify if something useful can be done with the (optional) altitude data in the tp=lbs records
     def add_location_data(self, data: []):
@@ -315,6 +312,8 @@ class HiActivity:
             step_freq_data['s-r'] = int(step_freq_data.pop('v'))
 
             # Try to auto detect the activity type (only if not already detected)
+            # TODO [FEATURE #28] The condition to recognize cycling activities on s-r = 0 is not correct anymore because
+            # TODO the same is true for open water swimming activities
             if step_freq_data['s-r'] == 0 and self.activity_type == self.TYPE_UNKNOWN:
                 # Cycling can be detected by (all) step frequency records with value = 0.
                 # Found at least one cycling activity that had a v=10 value for the last tp=s-r record (stop?).
@@ -470,8 +469,6 @@ class HiActivity:
         if not self.stop or self.stop < data['t']:
             self.stop = data['t']
 
-    # TODO Do distance calculation for walking/running/cycling activities based on the speed records when GPS signal is
-    # TODO lost for a longer time period or there is no GPS data at all.
     def get_segment_list(self) -> list:
         """" Returns the segment list.
             - For swimming activities, the segments were identified during parsing of the SWOLF data.
@@ -479,12 +476,23 @@ class HiActivity:
               location data. Because the location data is not (always) in chronological order (e.g. loops in the track),
               for these activities
         """
+        if not self._segment_list:
+            # Perform calculation only once.
+            self._calc_segments_and_distances()
 
-        if self._segment_list:
-            return self._segment_list
+        return self._segment_list
 
-        # 1-time calculation for walk, run, cycle activities of segments, their duration and distance +
-        # location duration
+    def _calc_segments_and_distances(self):
+        """" Perform the following detailed data calculations for walk, run, or cycle activities:
+        - segment list
+        - segment start, stop, duration and cumulative distance
+        - detailed track point cumulative distances
+
+        Calculations change/add the following class attributes in place:
+        - _segment_list
+        - data_dict : sorted by timestamp and distances added
+        """
+        logging.debug('Calculating segment and distance data for activity %s', self.activity_id)
 
         # Sort the data dictionary by timestamp
         self.data_dict = collections.OrderedDict(sorted(self.data_dict.items()))
@@ -505,9 +513,12 @@ class HiActivity:
                     elif 'lat' not in last_location:
                         # GPS was lost and is now back. Set distance to last known distance and use this record as the
                         # last known location.
-                        logging.debug('GPS signal returned at %s in %s. Calculating distance using location data.',
+                        logging.debug('GPS signal available at %s in %s. Calculating distance using location data.',
                                       data['t'], self.activity_id)
                         data['distance'] = last_location['distance']
+                        # If no current segment, create one
+                        if not self._current_segment:
+                            self._add_segment_start(data['t'])
                         last_location = data
                     else:
                         # Regular location record. If no current segment, create one
@@ -522,22 +533,30 @@ class HiActivity:
                     # First location. Set distance 0
                     data['distance'] = 0
                     last_location = data
-            elif last_location and 'rs' in data:
-                time_delta = data['t'] - last_location['t']
-                if 'lat' not in last_location or time_delta > GPS_TIMEOUT:
-                    # GPS signal lost for more than the GPS timeout period. Calculate distance based on speed records
-                    logging.debug('GPS signal lost between %s and %s in %s. Calculting distance using speed data (%s dm/s)',
-                                  last_location['t'], data['t'], self.activity_id, data['rs'])
-                    data['distance'] = last_location['distance'] + (data['rs'] * time_delta.seconds / 10)
+            elif 'rs' in data:
+                if last_location:
+                    time_delta = data['t'] - last_location['t']
+                    if 'lat' not in last_location or time_delta > GPS_TIMEOUT:
+                        # GPS signal lost for more than the GPS timeout period. Calculate distance based on speed records
+                        logging.debug('No GPS signal between %s and %s in %s. Calculating distance using speed data '
+                                      '(%s dm/s)',
+                                      last_location['t'], data['t'], self.activity_id, data['rs'])
+                        # If no current segment, create one
+                        if not self._current_segment:
+                            self._add_segment_start(data['t'])
+                        data['distance'] = last_location['distance'] + (data['rs'] * time_delta.seconds / 10)
+                        last_location = data
+                else:
+                    # No location records processed and speed record available = start without GPS or no GPS at all.
+                    # Set distance 0
+                    data['distance'] = 0
                     last_location = data
 
         # Close last segment if it is still open
         if self._current_segment:
             # If the segment is open (no stop record for end of activity), use timestamp and distance of last location
             # record.
-            self._add_segment_stop(self.stop)
-
-        return self._segment_list
+            self._add_segment_stop(last_location['t'], last_location['distance'])
 
     def get_segment_data(self, segment: dict) -> list:
         """" Returns a filtered and sorted data set containing all raw parsed data from the requested segment """
@@ -625,7 +644,7 @@ class HiActivity:
 class HiTrackFile:
     """The HiTrackFile class represents a single HiTrack file. It contains all file handling and parsing methods."""
 
-    def __init__(self, hitrack_filename: str):
+    def __init__(self, hitrack_filename: str, activity_type: str = HiActivity.TYPE_UNKNOWN):
         # Validate the file parameter and (try to) open the file for reading
         if not hitrack_filename:
             logging.error('Parameter HiTrack filename is missing')
@@ -637,6 +656,7 @@ class HiTrackFile:
             raise Exception('Error opening HiTrack file <%s>', hitrack_filename)
 
         self.activity = None
+        self.activity_type = activity_type
 
         # Try to parse activity start and stop datetime from the filename.
         # Original HiTrack filename is: HiTrack_<12 digit start datetime><12 digit stop datetime><5 digit unknown>
@@ -662,8 +682,9 @@ class HiTrackFile:
 
         logging.info('Parsing file <%s>', self.hitrack_file.name)
 
-        self.activity = HiActivity(
-            os.path.basename(self.hitrack_file.name))  # Create a new activity object for the file
+        # Create a new activity object for the file
+        self.activity = HiActivity(os.path.basename(self.hitrack_file.name), self.activity_type)
+
         data_list = []
         line_number = 0
         line = ''
@@ -1173,10 +1194,11 @@ def main():
     tcx_xml_schema = None if not args.validate_xml else _init_tcx_xml_schema()
 
     if args.file:
-        hi_file = HiTrackFile(args.file)
-        hi_activity = hi_file.parse()
         if args.sport:
-            hi_activity.set_activity_type(args.sport)
+            hi_file = HiTrackFile(args.file, args.sport)
+        else:
+            hi_file = HiTrackFile(args.file)
+        hi_activity = hi_file.parse()
         if args.pool_length and hi_activity.activity_type == HiActivity.TYPE_SWIM:
             hi_activity.set_pool_length(args.pool_length)
         tcx_activity = TcxActivity(hi_activity, tcx_xml_schema, args.output_dir)
