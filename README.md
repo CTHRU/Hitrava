@@ -91,10 +91,6 @@ calculation.
 >python Huawei-TCX-Converter --file HiTrack_12345678901212345678912 --pool_length 25
 
 #### Direct tar file conversion examples
-** NOTE ** It seems that in recent version of the Huawei Health app, the temporary files are cleaned up / deleted each 
-time a detailed report of another activity is requested in the app. Nevertheless, the tar option can be used to convert 
-any HiTrack file that is present in the backup.
-
 The first example extracts and converts any HiTrack file found in tar file com.huawei.health.tar into the ./output 
 directory. The output directory will contain both the extracted HiTrack file and the converted TCX XML file. 
 
@@ -114,6 +110,35 @@ I have copied the `Huawei-TCX-Converter.py` file to the directory containing my 
 I've included both the HiTrack file and the resultant TCX file in the Examples folder for you to have a go with. You can also [visualise the data online](https://www.mygpsfiles.com/app/#3gcQ1H3M).
 
 ## Release Notes
+### Version 2.2 Build 1909.0801
+#### New features and changes
+<li>
+    <p>
+    [FEATURE #21] Conversion of Walking, Running ad Cycling activities without any GPS data is supported. You can now convert 
+    activities that were recorded using a fitness band only (that has no GPS) without using your phone during the 
+    activity. Distance calculation is an estimated distance and may differ from the real distance because calculation is
+    based on (average) speed data during a period of seconds (typically 5 seconds) with a resolution of 1 dm/s. Closes
+    #21.
+    </p>
+</li>
+
+#### Solved issues
+
+<li>
+    <p>
+    [BUG #27] Solved conversion error due to improper segment handling in some cases of GPS loss and/or pause.
+    </p>
+    <p>
+    Solved potential conversion error due to improper distance calculation in case the HiTrack file would not contain 
+    an explicit stop record.
+    </p>
+</li>
+
+#### Known Limitations
+<li>
+[FEATURE #28] Open water swimming activities were not and are not supported (yet).
+</li>
+
 ### Version 2.1 Build 1909.0701
 #### New features and changes
 <li>
