@@ -22,31 +22,24 @@ You need [`python 3`](https://www.python.org/downloads/) to use this tool.
 Download the [Huawei TCX Converter](https://raw.githubusercontent.com/aricooperdavis/Huawei-TCX-Converter/master/Huawei-TCX-Converter.py) and save it as a Python script in the same folder as your HiTrack file.
 
 ### Command Line Arguments Overview
->usage: Huawei-TCX-Converter.py [-h] [-f FILE] [-s {Walk,Run,Cycle,Swim}] [-t TAR]
-                     [--pool_length POOL_LENGTH] [--from_date FROM_DATE]
-                     [--output_dir OUTPUT_DIR] [--validate_xml]
-                     [--log_level {INFO,DEBUG}]`
+>usage: HiToStrava.py [-h] [-f FILE]
+>                     [-s {Walk,Run,Cycle,Swim_Pool,Swim_Open_Water}] [-t TAR]
+>                     [--pool_length POOL_LENGTH] [--from_date FROM_DATE]
+>                     [--output_dir OUTPUT_DIR]
+>                     [--output_file_prefix OUTPUT_FILE_PREFIX]
+>                     [--validate_xml] [--log_level {INFO,DEBUG}]
 >
 >optional arguments:
 >
 >  -h, --help            show this help message and exit
->
->  --output_dir OUTPUT_DIR
->                        The path to the directory to store the output files.
->                        The default directory is ./output.
->
->  --validate_xml        Validate generated TCX XML file(s). NOTE: requires
->                        xmlschema library and an internet connection to
->                        retrieve the TCX XSD.
->
 >  --log_level {INFO,DEBUG}
 >                        Set the logging level.
 >
 >FILE options:
 >  -f FILE, --file FILE  The filename of a single HiTrack file to convert.
 >
->  -s {Walk,Run,Cycle,Swim}, --sport {Walk,Run,Cycle,Swim}
->                        Force sport in the converted TCX XML file.
+>-s {Walk,Run,Cycle,Swim_Pool,Swim_Open_Water}, --sport {Walk,Run,Cycle,Swim_Pool,Swim_Open_Water}
+                         Force sport for the conversion. Sport will be auto-detected when this option is not used.
 >
 >TAR options:
 >  -t TAR, --tar TAR     The filename of an (unencrypted) tarball with HiTrack
@@ -64,6 +57,18 @@ Download the [Huawei TCX Converter](https://raw.githubusercontent.com/aricooperd
 >                        pool length derived from the available speed data in
 >                        the HiTrack file will be used. Note that the available
 >                        speed data has a minimum resolution of 1 dm/s.`
+>OUTPUT options:
+>  --output_dir OUTPUT_DIR
+>                        The path to the directory to store the output files.
+>                        The default directory is ./output.
+>  --output_file_prefix OUTPUT_FILE_PREFIX
+>                        Adds the strftime representation of this argument as a
+>                        prefix to the generated TCX XML file(s). E.g. use
+>                        %Y-%m-%d- to add human readable year-month-day
+>                        information in the name of the generated TCX file.
+>  --validate_xml        Validate generated TCX XML file(s). NOTE: requires
+>                        xmlschema library and an internet connection to
+>                        retrieve the TCX XSD.
 
 ### Usage Examples
 
@@ -110,6 +115,61 @@ I have copied the `Huawei-TCX-Converter.py` file to the directory containing my 
 I've included both the HiTrack file and the resultant TCX file in the Examples folder for you to have a go with. You can also [visualise the data online](https://www.mygpsfiles.com/app/#3gcQ1H3M).
 
 ## Release Notes
+### Version 2.3 Build 1909.1501
+#### New features and changes
+<li>
+    <p>
+    Added **--output_file_prefix** command line argument option. You can now add the strftime representation of this argument 
+    as a prefix to the generated TCX XML file(s). E.g. use %Y-%m-%d- to add human readable year-month-day information in 
+    the name of the generated TCX file.
+    </p>
+</li>
+<li>
+    <p>
+    Reworked auto-detection of activity types. This was needed for the detection and distinction between pool swimming 
+    and open water swimming [see also FEATURE #28]. Added internal auto-distinction between walking and running based on
+    research in https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5435734. For validation purposes, both types will still be
+    converted as 'Run' in the TCX file (for now) to comply with the Garmin TCX XSD. Closes #31. Closes #24.
+    </p>
+</li>
+<li>
+    <p>
+    The --sport command line argument now disables auto-detection of the type of sport of the activity and also enforces 
+    the selected type of sport for the conversion.
+    </p>
+</li>
+<li>
+    <p>
+    The values of --sport command line argument have been changed. 'Swim' has been replaced by 'Swim_Pool' or 
+    'Swim_Open_water'. Please adapt your script(s) or remove the command line argument and try the (improved) auto-detection.   
+    </p>
+</li>
+<li>
+[FEATURE #28] Alpha support for open water swimming activities. Tested on a single activity file only. SWOLF and speed
+data were found to be unreliable / unusable. The conversion relies on the GPS data for this type of activity. We welcome
+your feedback if you have any problems or remarks using this feature. Closes #28. 
+</li>
+
+#### Solved issues
+<li>
+    <p>
+    Bug solved in swimming lap generation that could cause each lap to be generated twice (probably since V2.0 B1908.3101).
+    </p>
+</li>
+<li>
+    <p>
+    Bug solved that could cause the --sport command line argument to get overruled by auto-detection. Closes #30.
+    </p>
+</li>
+
+#### Known Limitations
+<li>
+    <p>
+    Distance calculation during long(er) pause periods can be off due to continuing speed data records
+    during the pause in the HiTrack file. If you suspect a converted activity to have a wrong distance, you can 
+    try to recalculate the distance from the activity details screen in Strava for now.
+    </p>
+</li>
 ### Version 2.2 Build 1909.0801
 #### New features and changes
 <li>
