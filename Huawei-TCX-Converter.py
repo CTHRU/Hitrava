@@ -33,7 +33,7 @@ PROGRAM_NAME = 'Huawei-TCX-Converter'
 PROGRAM_MAJOR_VERSION = '2'
 PROGRAM_MINOR_VERSION = '3'
 PROGRAM_MAJOR_BUILD = '1909'
-PROGRAM_MINOR_BUILD = '1501'
+PROGRAM_MINOR_BUILD = '2401'
 
 OUTPUT_DIR = './output'
 GPS_TIMEOUT = dts_delta(seconds=10)
@@ -944,14 +944,17 @@ class TcxActivity:
                     (HiActivity.TYPE_OPEN_WATER_SWIM, _SPORT_SWIMMING),
                     (HiActivity.TYPE_UNKNOWN, _SPORT_OTHER)]
 
-    def __init__(self, hi_activity: HiActivity, tcx_xml_schema: xmlschema = None, save_dir: str = OUTPUT_DIR,
+    def __init__(self, hi_activity: HiActivity, tcx_xml_schema=None, save_dir: str = OUTPUT_DIR,
                  filename_prefix: str = None):
         if not hi_activity:
             logging.error("No valid HiTrack activity specified to construct TCX activity.")
             raise Exception("No valid HiTrack activity specified to construct TCX activity.")
         self.hi_activity = hi_activity
         self.training_center_database = None
-        self.tcx_xml_schema: xmlschema = tcx_xml_schema
+        if tcx_xml_schema:
+            self.tcx_xml_schema: xmlschema = tcx_xml_schema
+        else:
+            self.tcx_xml_schema = None
         self.save_dir = save_dir
         self.filename_prefix = filename_prefix
 
@@ -1216,7 +1219,7 @@ class TcxActivity:
             raise Exception('Error validating TCX XML for activity <%s>\n%s', self.hi_activity.activity_id, e)
 
 
-def _init_tcx_xml_schema() -> xmlschema:
+def _init_tcx_xml_schema():
     """ Retrieves the TCX XML XSD schema for validation of files from the intenet """
 
     _TCX_XSD_FILE = 'TrainingCenterDatabasev2.xsd'
