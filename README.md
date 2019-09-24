@@ -56,16 +56,19 @@ Download the [Huawei TCX Converter](https://raw.githubusercontent.com/aricooperd
 >                        activities. If the option is not set, the estimated
 >                        pool length derived from the available speed data in
 >                        the HiTrack file will be used. Note that the available
->                        speed data has a minimum resolution of 1 dm/s.`
+>                        speed data has a minimum resolution of 1 dm/s.
+>
 >OUTPUT options:
 >  --output_dir OUTPUT_DIR
 >                        The path to the directory to store the output files.
 >                        The default directory is ./output.
+>
 >  --output_file_prefix OUTPUT_FILE_PREFIX
 >                        Adds the strftime representation of this argument as a
 >                        prefix to the generated TCX XML file(s). E.g. use
 >                        %Y-%m-%d- to add human readable year-month-day
 >                        information in the name of the generated TCX file.
+>
 >  --validate_xml        Validate generated TCX XML file(s). NOTE: requires
 >                        xmlschema library and an internet connection to
 >                        retrieve the TCX XSD.
@@ -115,6 +118,24 @@ I have copied the `Huawei-TCX-Converter.py` file to the directory containing my 
 I've included both the HiTrack file and the resultant TCX file in the Examples folder for you to have a go with. You can also [visualise the data online](https://www.mygpsfiles.com/app/#3gcQ1H3M).
 
 ## Release Notes
+### Version 2.3 Build 1909.2401
+#### Solved issues
+<li>
+    <p>
+    Program would error out when trying to convert without the --validate_xml option when the xmlschema library wasn't 
+    installed. Closes #36.
+    </p>
+</li>
+
+#### Known Limitations
+<li>
+    <p>
+    Since the latest version of Huawei Backup (10.0.0.360_OVE) and more importantly Huawei Health (10.0.0.533), the
+    program is ( / might be, see #35) defunct in its current state. Last version of Huawei Helath app seems to disallow
+    backups through its properties. Huawei Backup release notes state that encryption of the backup is required.
+    </p>
+</li>
+
 ### Version 2.3 Build 1909.1501
 #### New features and changes
 <li>
@@ -170,6 +191,7 @@ your feedback if you have any problems or remarks using this feature. Closes #28
     try to recalculate the distance from the activity details screen in Strava for now.
     </p>
 </li>
+
 ### Version 2.2 Build 1909.0801
 #### New features and changes
 <li>
