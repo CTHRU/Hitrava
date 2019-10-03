@@ -5,10 +5,12 @@ import argparse
 import collections
 import csv
 import datetime
+import json
 import logging
 import math
 import operator
 import os
+import re
 import sys
 import tarfile
 import tempfile
@@ -30,10 +32,10 @@ except:
 
 # Global Constants
 PROGRAM_NAME = 'Huawei-TCX-Converter'
-PROGRAM_MAJOR_VERSION = '2'
-PROGRAM_MINOR_VERSION = '3'
-PROGRAM_MAJOR_BUILD = '1909'
-PROGRAM_MINOR_BUILD = '2401'
+PROGRAM_MAJOR_VERSION = '3'
+PROGRAM_MINOR_VERSION = '0'
+PROGRAM_MAJOR_BUILD = '1910'
+PROGRAM_MINOR_BUILD = '0301'
 
 OUTPUT_DIR = './output'
 GPS_TIMEOUT = dts_delta(seconds=10)
@@ -416,8 +418,9 @@ class HiActivity:
             logging.error('One or more required data fields (k, v) missing or invalid in stroke frequency data %s\n%s',
                           data,
                           e)
-            raise Exception('One or more required data fields (k, v) missing or invalid in stroke frequency data %s\n%s',
-                            data)
+            raise Exception(
+                'One or more required data fields (k, v) missing or invalid in stroke frequency data %s\n%s',
+                data)
 
         # Add stroke frequency data
         self._add_data_detail(stroke_freq_data)
@@ -563,7 +566,7 @@ class HiActivity:
         self._add_segment_start(self.start)
 
         for key, data in self.data_dict.items():
-            if 'lat' in data:   # This is a location record
+            if 'lat' in data:  # This is a location record
                 if last_location:
                     if data['lat'] == 90 and data['lon'] == -80:
                         # Pause or stop records (lat = 90, long = -80, alt = 0) and handle segment data creation
@@ -689,7 +692,8 @@ class HiActivity:
             lap_data = {}
             lap_data['lap'] = n + 1
             lap_data['swolf'] = first_lap_record['swf']
-            lap_data['strokes'] = round(first_lap_record['p-f'] * raw_data_duration / 60)  # Convert strokes/min -> strokes/lap
+            lap_data['strokes'] = round(
+                first_lap_record['p-f'] * raw_data_duration / 60)  # Convert strokes/min -> strokes/lap
             lap_data['duration'] = lap_data['swolf'] - lap_data['strokes']  # Derive lap time from SWOLF - strokes
             if self.pool_length < 1:
                 # Pool length not set. Derive estimated distance from raw speed data
@@ -751,9 +755,10 @@ class HiActivity:
                     '\nID       : ' + self.activity_id + \
                     '\nType     : ' + self._activity_type + \
                     '\nDate     : ' + dts.strftime(self.start, "%Y-%m-%d") + ' (YYYY-MM-DD)' + \
-                    '\nDuration : ' + str(self.stop - self.start) + ' (H:MM:SS)'\
-                    '\nDistance : ' + str(self.distance) + 'm'
+                    '\nDuration : ' + str(self.stop - self.start) + ' (H:MM:SS)' \
+                                                                    '\nDistance : ' + str(self.distance) + 'm'
         return to_string
+
 
 class HiTrackFile:
     """The HiTrackFile class represents a single HiTrack file. It contains all file handling and parsing methods."""
@@ -927,14 +932,107 @@ class HiTarBall:
         self._close_tarball()
 
 
+class HiJson:
+    def __init__(self, json_filename: str, output_dir: str = OUTPUT_DIR):
+        # Validate the tarball file parameter
+        if not json_filename:
+            logging.error('Parameter for JSON filename is missing')
+
+        try:
+            self.json_file = open(json_filename, 'r')
+        except Exception as e:
+            logging.error('Error opening JSON file <%s>\n%s', json_filename, e)
+            raise Exception('Error opening JSON file <%s>', json_filename)
+
+        self.output_dir = output_dir
+        # If output directory doesn't exist, make it.
+        if not os.path.exists(self.output_dir):
+            os.makedirs(self.output_dir)
+
+        self.hi_activity_list = []
+
+    def parse(self, from_date: dts = None) -> list:
+        try:
+            # Look for HiTrack information in JSON file
+
+            # The JSON file from Huawei contains invalid formatting in the 'partTimeMap' data (missing double quotes
+            # for the keys). For now, remove the invalid parts using a regular expression.
+            json_string = self.json_file.read()
+
+            json_string = re.sub('\"partTimeMap\"\:{(.*?)}\,', '', json_string)
+
+            data = json.loads(json_string)
+
+            # JSON data structure
+            # data {list}
+            #   00 {dict}
+            #     motionPathData {list}
+            #       0 {dict)
+            #         sportType {int}
+            #         attribute {str} 'HW_EXT_TRACK_DETAIL@is<HiTrack File Data>&&HW_EXT_TRACK_SIMPLIFY@is<Other Data>
+            #     recordDay {int} 'YYYYMMDD'
+            for n, activity_dict in enumerate(data):
+                activity_date = dts.strptime(str(activity_dict['recordDay']), "%Y%m%d")
+                if activity_date >= from_date:
+                    logging.info('Found activity in JSON at index %d to parse from %s (YYY-MM-DD)',
+                                 n, activity_date.isoformat())
+                    # Create a HiTrack file from the HiTrack data
+                    motion_path_data = activity_dict['motionPathData'][0]
+                    hitrack_data = motion_path_data['attribute']
+                    # Strip prefix and suffix from raw HiTrack data
+                    hitrack_data = re.sub('HW_EXT_TRACK_DETAIL\@is', '', hitrack_data)
+                    hitrack_data = re.sub('\&\&HW_EXT_TRACK_SIMPLIFY\@is(.*?)', '', hitrack_data)
+
+                    # Save HiTrack data to HiTrack file
+                    hitrack_filename = "%s/HiTrack_%s_%d" % (self.output_dir, dts.strftime(activity_date, '%Y%m%d'), n)
+                    logging.info('Saving activity at index %d from %s to HiTrack file %s for parsing',
+                                 n, activity_date, hitrack_filename)
+                    try:
+                        hitrack_file = open(hitrack_filename, "w+")
+                        hitrack_file.write(hitrack_data)
+                    except Exception as e:
+                        logging.error('Error saving activity at index %d from %s to HiTrack file for parsing.\n%s',
+                                      n, activity_date, e)
+                    finally:
+                        try:
+                            if hitrack_file:
+                                hitrack_file.close()
+                        except Exception as e:
+                            logging.error('Error closing HiTrack file <%s>\n', hitrack_filename, e)
+
+                    # Parse the HiTrack file
+                    hitrack_file = HiTrackFile(hitrack_filename)
+                    hi_activity = hitrack_file.parse()
+                    self.hi_activity_list.append(hi_activity)
+                else:
+                    logging.info('Skipped parsing activity at index %d being an activity from %s before %s (YYYYMMDD).',
+                        n, activity_date.isoformat(), from_date.isoformat())
+
+            return self.hi_activity_list
+        except Exception as e:
+            logging.error('Error parsing JSON file <%s>\n%s', self.json_file.name, e)
+            raise Exception('Error parsing JSON file <%s>', self.json_file.name)
+
+    def _close_json(self):
+        try:
+            if self.json_file and not self.json_file.closed:
+                self.json_file.close()
+                logging.debug('JSON file <%s> closed', self.json_file.name)
+        except Exception as e:
+            logging.error('Error closing JSON file <%s>\n', self.json_file.name, e)
+
+    def __del__(self):
+        self._close_json()
+
+
 class TcxActivity:
     # Strava accepts following sports: walking, running, biking, swimming.
     # Note: TCX XSD only accepts Running, Biking, Other
     # TODO According to Strava documentation (https://developers.strava.com/docs/uploads/), Strava uses a custom set of sport types? These don't seem to work for the manual uplaod action? To be checked if thsi works with API in future functionality. If so, the XSD schema in the _validate_xml() function needs to be customized too.
     _SPORT_WALKING = 'Running'  # TODO Strava 'walking'
     _SPORT_RUNNING = 'Running'  # TODO Strava 'running'
-    _SPORT_BIKING = 'Biking'    # TODO Strava 'biking'
-    _SPORT_SWIMMING = 'Other'   # TODO Strava 'swimming'
+    _SPORT_BIKING = 'Biking'  # TODO Strava 'biking'
+    _SPORT_SWIMMING = 'Other'  # TODO Strava 'swimming'
     _SPORT_OTHER = 'Other'
 
     _SPORT_TYPES = [(HiActivity.TYPE_WALK, _SPORT_WALKING),
@@ -1283,9 +1381,26 @@ def _init_argument_parser() -> argparse.ArgumentParser:
                                      HiActivity.TYPE_CYCLE,
                                      HiActivity.TYPE_POOL_SWIM,
                                      HiActivity.TYPE_OPEN_WATER_SWIM])
+
+    json_group = parser.add_argument_group('JSON options')
+    json_group.add_argument('-j', '--json', help='The filename of a Huawei Cloud JSON file containing the motion path \
+                                                  detail data.')
+
     tar_group = parser.add_argument_group('TAR options')
     tar_group.add_argument('-t', '--tar', help='The filename of an (unencrypted) tarball with HiTrack files to \
                                                 convert.')
+
+    date_group = parser.add_argument_group('DATE options')
+    def from_date_type(arg):
+        try:
+            return dts.strptime(arg, "%Y-%m-%d")
+        except ValueError:
+            msg = "Invalid date or date format (expected YYYY-MM-DD): '{0}'.".format(arg)
+            raise argparse.ArgumentTypeError(msg)
+    date_group.add_argument('--from_date', help='Applicable to --json and --tar options only. Only convert HiTrack \
+                                                 information from the JSON file or from HiTrack files in the tarball \
+                                                 if the activity started on FROM_DATE or later. Format YYYY-MM-DD',
+                            type=from_date_type)
 
     swim_group = parser.add_argument_group('SWIM options')
     def pool_length_type(arg):
@@ -1295,21 +1410,13 @@ def _init_argument_parser() -> argparse.ArgumentParser:
         if l == 1013:
             print('Congrats on your sim in the Alfonso del Mar.')
         return l
+
     swim_group.add_argument('--pool_length', help='The pool length in meters to use for swimming activities. \
                                                   If the option is not set, the estimated pool length derived from \
                                                   the available speed data in the HiTrack file will be used. Note \
                                                   that the available speed data has a minimum resolution of 1 dm/s.',
                             type=pool_length_type)
 
-    def from_date_type(arg):
-        try:
-            return dts.strptime(arg, "%Y-%m-%d")
-        except ValueError:
-            msg = "Invalid date or date format (expected YYYY-MM-DD): '{0}'.".format(arg)
-            raise argparse.ArgumentTypeError(msg)
-    tar_group.add_argument('--from_date', help='Only convert HiTrack files in the tarball if the activity started on \
-                                                FROM_DATE or later. Format YYYY-MM-DD',
-                           type=from_date_type)
     output_group = parser.add_argument_group('OUTPUT options')
     output_group.add_argument('--output_dir', help='The path to the directory to store the output files. The default \
                                              directory is ' + OUTPUT_DIR + '.',
@@ -1322,7 +1429,7 @@ def _init_argument_parser() -> argparse.ArgumentParser:
                               type=str)
     output_group.add_argument('--validate_xml', help='Validate generated TCX XML file(s). NOTE: requires xmlschema library \
                                                 and an internet connection to retrieve the TCX XSD.',
-                        action='store_true')
+                              action='store_true')
     parser.add_argument('--log_level', help='Set the logging level.', type=str, choices=['INFO', 'DEBUG'],
                         default='INFO')
 
@@ -1359,6 +1466,18 @@ def main():
             hi_activity_list = hi_tarball.parse(args.from_date)
         else:
             hi_activity_list = hi_tarball.parse()
+        for hi_activity in hi_activity_list:
+            if args.pool_length:
+                hi_activity.set_pool_length(args.pool_length)
+            tcx_activity = TcxActivity(hi_activity, tcx_xml_schema, args.output_dir, args.output_file_prefix)
+            tcx_activity.save()
+            logging.info('Converted %s', hi_activity)
+    elif args.json:
+        hi_json = HiJson(args.json, args.output_dir)
+        if args.from_date:
+            hi_activity_list = hi_json.parse(args.from_date)
+        else:
+            hi_activity_list = hi_json.parse()
         for hi_activity in hi_activity_list:
             if args.pool_length:
                 hi_activity.set_pool_length(args.pool_length)
