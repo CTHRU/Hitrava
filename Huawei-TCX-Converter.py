@@ -1,13 +1,16 @@
 # Huawei-TCX-Converter.py
-# Ari Cooper-Davis / Christoph Vanthuyne , 2019 - github.com/aricooperdavis/Huawei-TCX-Converter
+# Copyright (c) 2019 Ari Cooper-Davis / Christoph Vanthuyne - github.com/aricooperdavis/Huawei-TCX-Converter
 
 import argparse
+import collections
 import csv
 import datetime
+import json
 import logging
 import math
 import operator
 import os
+import re
 import sys
 import tarfile
 import tempfile
@@ -18,21 +21,24 @@ from datetime import datetime as dts
 from datetime import timedelta as dts_delta
 
 # External libraries that require installation
+from typing import List, Optional
+
 try:
     import xmlschema  # (only) needed to validate the generated TCX XML.
 except:
     print('Info - External library xmlschema could not be imported.\n' +
-          'It is required when using the --validate option.\n' +
+          'It is required when using the --validate_xml argument.\n' +
           'It can be installed using: pip install xmlschema')
 
 # Global Constants
 PROGRAM_NAME = 'Huawei-TCX-Converter'
-PROGRAM_MAJOR_VERSION = '2'
+PROGRAM_MAJOR_VERSION = '3'
 PROGRAM_MINOR_VERSION = '0'
-PROGRAM_MAJOR_BUILD = '1908'
-PROGRAM_MINOR_BUILD = '2201'
+PROGRAM_MAJOR_BUILD = '1910'
+PROGRAM_MINOR_BUILD = '0301'
 
 OUTPUT_DIR = './output'
+GPS_TIMEOUT = dts_delta(seconds=10)
 
 
 class HiActivity:
@@ -41,36 +47,50 @@ class HiActivity:
     TYPE_WALK = 'Walk'
     TYPE_RUN = 'Run'
     TYPE_CYCLE = 'Cycle'
-    TYPE_SWIM = 'Swim'
+    TYPE_POOL_SWIM = 'Swim_Pool'
+    TYPE_OPEN_WATER_SWIM = 'Swim_Open_Water'
     TYPE_UNKNOWN = '?'
 
-    _ACTIVITY_TYPE_LIST = (TYPE_WALK, TYPE_RUN, TYPE_CYCLE, TYPE_SWIM)
+    _ACTIVITY_TYPE_LIST = (TYPE_WALK, TYPE_RUN, TYPE_CYCLE, TYPE_POOL_SWIM, TYPE_OPEN_WATER_SWIM)
 
     def __init__(self, activity_id: str, activity_type: str = TYPE_UNKNOWN):
         logging.debug('New HiTrack activity to process <%s>', activity_id)
         self.activity_id = activity_id
 
         if activity_type == self.TYPE_UNKNOWN:
-            self.activity_type = self.TYPE_UNKNOWN
+            self._activity_type = self.TYPE_UNKNOWN
         else:
             self.set_activity_type(activity_type)  # validate and set activity type of the activity
+
+        # Will hold a set of parameters to auto-determine activity type
+        self.activity_params = {}
 
         self.pool_length = -1
 
         self.start = None
         self.stop = None
+        self.distance = -1
 
         # Create an empty segment and segment list
         self._current_segment = None
-        self.segment_list = []
+        self._segment_list: List = None
 
         # Create an empty detail data dictionary. key = timestamp, value = dict{t, lat, lon, alt, hr)
         self.data_dict = {}
 
+        # Private variable to temporarily hold the last parsed SWOLF data during parsing of swimming activities
+        self.last_swolf_data = None
+
+    def get_activity_type(self) -> str:
+        if self._activity_type == self.TYPE_UNKNOWN:
+            # Perform activity type detection only once.
+            self._activity_type = self._detect_activity_type()
+        return self._activity_type
+
     def set_activity_type(self, activity_type: str):
         if activity_type in self._ACTIVITY_TYPE_LIST:
             logging.info('Setting activity type of activity %s to %s', self.activity_id, activity_type)
-            self.activity_type = activity_type
+            self._activity_type = activity_type
         else:
             logging.error('Invalid activity type <%s>', activity_type)
             raise Exception('Invalid activity type <%s>', activity_type)
@@ -78,41 +98,41 @@ class HiActivity:
     def set_pool_length(self, pool_length: int):
         logging.info('Setting pool length of activity %s to %d', self.activity_id, pool_length)
         self.pool_length = pool_length
-        if not self.activity_type == self.TYPE_SWIM:
-            logging.warning('Pool length for activity %s of type %s will not be used. It is not a swimming activity',
-                            self.activity_id, self.activity_type)
+        if not self.get_activity_type() == self.TYPE_POOL_SWIM:
+            logging.warning('Pool length for activity %s of type %s will not be used. It is not a pool swimming \
+                            activity', self.activity_id, self._activity_type)
 
     def _add_segment_start(self, segment_start: datetime):
         if self._current_segment:
-            logging.error('Request to start segment when there is already a current segment active')
+            logging.error('Request to start segment at %s when there is already a current segment active',
+                          segment_start)
             return
 
         logging.debug('Adding segment start at %s', segment_start)
 
         # No current segment, create one
         self._current_segment = {'start': segment_start, 'stop': None}
+        # Add it to the segment list (note: if no explicit stop record is found, the segment will exist and stay 'open')
+        if not self._segment_list:
+            self._segment_list = []
+        self._segment_list.append(self._current_segment)
         if not self.start:
             # Set activity start
             self.start = segment_start
 
-    def _add_segment_stop(self, segment_stop: datetime):
+    def _add_segment_stop(self, segment_stop: datetime, segment_distance: int = -1):
         logging.debug('Adding segment stop at %s', segment_stop)
         if not self._current_segment:
-            logging.error('Request to stop segment when there is no current segment active')
+            logging.error('Request to stop segment at %s when there is no current segment active', segment_stop)
             return
 
         # Set stop of current segment, add it to the segment list and clear the current segment
         self._current_segment['stop'] = segment_stop
         self._current_segment['duration'] = int((segment_stop - self._current_segment['start']).total_seconds())
-        if not self.activity_type == self.TYPE_SWIM:
-            # Calculate distance based on distance data directly for non-swimming activities
-            self._current_segment['distance'] = self.data_dict[segment_stop]['distance'] - \
-                                                self.data_dict[self._current_segment['start']]['distance']
-        self.segment_list.append(self._current_segment)
-        self._current_segment = None
+        if not segment_distance == -1:
+            self._current_segment['distance'] = segment_distance
 
-        # Update activity stop
-        self.stop = segment_stop
+        self._current_segment = None
 
     # TODO Verify if something useful can be done with the (optional) altitude data in the tp=lbs records
     def add_location_data(self, data: []):
@@ -127,8 +147,8 @@ class HiActivity:
         - When tracking an activity with a tracking the device, the records in the HiTrack file seem to be ordered by
           record type. This seems not to be the case when using a mobile phone only, where records seem to be added in
           order of the timestamp they occurred.
-        Assumption: proper activity stop and/or activity segment stop relies on the presence of the records
-        tp=lbs;lat=90;lon=-80;alt=0.
+        - Location records are NOT ordered by timestamp when the activity contains loops of the same track.
+        - Pause and stop records are identified by tp=lbs;lat=90;lon=-80;alt=0;t=<valid epoch time value or zero>
         """
 
         logging.debug('Adding location data %s', data)
@@ -140,11 +160,6 @@ class HiActivity:
             # All raw values are floats (timestamp will be converted later)
             for keys in location_data:
                 location_data[keys] = float(location_data[keys])
-
-            # Detect pause or stop records (lat = 90, long = -80, alt = 0) and handle segment data creation
-            if location_data['lat'] == 90 and location_data['lon'] == -80:
-                self._add_segment_stop(sorted(self.data_dict.keys())[-1])  # Use timestamp of last (location) record
-                return
         except Exception as e:
             logging.error('One or more required data fields (t, lat, lon) missing or invalid in location data %s\n%s',
                           data,
@@ -152,27 +167,20 @@ class HiActivity:
             raise Exception('One or more required data fields (t, lat, lon) missing or invalid in location data %s',
                             data)
 
-        # Regular location record.
-        # Convert the timestamp to a datetime
-        location_data['t'] = _convert_hitrack_timestamp(location_data['t'])
-        # Calculate distance from last location and add cumulative distance to record (required for export)
-        if self.data_dict:  # First location has no distance
-            # Get the last location record that was added
-            #last_location = self.data_dict[sorted(self.data_dict.keys())[-1]]
-            last_location = self._get_last_location()
-            location_data['distance'] = self._vincenty((last_location['lat'], last_location['lon']),
-                                                       (location_data['lat'], location_data['lon'])) + \
-                                        last_location['distance']
+        if location_data['t'] == 0 and location_data['lat'] == 90 and location_data['lon'] == -80:
+            # Pause/stop record without a valid epoch timestamp. Set it to the last timestamp recorded.
+            location_data['t'] = self.stop
         else:
-            location_data['distance'] = 0
+            # Regular location record or pause/stop record with valid epoch timestamp.
+            # Convert the timestamp to a datetime
+            location_data['t'] = _convert_hitrack_timestamp(location_data['t'])
 
-        # If we don't have a segment, create one.
-        if not self._current_segment:
-            self._add_segment_start(location_data['t'])
+            self.activity_params['gps'] = True
+
         # Add location data
         self._add_data_detail(location_data)
 
-    def _get_last_location(self) -> dict:
+    def _get_last_location(self) -> Optional[dict]:
         """ Returns the last location record in the data dictionary """
         if self.data_dict:
             reverse_sorted_data = sorted(self.data_dict.items(), key=operator.itemgetter(0), reverse=True)
@@ -285,7 +293,7 @@ class HiActivity:
             alti_data = dict(data)
             # Use unique keys. Update keys k -> t and v -> hr
             alti_data['t'] = _convert_hitrack_timestamp(float(alti_data.pop('k')))
-            alti_data['alti'] = int(alti_data.pop('v'))
+            alti_data['alti'] = float(alti_data.pop('v'))
 
             # Ignore invalid heart rate data (for export)
             if alti_data['alti'] < -1000 or alti_data['alti'] > 10000:
@@ -320,49 +328,34 @@ class HiActivity:
             # Use unique keys. Update keys k -> t and v -> s_r
             step_freq_data['t'] = _convert_hitrack_timestamp(float(step_freq_data.pop('k')))
             step_freq_data['s-r'] = int(step_freq_data.pop('v'))
-
-            # Try to auto detect the activity type (only if not already detected)
-            if step_freq_data['s-r'] == 0 and self.activity_type == self.TYPE_UNKNOWN:
-                # Cycling can be detected by (all) step frequency records with value = 0.
-                # Found at least one cycling activity that had a v=10 value for the last tp=s-r record (stop?).
-                # To prevent auto detection of walking/running based on this last record, do not process tp=s-r records
-                # any further after the first v=0 record.
-                # TODO Cycling activities registered without a fitness device (phone only) don't have any s-r records and hence auto activity type detection for these activities does not work
-                # TODO Needs verification if v=0 records could be generated for walking/running activities e.g when standing still for a while right after the start of a new activity
-                # TODO Required? Add better detection of cycling by checking if tp=lbs records were processed?
-                if not self.activity_type == self.TYPE_CYCLE:
-                    self.set_activity_type(self.TYPE_CYCLE)
-                else:
-                    logging.warning("Activity type Cycle auto detected earlier. This step frequency record is ignored.")
-                return  # Do not process the zero (cycle) records any further
-            elif step_freq_data['s-r'] < 0 or self.activity_type == self.TYPE_SWIM:
-                # Swimming can be detected by step frequency records with value < 0.
-                # The last record has a positive value and should not be processed.
-                # Hence, this record will be ignored if a swimming activity was already detected.
-                # Timestamps of these records don't seem to have any relation to the activity as it seems they are
-                # all about a minute apart. No clue to the meaning of the value except for the activity type indication.
-                # The only plausible relation is the number of laps that were swum.
-                if not self.activity_type == self.TYPE_SWIM:
-                    self.set_activity_type(self.TYPE_SWIM)
-                    # Explicitly set the start time of the activity on the first s-r record (all other timestamps in the
-                    # file are relative to this timestamp)
-                    self.start = step_freq_data['t']
-                return
-            else:
-                # tp=s-r record with v > 0. Not swimming nor cycling, but walking or running. Add step frequency data.
-                if self.activity_type == self.TYPE_UNKNOWN:
-                    # TODO add distinction between walking and running here?
-                    self.set_activity_type(self.TYPE_WALK)
-                self._add_data_detail(step_freq_data)
         except Exception as e:
-                logging.error('One or more required data fields (k, v) missing or invalid in step frequency data %s\n%s',
-                              data,
-                              e)
-                raise Exception('One or more required data fields (k, v) missing or invalid in step frequency data %s\n%s',
-                                data)
+            logging.error('One or more required data fields (k, v) missing or invalid in step frequency data %s\n%s',
+                          data,
+                          e)
+            raise Exception('One or more required data fields (k, v) missing or invalid in step frequency data %s\n%s',
+                            data)
+
+        # Keep track of minimum, maximum and average step frequency data for activity type auto-detection.
+        # Ignore negative values since these belong to swimming activities and are not important to recognize the
+        # swimming activity.
+        if step_freq_data['s-r'] >= 0:
+            if 'step frequency min' not in self.activity_params:
+                self.activity_params['step frequency min'] = step_freq_data['s-r']
+                self.activity_params['step frequency max'] = step_freq_data['s-r']
+                self.activity_params['step frequency data'] = []
+            elif step_freq_data['s-r'] < self.activity_params['step frequency min']:
+                self.activity_params['step frequency min'] = step_freq_data['s-r']
+            elif step_freq_data['s-r'] > self.activity_params['step frequency max']:
+                self.activity_params['step frequency max'] = step_freq_data['s-r']
+
+            # Add step frequency data detail to activity parameters for later average step frequency calculation.
+            self.activity_params['step frequency data'].append(step_freq_data['s-r'])
+
+        # Add step frequency data.
+        self._add_data_detail(step_freq_data)
 
     def add_swolf_data(self, data: []):
-        """ Add SWOLF (swimming) data from a tp=s-r record in a HiTrack file
+        """ Add SWOLF (swimming) data from a tp=swf record in a HiTrack file
         SWOLF value = time to swim one pool length + number of strokes
         """
 
@@ -377,6 +370,8 @@ class HiActivity:
             swolf_data['t'] = self.start + dts_delta(seconds=int(swolf_data.pop('k')) + 5)
             swolf_data['swf'] = int(swolf_data.pop('v'))
 
+            self.activity_params['swim'] = True
+
             # If there is no last swf record or the last added swf record had a different swf value, then this record
             # belongs to a new lap (segment)
             # TODO There is a chance that checking on SWOLF only might miss a lap in case two consecutive laps have the same SWOLF (but then again, chances are that stroke and speed data are also identical)
@@ -384,25 +379,18 @@ class HiActivity:
             if not self._current_segment:
                 # First record of first lap. Start new segment (lap)
                 self._add_segment_start(swolf_data['t'] - dts_delta(seconds=5))
-                # Add the current segment directly to the segment list here. Because there's no 'last record' indication
-                # like with the tp=lbs records, the last segment will have no stop date. This will be dealt with when
-                # the swim data is requested via the _get_sim_data() function.
-                self.segment_list.append(self._current_segment)
             else:
-                last_swolf = self.data_dict[sorted(self.data_dict.keys())[-1]]
-                if last_swolf['swf'] != swolf_data['swf']:
+                if self.last_swolf_data['swf'] != swolf_data['swf']:
                     # New lap detected.
                     # Close segment of previous lap. Since the current lap starts at the exact same time
-                    self._current_segment['stop'] = last_swolf['t']
+                    self._current_segment['stop'] = self.last_swolf_data['t']
                     self._current_segment = None
                     # Open new segment for this lap. End of previous lap is start of current lap.
                     # Add 1 microsecond to split the lap data correctly.
-                    self._add_segment_start(last_swolf['t'] + dts_delta(microseconds=1))
-                    # Add the current segment directly to the segment list here. Because there's no 'last record'
-                    # indication like with the tp=lbs records, the last segment will have no stop date. This will be
-                    # dealt with when the swim data is requested via the _get_sim_data() function.
-                    self.segment_list.append(self._current_segment)
+                    self._add_segment_start(swolf_data['t'] + dts_delta(microseconds=1))
 
+            # Remember this SWOLF data as last parsed SWOLF data.
+            self.last_swolf_data = swolf_data
         except Exception as e:
             logging.error('One or more required data fields (k, v) missing or invalid in SWOLF data %s\n%s',
                           data,
@@ -430,13 +418,13 @@ class HiActivity:
             logging.error('One or more required data fields (k, v) missing or invalid in stroke frequency data %s\n%s',
                           data,
                           e)
-            raise Exception('One or more required data fields (k, v) missing or invalid in stroke frequency data %s\n%s',
-                            data)
+            raise Exception(
+                'One or more required data fields (k, v) missing or invalid in stroke frequency data %s\n%s',
+                data)
 
         # Add stroke frequency data
         self._add_data_detail(stroke_freq_data)
 
-    # TODO Do distance calculation for walking/running/cycling activities based on the speed records when GPS signal is lost for a longer time period or there is no GPS data at all
     def add_speed_data(self, data: []):
         """ Add speed data (in decimeter/second) from a tp=rs record in a HiTrack file """
 
@@ -463,11 +451,177 @@ class HiActivity:
     def _add_data_detail(self, data: dict):
         # Add the data to the data dictionary.
         if data['t'] not in self.data_dict:
-            # No data for timestamp. Add it.
+            # No data for timestamp. Create a new record for it.
             self.data_dict[data['t']] = data
         else:
-            #
+            # Existing data for timestamp. Add the new data to the existing record.
             self.data_dict[data['t']].update(data)
+
+        # Records are NOT necessarily in chronological order.
+        # Update start of the activity when a record with an earlier timestamp is added.
+        if not self.start or self.start > data['t']:
+            self.start = data['t']
+        # Update stop of the activity when a record with a later timestamp is added.
+        if not self.stop or self.stop < data['t']:
+            self.stop = data['t']
+
+    def get_segments(self) -> list:
+        """" Returns the segment list.
+            - For swimming activities, the segments were identified during parsing of the SWOLF data.
+            - For walking, running and cycling activities, the segments must be calculated once based on the parsed
+              location data. Because the location data is not (always) in chronological order (e.g. loops in the track),
+              for these activities
+        """
+        # Make sure calculation of segments is done.
+        self._calc_segments_and_distances()
+        return self._segment_list
+
+    def _reset_segments(self):
+        self._segment_list = None
+        self._current_segment = None
+
+    def _detect_activity_type(self) -> str:
+        """"Auto-detection of the activity type. Only valid when called after all data has been parsed."""
+        logging.debug('Detecting activity type for activity %s with parameters %s',
+                      self.activity_id, self.activity_params)
+
+        # Filter out swimming
+        if 'swim' in self.activity_params:
+            # Swimming detected
+            if 'gps' not in self.activity_params:
+                self._activity_type = self.TYPE_POOL_SWIM
+            else:
+                self._activity_type = self.TYPE_OPEN_WATER_SWIM
+            logging.debug('Activity type %s detected for activity %s', self._activity_type, self.activity_id)
+            return self._activity_type
+
+        # Walk / Run / Cycle
+        if 'step frequency min' in self.activity_params:
+            # Walk / Run / Cycle - Step frequency data available
+            # For walking and running, the assumption is that step frequency data is available regardless whether
+            # a fitness tracking device is used or not.
+
+            # Calculate average step frequency
+            step_freq_sum = 0
+            for n, step_freq in enumerate(self.activity_params['step frequency data']):
+                step_freq_sum += step_freq
+
+            step_freq_avg = step_freq_sum / n
+            logging.debug('Activity %s has a calculated average step frequency of %d', self.activity_id, step_freq_avg)
+
+            if self.activity_params['step frequency min'] == 0 and self.activity_params['step frequency max'] == 0:
+                # Specific check for cycling - all step frequency records being zero
+                self._activity_type = self.TYPE_CYCLE
+            elif self.activity_params['step frequency min'] == 0 and step_freq_avg < 70:
+                # TODO This condition will have to be confirmed in practice whether a long pause during walking would cause it to be detected as cycling
+
+                # Some walking on foot during cycling activity - detect it as cycling
+                # See https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5435734/ - Figure 2 extrapolated theoretical stride
+                # frequency of 35 at speed 0.
+                self._activity_type = self.TYPE_CYCLE
+            elif self.activity_params['step frequency max'] < 135:
+                # See https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5435734/ - Walk-to-run stride frequency of 70.6 +- 3.2
+                self._activity_type = self.TYPE_WALK
+            else:
+                self._activity_type = self.TYPE_RUN
+
+            logging.debug('Activity type %s detected using step frequency data for activity %s',
+                          self._activity_type, self.activity_id)
+            return self._activity_type
+        else:
+            # Walk / Run / Cycle - no step frequency data available (e.g. activities registered using phone only).
+            # See above, since it is assumed that walking or running activities will always have step frequency records
+            # regardless whether a fitness tracking device was used or not, this must be a cycling activity.
+            self._activity_type = self.TYPE_CYCLE
+            logging.debug('Activity type %s detected using step frequency data for activity %s',
+                          self._activity_type, self.activity_id)
+            return self._activity_type
+
+    def _calc_segments_and_distances(self):
+        """" Perform the following detailed data calculations for walk, run, or cycle activities:
+        - segment list
+        - segment start, stop, duration and cumulative distance
+        - detailed track point cumulative distances
+        - total distance
+
+        Calculations change/add the following class attributes in place:
+        - _segment_list
+        - data_dict : sorted by timestamp and distances added
+        - distance
+        """
+
+        # Calculate only once
+        if self._segment_list:
+            return
+
+        logging.debug('Calculating segment and distance data for activity %s', self.activity_id)
+
+        # Sort the data dictionary by timestamp
+        self.data_dict = collections.OrderedDict(sorted(self.data_dict.items()))
+
+        # Do calculations
+        last_location = None
+
+        # Start first segment at earliest data found while adding the data
+        self._add_segment_start(self.start)
+
+        for key, data in self.data_dict.items():
+            if 'lat' in data:  # This is a location record
+                if last_location:
+                    if data['lat'] == 90 and data['lon'] == -80:
+                        # Pause or stop records (lat = 90, long = -80, alt = 0) and handle segment data creation
+                        # Use timestamp and distance of last (location) record
+                        self._add_segment_stop(last_location['t'], last_location['distance'])
+                    elif 'lat' not in last_location:
+                        # GPS was lost and is now back. Set distance to last known distance and use this record as the
+                        # last known location.
+                        logging.debug('GPS signal available at %s in %s. Calculating distance using location data.',
+                                      data['t'], self.activity_id)
+                        data['distance'] = last_location['distance']
+                        # If no current segment, create one
+                        if not self._current_segment:
+                            self._add_segment_start(data['t'])
+                        last_location = data
+                    else:
+                        # Regular location record. If no current segment, create one
+                        if not self._current_segment:
+                            self._add_segment_start(data['t'])
+                        # Calculate and set the accumulative distance of the location record
+                        data['distance'] = self._vincenty((last_location['lat'], last_location['lon']),
+                                                          (data['lat'], data['lon'])) + \
+                                           last_location['distance']
+                        last_location = data
+                else:
+                    # First location. Set distance 0
+                    data['distance'] = 0
+                    last_location = data
+            elif 'rs' in data:
+                if last_location:
+                    time_delta = data['t'] - last_location['t']
+                    if 'lat' not in last_location or time_delta > GPS_TIMEOUT:
+                        # GPS signal lost for more than the GPS timeout period. Calculate distance based on speed records
+                        logging.debug('No GPS signal between %s and %s in %s. Calculating distance using speed data '
+                                      '(%s dm/s)',
+                                      last_location['t'], data['t'], self.activity_id, data['rs'])
+                        # If no current segment, create one
+                        if not self._current_segment:
+                            self._add_segment_start(data['t'])
+                        data['distance'] = last_location['distance'] + (data['rs'] * time_delta.seconds / 10)
+                        last_location = data
+                else:
+                    # No location records processed and speed record available = start without GPS or no GPS at all.
+                    # Set distance 0
+                    data['distance'] = 0
+                    last_location = data
+
+        # Close last segment if it is still open
+        if self._current_segment:
+            # If the segment is open (no stop record for end of activity), use timestamp and distance of last location
+            # record.
+            self._add_segment_stop(last_location['t'], last_location['distance'])
+
+        # Set the total distance of the activity
+        self.distance = int(last_location['distance'])
 
     def get_segment_data(self, segment: dict) -> list:
         """" Returns a filtered and sorted data set containing all raw parsed data from the requested segment """
@@ -485,14 +639,22 @@ class HiActivity:
         segment_data = [value for (key, value) in sorted(segment_data_dict.items())]
         return segment_data
 
-    def get_swim_data(self) -> list:
-        """" Calculates the real swim (lap) data based on the raw parsed swim data
+    def get_swim_data(self) -> Optional[list]:
+        if self.get_activity_type() == self.TYPE_POOL_SWIM:
+            return self._get_pool_swim_data()
+        elif self.get_activity_type() == self.TYPE_OPEN_WATER_SWIM:
+            return self._get_open_water_swim_data()
+        else:
+            return None
+
+    def _get_pool_swim_data(self) -> list:
+        """" Calculates the real swim (lap) data based on the raw parsed pool swim data
         The following calculation steps on the raw parsed data is applied.
         1. Starting point is the raw parsed data per lap (segment). The data consists of multiple data records
            with a 5 second time interval containing the same SWOLF and stroke frequency (in strokes/minute) values.
         2. Calculate the number of strokes in the lap.
            Number of strokes = stroke frequency x (last - first lqp timestamp) / 60
-        3. Calculate the lap time: lap time = SWOLF - number of strokes
+            3. Calculate the lap time: lap time = SWOLF - number of strokes
 
         :return
         A list of lap data dictionaries containing the following data:
@@ -511,9 +673,17 @@ class HiActivity:
 
         swim_data = []
 
-        for n, segment in enumerate(self.segment_list):
+        # Sort the data dictionary by timestamp
+        self.data_dict = collections.OrderedDict(sorted(self.data_dict.items()))
+
+        total_distance = 0
+
+        for n, segment in enumerate(self._segment_list):
             segment_data = self.get_segment_data(segment)
-            first_lap_record = segment_data[0]
+            first_swf_index = 0
+            while 'swf' not in segment_data[first_swf_index]:
+                first_swf_index += 1
+            first_lap_record = segment_data[first_swf_index]
             last_lap_record = segment_data[-1]
 
             # First record is after 5 s in lap
@@ -522,7 +692,8 @@ class HiActivity:
             lap_data = {}
             lap_data['lap'] = n + 1
             lap_data['swolf'] = first_lap_record['swf']
-            lap_data['strokes'] = round(first_lap_record['p-f'] * raw_data_duration / 60)  # Convert strokes/min -> strokes/lap
+            lap_data['strokes'] = round(
+                first_lap_record['p-f'] * raw_data_duration / 60)  # Convert strokes/min -> strokes/lap
             lap_data['duration'] = lap_data['swolf'] - lap_data['strokes']  # Derive lap time from SWOLF - strokes
             if self.pool_length < 1:
                 # Pool length not set. Derive estimated distance from raw speed data
@@ -531,6 +702,8 @@ class HiActivity:
             else:
                 lap_data['distance'] = self.pool_length
                 lap_data['speed'] = self.pool_length / lap_data['duration']
+
+            total_distance += lap_data['distance']
 
             # Start timestamp of lap
             if not swim_data:
@@ -545,17 +718,52 @@ class HiActivity:
 
             swim_data.append(lap_data)
 
+        # Update activity distance
+        self.distance = total_distance
+
+        return swim_data
+
+    def _get_open_water_swim_data(self) -> list:
+        """" Calculates the real swim (lap) data based on the raw parsed open water swim data"""
+        logging.info('Calculating swim data for activity %s', self.activity_id)
+
+        swim_data = []
+
+        # Sort the data dictionary by timestamp
+        self.data_dict = collections.OrderedDict(sorted(self.data_dict.items()))
+
+        total_distance = 0
+
+        # The generated segment list based on the SWOLF data is unusable for open water swim activities.
+        # Reset it and recalculate segments and distances based on the GPS location data.
+        self._reset_segments()
+        self._calc_segments_and_distances()
+
+        # Create 1 large lap
+        lap_data = {}
+        lap_data['lap'] = 1
+        lap_data['start'] = self.start
+        lap_data['stop'] = self.stop
+        lap_data['duration'] = (self.stop - self.start).seconds
+        lap_data['distance'] = self.distance
+        swim_data.append(lap_data)
+
         return swim_data
 
     def __repr__(self):
-        to_string = self.__class__.__name__ + ' : ' + self.activity_id + ' type ' + self.activity_type
+        to_string = self.__class__.__name__ + \
+                    '\nID       : ' + self.activity_id + \
+                    '\nType     : ' + self._activity_type + \
+                    '\nDate     : ' + dts.strftime(self.start, "%Y-%m-%d") + ' (YYYY-MM-DD)' + \
+                    '\nDuration : ' + str(self.stop - self.start) + ' (H:MM:SS)' \
+                                                                    '\nDistance : ' + str(self.distance) + 'm'
         return to_string
 
 
 class HiTrackFile:
     """The HiTrackFile class represents a single HiTrack file. It contains all file handling and parsing methods."""
 
-    def __init__(self, hitrack_filename: str):
+    def __init__(self, hitrack_filename: str, activity_type: str = HiActivity.TYPE_UNKNOWN):
         # Validate the file parameter and (try to) open the file for reading
         if not hitrack_filename:
             logging.error('Parameter HiTrack filename is missing')
@@ -567,6 +775,7 @@ class HiTrackFile:
             raise Exception('Error opening HiTrack file <%s>', hitrack_filename)
 
         self.activity = None
+        self.activity_type = activity_type
 
         # Try to parse activity start and stop datetime from the filename.
         # Original HiTrack filename is: HiTrack_<12 digit start datetime><12 digit stop datetime><5 digit unknown>
@@ -592,8 +801,9 @@ class HiTrackFile:
 
         logging.info('Parsing file <%s>', self.hitrack_file.name)
 
-        self.activity = HiActivity(
-            os.path.basename(self.hitrack_file.name))  # Create a new activity object for the file
+        # Create a new activity object for the file
+        self.activity = HiActivity(os.path.basename(self.hitrack_file.name), self.activity_type)
+
         data_list = []
         line_number = 0
         line = ''
@@ -603,7 +813,7 @@ class HiTrackFile:
             for line_number, line in enumerate(csv_reader, start=1):
                 data_list.clear()
                 if line[0] == 'tp=lbs':  # Location line format: tp=lbs;k=_;lat=_;lon=_;alt=_;t=_
-                    for data_index in [5, 2, 3]:  # Parse parameters t, lat, long parameters (alt not parsed)
+                    for data_index in [5, 2, 3]:  # Parse parameters t, lat, lon parameters (alt not parsed)
                         # data_list.append(line[data_index].split('=')[1])   # Parse values after the '=' character
                         data_list.append(line[data_index].split('='))  # Parse key value pairs
                     self.activity.add_location_data(data_list)
@@ -722,33 +932,133 @@ class HiTarBall:
         self._close_tarball()
 
 
+class HiJson:
+    def __init__(self, json_filename: str, output_dir: str = OUTPUT_DIR):
+        # Validate the tarball file parameter
+        if not json_filename:
+            logging.error('Parameter for JSON filename is missing')
+
+        try:
+            self.json_file = open(json_filename, 'r')
+        except Exception as e:
+            logging.error('Error opening JSON file <%s>\n%s', json_filename, e)
+            raise Exception('Error opening JSON file <%s>', json_filename)
+
+        self.output_dir = output_dir
+        # If output directory doesn't exist, make it.
+        if not os.path.exists(self.output_dir):
+            os.makedirs(self.output_dir)
+
+        self.hi_activity_list = []
+
+    def parse(self, from_date: dts = None) -> list:
+        try:
+            # Look for HiTrack information in JSON file
+
+            # The JSON file from Huawei contains invalid formatting in the 'partTimeMap' data (missing double quotes
+            # for the keys). For now, remove the invalid parts using a regular expression.
+            json_string = self.json_file.read()
+
+            json_string = re.sub('\"partTimeMap\"\:{(.*?)}\,', '', json_string)
+
+            data = json.loads(json_string)
+
+            # JSON data structure
+            # data {list}
+            #   00 {dict}
+            #     motionPathData {list}
+            #       0 {dict)
+            #         sportType {int}
+            #         attribute {str} 'HW_EXT_TRACK_DETAIL@is<HiTrack File Data>&&HW_EXT_TRACK_SIMPLIFY@is<Other Data>
+            #     recordDay {int} 'YYYYMMDD'
+            for n, activity_dict in enumerate(data):
+                activity_date = dts.strptime(str(activity_dict['recordDay']), "%Y%m%d")
+                if activity_date >= from_date:
+                    logging.info('Found activity in JSON at index %d to parse from %s (YYY-MM-DD)',
+                                 n, activity_date.isoformat())
+                    # Create a HiTrack file from the HiTrack data
+                    motion_path_data = activity_dict['motionPathData'][0]
+                    hitrack_data = motion_path_data['attribute']
+                    # Strip prefix and suffix from raw HiTrack data
+                    hitrack_data = re.sub('HW_EXT_TRACK_DETAIL\@is', '', hitrack_data)
+                    hitrack_data = re.sub('\&\&HW_EXT_TRACK_SIMPLIFY\@is(.*?)', '', hitrack_data)
+
+                    # Save HiTrack data to HiTrack file
+                    hitrack_filename = "%s/HiTrack_%s_%d" % (self.output_dir, dts.strftime(activity_date, '%Y%m%d'), n)
+                    logging.info('Saving activity at index %d from %s to HiTrack file %s for parsing',
+                                 n, activity_date, hitrack_filename)
+                    try:
+                        hitrack_file = open(hitrack_filename, "w+")
+                        hitrack_file.write(hitrack_data)
+                    except Exception as e:
+                        logging.error('Error saving activity at index %d from %s to HiTrack file for parsing.\n%s',
+                                      n, activity_date, e)
+                    finally:
+                        try:
+                            if hitrack_file:
+                                hitrack_file.close()
+                        except Exception as e:
+                            logging.error('Error closing HiTrack file <%s>\n', hitrack_filename, e)
+
+                    # Parse the HiTrack file
+                    hitrack_file = HiTrackFile(hitrack_filename)
+                    hi_activity = hitrack_file.parse()
+                    self.hi_activity_list.append(hi_activity)
+                else:
+                    logging.info('Skipped parsing activity at index %d being an activity from %s before %s (YYYYMMDD).',
+                        n, activity_date.isoformat(), from_date.isoformat())
+
+            return self.hi_activity_list
+        except Exception as e:
+            logging.error('Error parsing JSON file <%s>\n%s', self.json_file.name, e)
+            raise Exception('Error parsing JSON file <%s>', self.json_file.name)
+
+    def _close_json(self):
+        try:
+            if self.json_file and not self.json_file.closed:
+                self.json_file.close()
+                logging.debug('JSON file <%s> closed', self.json_file.name)
+        except Exception as e:
+            logging.error('Error closing JSON file <%s>\n', self.json_file.name, e)
+
+    def __del__(self):
+        self._close_json()
+
+
 class TcxActivity:
     # Strava accepts following sports: walking, running, biking, swimming.
     # Note: TCX XSD only accepts Running, Biking, Other
     # TODO According to Strava documentation (https://developers.strava.com/docs/uploads/), Strava uses a custom set of sport types? These don't seem to work for the manual uplaod action? To be checked if thsi works with API in future functionality. If so, the XSD schema in the _validate_xml() function needs to be customized too.
     _SPORT_WALKING = 'Running'  # TODO Strava 'walking'
     _SPORT_RUNNING = 'Running'  # TODO Strava 'running'
-    _SPORT_BIKING = 'Biking'    # TODO Strava 'biking'
-    _SPORT_SWIMMING = 'Other'   # TODO Strava 'swimming'
+    _SPORT_BIKING = 'Biking'  # TODO Strava 'biking'
+    _SPORT_SWIMMING = 'Other'  # TODO Strava 'swimming'
     _SPORT_OTHER = 'Other'
 
     _SPORT_TYPES = [(HiActivity.TYPE_WALK, _SPORT_WALKING),
                     (HiActivity.TYPE_RUN, _SPORT_RUNNING),
                     (HiActivity.TYPE_CYCLE, _SPORT_BIKING),
-                    (HiActivity.TYPE_SWIM, _SPORT_SWIMMING),
+                    (HiActivity.TYPE_POOL_SWIM, _SPORT_SWIMMING),
+                    (HiActivity.TYPE_OPEN_WATER_SWIM, _SPORT_SWIMMING),
                     (HiActivity.TYPE_UNKNOWN, _SPORT_OTHER)]
 
-    def __init__(self, hi_activity: HiActivity, tcx_xml_schema: xmlschema = None, save_dir: str = OUTPUT_DIR):
+    def __init__(self, hi_activity: HiActivity, tcx_xml_schema=None, save_dir: str = OUTPUT_DIR,
+                 filename_prefix: str = None):
         if not hi_activity:
             logging.error("No valid HiTrack activity specified to construct TCX activity.")
             raise Exception("No valid HiTrack activity specified to construct TCX activity.")
         self.hi_activity = hi_activity
         self.training_center_database = None
-        self.tcx_xml_schema: xmlschema = tcx_xml_schema
+        if tcx_xml_schema:
+            self.tcx_xml_schema: xmlschema = tcx_xml_schema
+        else:
+            self.tcx_xml_schema = None
         self.save_dir = save_dir
+        self.filename_prefix = filename_prefix
 
     def generate_xml(self) -> xml_et.Element:
         """"Generates the TCX XML content."""
+        logging.debug('Generating TCX XML data for activity %s', self.hi_activity.activity_id)
         try:
             # * TrainingCenterDatabase
             training_center_database = xml_et.Element('TrainingCenterDatabase')
@@ -764,10 +1074,11 @@ class TcxActivity:
 
             # *** Activity
             el_activity = xml_et.SubElement(el_activities, 'Activity')
+            sport = ''
             try:
-                sport = [item[1] for item in self._SPORT_TYPES if item[0] == self.hi_activity.activity_type][0]
+                sport = [item[1] for item in self._SPORT_TYPES if item[0] == self.hi_activity.get_activity_type()][0]
             finally:
-                if not sport:
+                if sport == '':
                     logging.warning('Activity <%s> has an undetermined/unknown sport type.',
                                     self.hi_activity.activity_id)
                     sport = self._SPORT_OTHER
@@ -779,12 +1090,13 @@ class TcxActivity:
             el_id.text = self.hi_activity.start.isoformat('T', 'seconds') + '.000Z'
 
             # Generate the activity xml content based on the type of activity
-            if self.hi_activity.activity_type in [HiActivity.TYPE_WALK,
-                                                HiActivity.TYPE_RUN,
-                                                HiActivity.TYPE_CYCLE,
-                                                HiActivity.TYPE_UNKNOWN]:
+            if self.hi_activity.get_activity_type() in [HiActivity.TYPE_WALK,
+                                                        HiActivity.TYPE_RUN,
+                                                        HiActivity.TYPE_CYCLE,
+                                                        HiActivity.TYPE_UNKNOWN]:
                 self._generate_walk_run_cycle_xml_data(el_activity)
-            elif self.hi_activity.activity_type == HiActivity.TYPE_SWIM:
+            elif self.hi_activity.get_activity_type() in [HiActivity.TYPE_POOL_SWIM,
+                                                          HiActivity.TYPE_OPEN_WATER_SWIM]:
                 self._generate_swim_xml_data(el_activity)
 
             # *** Creator
@@ -836,7 +1148,7 @@ class TcxActivity:
 
     def _generate_walk_run_cycle_xml_data(self, el_activity):
         # **** Lap (a lap in the TCX XML corresponds to a segment in the HiActivity)
-        for n, segment in enumerate(self.hi_activity.segment_list):
+        for n, segment in enumerate(self.hi_activity.get_segments()):
             el_lap = xml_et.SubElement(el_activity, 'Lap')
             el_lap.set('StartTime', segment['start'].isoformat('T', 'seconds') + '.000Z')
             el_total_time_seconds = xml_et.SubElement(el_lap, 'TotalTimeSeconds')
@@ -880,7 +1192,7 @@ class TcxActivity:
                     value.text = str(data['hr'])
 
                 if 's-r' in data:  # Step frequency (for walking and running)
-                    if self.hi_activity.activity_type in (HiActivity.TYPE_WALK, HiActivity.TYPE_RUN):
+                    if self.hi_activity.get_activity_type() in (HiActivity.TYPE_WALK, HiActivity.TYPE_RUN):
                         el_extensions = xml_et.SubElement(el_trackpoint, 'Extensions')
                         el_tpx = xml_et.SubElement(el_extensions, 'TPX')
                         el_tpx.set('xmlns', 'http://www.garmin.com/xmlschemas/ActivityExtension/v2')
@@ -891,7 +1203,8 @@ class TcxActivity:
                         el_run_cadence.text = str(int(data['s-r'] / 2))
 
     def _generate_swim_xml_data(self, el_activity):
-        """ Generates the TCX XML content for POOL swimming activities """
+        """ Generates the TCX XML content for swimming activities """
+
         cumulative_distance = 0
         for n, lap in enumerate(self.hi_activity.get_swim_data()):
             el_lap = xml_et.SubElement(el_activity, 'Lap')
@@ -915,6 +1228,19 @@ class TcxActivity:
             el_distance_meters = xml_et.SubElement(el_trackpoint, 'DistanceMeters')
             el_distance_meters.text = str(cumulative_distance)
 
+            # Add location records during lap (if any, only for open water swimming)
+            for i, lap_detail_data in enumerate(self.hi_activity.get_segment_data(self.hi_activity.get_segments()[n])):
+                if 'lat' in lap_detail_data:
+                    el_trackpoint = xml_et.SubElement(el_track, 'Trackpoint')
+                    el_time = xml_et.SubElement(el_trackpoint, 'Time')
+                    el_time.text = lap_detail_data['t'].isoformat('T', 'seconds') + '.000Z'
+
+                    el_position = xml_et.SubElement(el_trackpoint, 'Position')
+                    el_latitude_degrees = xml_et.SubElement(el_position, 'LatitudeDegrees')
+                    el_latitude_degrees.text = str(lap_detail_data['lat'])
+                    el_longitude_degrees = xml_et.SubElement(el_position, 'LongitudeDegrees')
+                    el_longitude_degrees.text = str(lap_detail_data['lon'])
+
             # Add second TrackPoint for stop of lap
             cumulative_distance += lap['distance']
 
@@ -932,7 +1258,10 @@ class TcxActivity:
 
         # Format and save the TCX XML file
         if not tcx_filename:
-            tcx_filename = self.save_dir + '/' + self.hi_activity.activity_id + '.tcx'
+            tcx_filename = self.save_dir + '/'
+            if self.filename_prefix:
+                tcx_filename += dts.strftime(self.hi_activity.start, self.filename_prefix)
+            tcx_filename += self.hi_activity.activity_id + '.tcx'
         try:
             logging.info('Saving TCX file <%s> for HiTrack activity <%s>', tcx_filename, self.hi_activity.activity_id)
             self._format_xml(self.training_center_database)
@@ -988,7 +1317,7 @@ class TcxActivity:
             raise Exception('Error validating TCX XML for activity <%s>\n%s', self.hi_activity.activity_id, e)
 
 
-def _init_tcx_xml_schema() -> xmlschema:
+def _init_tcx_xml_schema():
     """ Retrieves the TCX XML XSD schema for validation of files from the intenet """
 
     _TCX_XSD_FILE = 'TrainingCenterDatabasev2.xsd'
@@ -1045,14 +1374,33 @@ def _init_argument_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser()
     file_group = parser.add_argument_group('FILE options')
     file_group.add_argument('-f', '--file', help='The filename of a single HiTrack file to convert.')
-    file_group.add_argument('-s', '--sport', help='Force sport in the converted TCX XML file.', type=str,
+    file_group.add_argument('-s', '--sport', help='Force sport for the conversion. Sport will be auto-detected when \
+                                                   this option is not used.', type=str,
                             choices=[HiActivity.TYPE_WALK,
                                      HiActivity.TYPE_RUN,
                                      HiActivity.TYPE_CYCLE,
-                                     HiActivity.TYPE_SWIM])
+                                     HiActivity.TYPE_POOL_SWIM,
+                                     HiActivity.TYPE_OPEN_WATER_SWIM])
+
+    json_group = parser.add_argument_group('JSON options')
+    json_group.add_argument('-j', '--json', help='The filename of a Huawei Cloud JSON file containing the motion path \
+                                                  detail data.')
+
     tar_group = parser.add_argument_group('TAR options')
     tar_group.add_argument('-t', '--tar', help='The filename of an (unencrypted) tarball with HiTrack files to \
                                                 convert.')
+
+    date_group = parser.add_argument_group('DATE options')
+    def from_date_type(arg):
+        try:
+            return dts.strptime(arg, "%Y-%m-%d")
+        except ValueError:
+            msg = "Invalid date or date format (expected YYYY-MM-DD): '{0}'.".format(arg)
+            raise argparse.ArgumentTypeError(msg)
+    date_group.add_argument('--from_date', help='Applicable to --json and --tar options only. Only convert HiTrack \
+                                                 information from the JSON file or from HiTrack files in the tarball \
+                                                 if the activity started on FROM_DATE or later. Format YYYY-MM-DD',
+                            type=from_date_type)
 
     swim_group = parser.add_argument_group('SWIM options')
     def pool_length_type(arg):
@@ -1062,27 +1410,26 @@ def _init_argument_parser() -> argparse.ArgumentParser:
         if l == 1013:
             print('Congrats on your sim in the Alfonso del Mar.')
         return l
+
     swim_group.add_argument('--pool_length', help='The pool length in meters to use for swimming activities. \
                                                   If the option is not set, the estimated pool length derived from \
                                                   the available speed data in the HiTrack file will be used. Note \
                                                   that the available speed data has a minimum resolution of 1 dm/s.',
                             type=pool_length_type)
 
-    def from_date_type(arg):
-        try:
-            return dts.strptime(arg, "%Y-%m-%d")
-        except ValueError:
-            msg = "Invalid date or date format (expected YYYY-MM-DD): '{0}'.".format(arg)
-            raise argparse.ArgumentTypeError(msg)
-    tar_group.add_argument('--from_date', help='Only convert HiTrack files in the tarball if the activity started on \
-                                                FROM_DATE or later. Format YYYY-MM-DD',
-                           type=from_date_type)
-    parser.add_argument('--output_dir', help='The path to the directory to store the output files. The default \
+    output_group = parser.add_argument_group('OUTPUT options')
+    output_group.add_argument('--output_dir', help='The path to the directory to store the output files. The default \
                                              directory is ' + OUTPUT_DIR + '.',
-                        default=OUTPUT_DIR)
-    parser.add_argument('--validate_xml', help='Validate generated TCX XML file(s). NOTE: requires xmlschema library \
+                              default=OUTPUT_DIR)
+
+    output_group.add_argument('--output_file_prefix',
+                              help='Adds the strftime representation of this argument as a prefix to the generated \
+                              TCX XML file(s). E.g. use %%Y-%%m-%%d- to add human readable year-month-day information \
+                              in the name of the generated TCX file.',
+                              type=str)
+    output_group.add_argument('--validate_xml', help='Validate generated TCX XML file(s). NOTE: requires xmlschema library \
                                                 and an internet connection to retrieve the TCX XSD.',
-                        action='store_true')
+                              action='store_true')
     parser.add_argument('--log_level', help='Set the logging level.', type=str, choices=['INFO', 'DEBUG'],
                         default='INFO')
 
@@ -1103,14 +1450,16 @@ def main():
     tcx_xml_schema = None if not args.validate_xml else _init_tcx_xml_schema()
 
     if args.file:
-        hi_file = HiTrackFile(args.file)
-        hi_activity = hi_file.parse()
         if args.sport:
-            hi_activity.set_activity_type(args.sport)
-        if args.pool_length and hi_activity.activity_type == HiActivity.TYPE_SWIM:
+            hi_file = HiTrackFile(args.file, args.sport)
+        else:
+            hi_file = HiTrackFile(args.file)
+        hi_activity = hi_file.parse()
+        if args.pool_length:
             hi_activity.set_pool_length(args.pool_length)
-        tcx_activity = TcxActivity(hi_activity, tcx_xml_schema, args.output_dir)
+        tcx_activity = TcxActivity(hi_activity, tcx_xml_schema, args.output_dir, args.output_file_prefix)
         tcx_activity.save()
+        logging.info('Converted %s', hi_activity)
     elif args.tar:
         hi_tarball = HiTarBall(args.tar)
         if args.from_date:
@@ -1118,12 +1467,24 @@ def main():
         else:
             hi_activity_list = hi_tarball.parse()
         for hi_activity in hi_activity_list:
-            if args.pool_length and hi_activity.activity_type == HiActivity.TYPE_SWIM:
+            if args.pool_length:
                 hi_activity.set_pool_length(args.pool_length)
-            tcx_activity = TcxActivity(hi_activity, tcx_xml_schema, args.output_dir)
+            tcx_activity = TcxActivity(hi_activity, tcx_xml_schema, args.output_dir, args.output_file_prefix)
             tcx_activity.save()
+            logging.info('Converted %s', hi_activity)
+    elif args.json:
+        hi_json = HiJson(args.json, args.output_dir)
+        if args.from_date:
+            hi_activity_list = hi_json.parse(args.from_date)
+        else:
+            hi_activity_list = hi_json.parse()
+        for hi_activity in hi_activity_list:
+            if args.pool_length:
+                hi_activity.set_pool_length(args.pool_length)
+            tcx_activity = TcxActivity(hi_activity, tcx_xml_schema, args.output_dir, args.output_file_prefix)
+            tcx_activity.save()
+            logging.info('Converted %s', hi_activity)
 
 
 if __name__ == '__main__':
     main()
-
