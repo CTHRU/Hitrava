@@ -136,6 +136,7 @@ later will be extracted and converted to the ./output directory.
     NOTE: when using the --validate_xml option, TCX XML complaint sport types will be used as in previous versions.
     </p>
 </li>
+
 #### Solved issues
 <li>
     <p>
