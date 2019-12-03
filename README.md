@@ -142,6 +142,8 @@ later will be extracted and converted to the ./output directory.
     <p>
     Script terminated with error when using --tar and --json options without --from_date option.
     </p>
+</li>
+<li>
     <p>
     Conversion failed with a division by zero error when there is only 1 valid step frequency record. 
     </p>
