@@ -127,13 +127,39 @@ later will be extracted and converted to the ./output directory.
  
 ## Release Notes
 
+### Version 3.0 Build 1912.1901
+#### New features and changes
+<li>
+    <p>
+    JSON conversion now uses the following detailed information available in the JSON data:<br>
+    - Sport types for walking and cycling activities are automatically set (instead of being detected based on the Hitrack
+    data.<br>
+    - All date and time information in the converted TCX files includes the time zone information of the
+    local time when the activity took place.<br>     
+    </p>
+</li>
+
+#### Solved issues
+<li>
+    <p>
+    Conversion failed if HiTrack data started with a GPS loss / pauze record.
+    </p>
+</li>
+
+#### Known Limitations
+<li>
+    <p>
+    We (currently) don't have the JSON sport type values for activity types other than walking or cycling. 
+    </p>
+</li>
+
 ### Version 3.0 Build 1912.0301
 #### New features and changes
 <li>
     <p>
     Generated TCX files now contain the Strava custom sport type when XML validation is NOT being used.
     Strava recognizes the correct sport type on import without the need to manually adjust it after import.
-    NOTE: when using the --validate_xml option, TCX XML complaint sport types will be used as in previous versions.
+    NOTE: when using the --validate_xml option, TCX XML compliant sport types will be used as in previous versions.
     </p>
 </li>
 
