@@ -19,6 +19,7 @@ import urllib.request as url_req
 import xml.etree.cElementTree as xml_et
 from datetime import datetime as dts
 from datetime import timedelta as dts_delta
+from datetime import timezone as tz
 
 # External libraries that require installation
 from typing import List, Optional
@@ -35,7 +36,7 @@ PROGRAM_NAME = 'HiToStrava'
 PROGRAM_MAJOR_VERSION = '3'
 PROGRAM_MINOR_VERSION = '0'
 PROGRAM_MAJOR_BUILD = '1912'
-PROGRAM_MINOR_BUILD = '0301'
+PROGRAM_MINOR_BUILD = '1901'
 
 OUTPUT_DIR = './output'
 GPS_TIMEOUT = dts_delta(seconds=10)
@@ -67,9 +68,16 @@ class HiActivity:
 
         self.pool_length = -1
 
+        # All date and timestamp variables are stored as time zone unaware because there is no time zone information
+        # available in the raw HiTrack files. However, time zone information is available from the JSON data and can be
+        # stored as an attribute of the HiActivity (see below). Please take care to properly format any display/output
+        # dates and times using this time zone information.
+        # TODO Revise formatting of all displayed / outputted date and time information to take time zone into account
         self.start = None
         self.stop = None
+        self.time_zone = None
         self.distance = -1
+        self.calories = -1
 
         # Create an empty segment and segment list
         self._current_segment = None
@@ -123,7 +131,8 @@ class HiActivity:
     def _add_segment_stop(self, segment_stop: datetime, segment_distance: int = -1):
         logging.debug('Adding segment stop at %s', segment_stop)
         if not self._current_segment:
-            logging.error('Request to stop segment at %s when there is no current segment active', segment_stop)
+            logging.error('Request to stop segment at %s when there is no current segment active',
+                          segment_stop)
             return
 
         # Set stop of current segment, add it to the segment list and clear the current segment
@@ -168,7 +177,7 @@ class HiActivity:
                             data)
 
         if location_data['t'] == 0 and location_data['lat'] == 90 and location_data['lon'] == -80:
-            # Pause/stop record without a valid epoch timestamp. Set it to the last timestamp recorded.
+            # Pause/stop record without a valid epoch timestamp. Set it to the last timestamp recorded
             location_data['t'] = self.stop
         else:
             # Regular location record or pause/stop record with valid epoch timestamp.
@@ -177,8 +186,9 @@ class HiActivity:
 
             self.activity_params['gps'] = True
 
-        # Add location data
-        self._add_data_detail(location_data)
+        # Only add location data with a valid timestamp (ignore GPS loss or pause records at start of the location data)
+        if location_data['t']:
+            self._add_data_detail(location_data)
 
     def _get_last_location(self) -> Optional[dict]:
         """ Returns the last location record in the data dictionary """
@@ -750,11 +760,31 @@ class HiActivity:
 
         return swim_data
 
+    def get_tz_aware_datetime(self, naive_datetime: datetime):
+        """"All datetimes in the HiActivity are represented as UTC datetimes and are parsed as time zone unaware
+        (naive) datetime objects. This method returns the equivalent time zone aware datetime representation using the
+        time zone information of the HiTrack activity (if any). If the Hitrack activity has no time zone information,
+        UTC (GMT) time zone is assumed.
+
+        :type naive_datetime: datetime
+
+        :return
+        The (time zone) aware datetime corresponding to the naive datetime in the naive_datetime parameter
+        """
+        utc_datetime = dts.replace(naive_datetime, tzinfo=tz.utc)
+        if self.time_zone:
+            aware_datetime = utc_datetime.astimezone(self.time_zone)
+        else:
+            aware_datetime = utc_datetime
+
+        return aware_datetime
+
     def __repr__(self):
+        # TODO verify timezone (un)aware display date / time
         to_string = self.__class__.__name__ + \
                     '\nID       : ' + self.activity_id + \
                     '\nType     : ' + self._activity_type + \
-                    '\nDate     : ' + dts.strftime(self.start, "%Y-%m-%d") + ' (YYYY-MM-DD)' + \
+                    '\nDate     : ' + self.start.strftime("%Y-%m-%d") + ' (YYYY-MM-DD)' + \
                     '\nDuration : ' + str(self.stop - self.start) + ' (H:MM:SS)' \
                                                                     '\nDistance : ' + str(self.distance) + 'm'
         return to_string
@@ -898,6 +928,7 @@ class HiTarBall:
                             # Parse Hitrack file from tar ball
                             self._extract_and_parse_hitrack_file(tar_info)
                         else:
+                            # TODO verify timezone (un)aware display date / time
                             logging.info(
                                 'Skipped parsing HiTrack file <%s> being an activity from %s before %s (YYYYMMDD).',
                                 hitrack_filename, hitrack_file_date.isoformat(), from_date.isoformat())
@@ -933,6 +964,13 @@ class HiTarBall:
 
 
 class HiJson:
+    # TODO find the correct values for the unknown/undocumented JSON sport types
+    _JSON_SPORT_TYPES = [(5, HiActivity.TYPE_WALK),
+                         (-1, HiActivity.TYPE_RUN),
+                         (3, HiActivity.TYPE_CYCLE),
+                         (-2, HiActivity.TYPE_POOL_SWIM),
+                         (-3, HiActivity.TYPE_OPEN_WATER_SWIM)]
+
     def __init__(self, json_filename: str, output_dir: str = OUTPUT_DIR):
         # Validate the tarball file parameter
         if not json_filename:
@@ -977,23 +1015,38 @@ class HiJson:
             for n, activity_dict in enumerate(data):
                 activity_date = dts.strptime(str(activity_dict['recordDay']), "%Y%m%d")
                 if activity_date >= from_date:
+                    # TODO verify timezone (un)aware display date / time
                     logging.info('Found one or more activities in JSON at index %d to parse from %s (YYY-MM-DD)',
                                  n, activity_date.isoformat())
-                    for motion_path_data in activity_dict['motionPathData']:
+                    for motion_path_dict in activity_dict['motionPathData']:
                         # Create a HiTrack file from the HiTrack data
-                        hitrack_data = motion_path_data['attribute']
+                        hitrack_data = motion_path_dict['attribute']
                         # Strip prefix and suffix from raw HiTrack data
                         hitrack_data = re.sub('HW_EXT_TRACK_DETAIL\@is', '', hitrack_data)
                         hitrack_data = re.sub('\&\&HW_EXT_TRACK_SIMPLIFY\@is(.*?)', '', hitrack_data)
 
+                        # Get additional activity detail data
+                        activity_detail_data = motion_path_dict['attribute']
+                        activity_detail_data = re.sub('HW_EXT_TRACK_DETAIL\@is(.*)\&\&HW_EXT_TRACK_SIMPLIFY\@is',
+                                                      '', activity_detail_data, flags=re.DOTALL)
+                        activity_detail_dict = json.loads(activity_detail_data)
+
+                        # Get time zone
+                        time_zone_string = motion_path_dict['timeZone']
+                        time_zone_hours_offset = int(time_zone_string[:3])
+                        time_zone_minutes_offset = int(time_zone_string[3:])
+                        time_zone = tz(dts_delta(hours=time_zone_hours_offset,
+                                                 minutes=time_zone_minutes_offset))
+
                         # Get start date and time
-                        activity_start = dts.fromtimestamp(motion_path_data['startTime'] / 1000)
+                        activity_start = dts.fromtimestamp(motion_path_dict['startTime'] / 1000)
 
                         # Save HiTrack data to HiTrack file
+                        # TODO verify timezone (un)aware display date / time
                         hitrack_filename = "%s/HiTrack_%s" % \
                                            (self.output_dir,
-                                            dts.strftime(activity_start, '%Y%m%d_%H%M%S')
-                                           )
+                                            activity_start.strftime('%Y%m%d_%H%M%S')
+                                            )
                         logging.info('Saving activity at index %d from %s to HiTrack file %s for parsing',
                                      n, activity_date, hitrack_filename)
                         try:
@@ -1011,12 +1064,38 @@ class HiJson:
 
                         # Parse the HiTrack file
                         hitrack_file = HiTrackFile(hitrack_filename)
-
                         hi_activity = hitrack_file.parse()
+
+                        # Use activity attributes available in JSON data
+                        # Sport type
+                        if any(motion_path_dict['sportType'] in i for i in self._JSON_SPORT_TYPES):
+                            sport = \
+                                [item[1] for item in self._JSON_SPORT_TYPES if
+                                 item[0] == motion_path_dict['sportType']][0]
+                            hi_activity.set_activity_type(sport)
+
+                        # TODO Start date and time (in UTC)
+                        # hi_activity.start
+
+                        # Time zone - Use time zone from JSON activity data
+                        hi_activity.time_zone = time_zone
+
+                        # TODO Duration
+                        # hi_activity.duration
+
+                        # TODO Total distance
+
+                        # TODO Total calories
+
+                        # Swimming pool length
+                        if 'swim_pool_length' in activity_detail_dict['wearSportData']:
+                            hi_activity.set_pool_length(activity_detail_dict['wearSportData']['swim_pool_length'] / 100)
+
                         self.hi_activity_list.append(hi_activity)
                 else:
+                    # TODO verify timezone (un)aware display date / time
                     logging.info('Skipped parsing activity at index %d being an activity from %s before %s (YYYYMMDD).',
-                        n, activity_date.isoformat(), from_date.isoformat())
+                                 n, activity_date.isoformat(), from_date.isoformat())
 
             return self.hi_activity_list
         except Exception as e:
@@ -1038,26 +1117,21 @@ class HiJson:
 class TcxActivity:
     # Strava accepts following sports: walking, running, biking, swimming.
     # Note: TCX XSD only accepts Running, Biking, Other
-    # TODO According to Strava documentation (https://developers.strava.com/docs/uploads/), Strava uses a custom set of sport types? These don't seem to work for the manual uplaod action? To be checked if thsi works with API in future functionality. If so, the XSD schema in the _validate_xml() function needs to be customized too.
-    _SPORT_WALKING = 'Running'  # TODO Strava 'walking'
-    _SPORT_RUNNING = 'Running'  # TODO Strava 'running'
-    _SPORT_BIKING = 'Biking'  # TODO Strava 'biking'
-    _SPORT_SWIMMING = 'Other'  # TODO Strava 'swimming'
-    _SPORT_OTHER = 'Other'
+    _TCX_SPORT_TYPES = [(HiActivity.TYPE_WALK, 'Running'),
+                        (HiActivity.TYPE_RUN, 'Running'),
+                        (HiActivity.TYPE_CYCLE, 'Biking'),
+                        (HiActivity.TYPE_POOL_SWIM, 'Other'),
+                        (HiActivity.TYPE_OPEN_WATER_SWIM, 'Other'),
+                        (HiActivity.TYPE_UNKNOWN, 'Other')]
 
-    _TCX_SPORT_TYPES = [(HiActivity.TYPE_WALK, _SPORT_WALKING),
-                        (HiActivity.TYPE_RUN, _SPORT_RUNNING),
-                        (HiActivity.TYPE_CYCLE, _SPORT_BIKING),
-                        (HiActivity.TYPE_POOL_SWIM, _SPORT_SWIMMING),
-                        (HiActivity.TYPE_OPEN_WATER_SWIM, _SPORT_SWIMMING),
-                        (HiActivity.TYPE_UNKNOWN, _SPORT_OTHER)]
-
+    # TODO Customize XSD schema in the _validate_xml() function to validate Strava sport types.
+    # TODO Upload activities directly into Strava using Strava API
     _STRAVA_SPORT_TYPES = [(HiActivity.TYPE_WALK, 'walking'),
                            (HiActivity.TYPE_RUN, 'running'),
                            (HiActivity.TYPE_CYCLE, 'biking'),
                            (HiActivity.TYPE_POOL_SWIM, 'swimming'),
                            (HiActivity.TYPE_OPEN_WATER_SWIM, 'swimming'),
-                           (HiActivity.TYPE_UNKNOWN, _SPORT_OTHER)]
+                           (HiActivity.TYPE_UNKNOWN, 'Other')]
 
     def __init__(self, hi_activity: HiActivity, tcx_xml_schema=None, save_dir: str = OUTPUT_DIR,
                  filename_prefix: str = None):
@@ -1095,10 +1169,14 @@ class TcxActivity:
             try:
                 if self.tcx_xml_schema:
                     # Use TCX XML compliant sport types when XML validation is used
-                    sport = [item[1] for item in self._TCX_SPORT_TYPES if item[0] == self.hi_activity.get_activity_type()][0]
+                    sport = \
+                        [item[1] for item in self._TCX_SPORT_TYPES if item[0] == self.hi_activity.get_activity_type()][
+                            0]
                 else:
                     # Use Strava sport types when XML validation is NOT used
-                    sport = [item[1] for item in self._STRAVA_SPORT_TYPES if item[0] == self.hi_activity.get_activity_type()][0]
+                    sport = \
+                        [item[1] for item in self._STRAVA_SPORT_TYPES if
+                         item[0] == self.hi_activity.get_activity_type()][0]
             finally:
                 if sport == '':
                     logging.warning('Activity <%s> has an undetermined/unknown sport type.',
@@ -1109,8 +1187,7 @@ class TcxActivity:
             # Strange enough, according to TCX XSD the Id should be a date.
             # TODO verify if this is the case for Strava too or if something more meaningful can be passed.
             el_id = xml_et.SubElement(el_activity, 'Id')
-            el_id.text = self.hi_activity.start.isoformat('T', 'seconds') + '.000Z'
-
+            el_id.text = self.hi_activity.get_tz_aware_datetime(self.hi_activity.start).isoformat('T', 'seconds')
             # Generate the activity xml content based on the type of activity
             if self.hi_activity.get_activity_type() in [HiActivity.TYPE_WALK,
                                                         HiActivity.TYPE_RUN,
@@ -1122,7 +1199,7 @@ class TcxActivity:
                 self._generate_swim_xml_data(el_activity)
 
             # *** Creator
-            # TODO: verify if information is available in tar file
+            # TODO: verify if information is available in JSON file
             el_creator = xml_et.SubElement(el_activity, 'Creator')
             el_creator.set('xsi:type', 'Device_t')
             el_name = xml_et.SubElement(el_creator, 'Name')
@@ -1172,7 +1249,7 @@ class TcxActivity:
         # **** Lap (a lap in the TCX XML corresponds to a segment in the HiActivity)
         for n, segment in enumerate(self.hi_activity.get_segments()):
             el_lap = xml_et.SubElement(el_activity, 'Lap')
-            el_lap.set('StartTime', segment['start'].isoformat('T', 'seconds') + '.000Z')
+            el_lap.set('StartTime', self.hi_activity.get_tz_aware_datetime(segment['start']).isoformat('T', 'seconds'))
             el_total_time_seconds = xml_et.SubElement(el_lap, 'TotalTimeSeconds')
             el_total_time_seconds.text = str(segment['duration'])
             el_distance_meters = xml_et.SubElement(el_lap, 'DistanceMeters')
@@ -1190,7 +1267,7 @@ class TcxActivity:
             for data in segment_data:
                 el_trackpoint = xml_et.SubElement(el_track, 'Trackpoint')
                 el_time = xml_et.SubElement(el_trackpoint, 'Time')
-                el_time.text = data['t'].isoformat('T', 'seconds') + '.000Z'
+                el_time.text = self.hi_activity.get_tz_aware_datetime(data['t']).isoformat('T', 'seconds')
 
                 if 'lat' in data:
                     el_position = xml_et.SubElement(el_trackpoint, 'Position')
@@ -1230,7 +1307,7 @@ class TcxActivity:
         cumulative_distance = 0
         for n, lap in enumerate(self.hi_activity.get_swim_data()):
             el_lap = xml_et.SubElement(el_activity, 'Lap')
-            el_lap.set('StartTime', lap['start'].isoformat('T', 'seconds') + '.000Z')
+            el_lap.set('StartTime', self.hi_activity.get_tz_aware_datetime(lap['start']).isoformat('T', 'seconds'))
             el_total_time_seconds = xml_et.SubElement(el_lap, 'TotalTimeSeconds')
             el_total_time_seconds.text = str(lap['duration'])
             el_distance_meters = xml_et.SubElement(el_lap, 'DistanceMeters')
@@ -1246,7 +1323,7 @@ class TcxActivity:
             # Add first TrackPoint for start of lap
             el_trackpoint = xml_et.SubElement(el_track, 'Trackpoint')
             el_time = xml_et.SubElement(el_trackpoint, 'Time')
-            el_time.text = lap['start'].isoformat('T', 'seconds') + '.000Z'
+            el_time.text = self.hi_activity.get_tz_aware_datetime(lap['start']).isoformat('T', 'seconds')
             el_distance_meters = xml_et.SubElement(el_trackpoint, 'DistanceMeters')
             el_distance_meters.text = str(cumulative_distance)
 
@@ -1255,7 +1332,7 @@ class TcxActivity:
                 if 'lat' in lap_detail_data:
                     el_trackpoint = xml_et.SubElement(el_track, 'Trackpoint')
                     el_time = xml_et.SubElement(el_trackpoint, 'Time')
-                    el_time.text = lap_detail_data['t'].isoformat('T', 'seconds') + '.000Z'
+                    el_time.text = self.hi_activity.get_tz_aware_datetime(lap_detail_data['t']).isoformat('T', 'seconds')
 
                     el_position = xml_et.SubElement(el_trackpoint, 'Position')
                     el_latitude_degrees = xml_et.SubElement(el_position, 'LatitudeDegrees')
@@ -1268,7 +1345,7 @@ class TcxActivity:
 
             el_trackpoint = xml_et.SubElement(el_track, 'Trackpoint')
             el_time = xml_et.SubElement(el_trackpoint, 'Time')
-            el_time.text = lap['stop'].isoformat('T', 'seconds') + '.000Z'
+            el_time.text = self.hi_activity.get_tz_aware_datetime(lap['stop']).isoformat('T', 'seconds')
             el_distance_meters = xml_et.SubElement(el_trackpoint, 'DistanceMeters')
             el_distance_meters.text = str(cumulative_distance)
         return
@@ -1282,6 +1359,7 @@ class TcxActivity:
         if not tcx_filename:
             tcx_filename = self.save_dir + '/'
             if self.filename_prefix:
+                # TODO verify timezone (un)aware display date / time
                 tcx_filename += dts.strftime(self.hi_activity.start, self.filename_prefix)
             tcx_filename += self.hi_activity.activity_id + '.tcx'
         try:
@@ -1413,12 +1491,14 @@ def _init_argument_parser() -> argparse.ArgumentParser:
                                                 convert.')
 
     date_group = parser.add_argument_group('DATE options')
+
     def from_date_type(arg):
         try:
             return dts.strptime(arg, '%Y-%m-%d')
         except ValueError:
             msg = "Invalid date or date format (expected YYYY-MM-DD): '{0}'.".format(arg)
             raise argparse.ArgumentTypeError(msg)
+
     date_group.add_argument('--from_date', help='Applicable to --json and --tar options only. Only convert HiTrack \
                                                  information from the JSON file or from HiTrack files in the tarball \
                                                  if the activity started on FROM_DATE or later. Format YYYY-MM-DD',
@@ -1426,6 +1506,7 @@ def _init_argument_parser() -> argparse.ArgumentParser:
                             default='1970-01-01')
 
     swim_group = parser.add_argument_group('SWIM options')
+
     def pool_length_type(arg):
         l = int(arg)
         if l < 1:
