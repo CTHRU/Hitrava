@@ -127,6 +127,15 @@ later will be extracted and converted to the ./output directory.
  
 ## Release Notes
 
+### Version 3.0 Build 1912.1902
+#### New features and changes
+<li>
+    <p>
+    Refactored logging to use a program specific logger instead of the root logger for more reliable logging.
+    Reformatted some logging messages to have clearer logging of dates / times.
+    </p>
+</li>
+
 ### Version 3.0 Build 1912.1901
 #### New features and changes
 <li>
