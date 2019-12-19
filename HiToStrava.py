@@ -36,7 +36,7 @@ PROGRAM_NAME = 'HiToStrava'
 PROGRAM_MAJOR_VERSION = '3'
 PROGRAM_MINOR_VERSION = '0'
 PROGRAM_MAJOR_BUILD = '1912'
-PROGRAM_MINOR_BUILD = '1901'
+PROGRAM_MINOR_BUILD = '1902'
 
 OUTPUT_DIR = './output'
 GPS_TIMEOUT = dts_delta(seconds=10)
@@ -55,7 +55,7 @@ class HiActivity:
     _ACTIVITY_TYPE_LIST = (TYPE_WALK, TYPE_RUN, TYPE_CYCLE, TYPE_POOL_SWIM, TYPE_OPEN_WATER_SWIM)
 
     def __init__(self, activity_id: str, activity_type: str = TYPE_UNKNOWN):
-        logging.debug('New HiTrack activity to process <%s>', activity_id)
+        logging.getLogger(PROGRAM_NAME).debug('New HiTrack activity to process <%s>', activity_id)
         self.activity_id = activity_id
 
         if activity_type == self.TYPE_UNKNOWN:
@@ -97,26 +97,28 @@ class HiActivity:
 
     def set_activity_type(self, activity_type: str):
         if activity_type in self._ACTIVITY_TYPE_LIST:
-            logging.info('Setting activity type of activity %s to %s', self.activity_id, activity_type)
+            logging.getLogger(PROGRAM_NAME).info('Setting activity type of activity %s to %s',
+                                                 self.activity_id, activity_type)
             self._activity_type = activity_type
         else:
-            logging.error('Invalid activity type <%s>', activity_type)
+            logging.getLogger(PROGRAM_NAME).error('Invalid activity type <%s>', activity_type)
             raise Exception('Invalid activity type <%s>', activity_type)
 
     def set_pool_length(self, pool_length: int):
-        logging.info('Setting pool length of activity %s to %d', self.activity_id, pool_length)
+        logging.getLogger(PROGRAM_NAME).info('Setting pool length of activity %s to %d', self.activity_id, pool_length)
         self.pool_length = pool_length
         if not self.get_activity_type() == self.TYPE_POOL_SWIM:
-            logging.warning('Pool length for activity %s of type %s will not be used. It is not a pool swimming \
-                            activity', self.activity_id, self._activity_type)
+            logging.getLogger(PROGRAM_NAME).warning(
+                'Pool length for activity %s of type %s will not be used. It is not a pool swimming activity',
+                self.activity_id, self._activity_type)
 
     def _add_segment_start(self, segment_start: datetime):
         if self._current_segment:
-            logging.error('Request to start segment at %s when there is already a current segment active',
-                          segment_start)
+            logging.getLogger(PROGRAM_NAME).error(
+                'Request to start segment at %s when there is already a current segment active', segment_start)
             return
 
-        logging.debug('Adding segment start at %s', segment_start)
+        logging.getLogger(PROGRAM_NAME).debug('Adding segment start at %s', segment_start)
 
         # No current segment, create one
         self._current_segment = {'start': segment_start, 'stop': None}
@@ -129,10 +131,10 @@ class HiActivity:
             self.start = segment_start
 
     def _add_segment_stop(self, segment_stop: datetime, segment_distance: int = -1):
-        logging.debug('Adding segment stop at %s', segment_stop)
+        logging.getLogger(PROGRAM_NAME).debug('Adding segment stop at %s', segment_stop)
         if not self._current_segment:
-            logging.error('Request to stop segment at %s when there is no current segment active',
-                          segment_stop)
+            logging.getLogger(PROGRAM_NAME).error(
+                'Request to stop segment at %s when there is no current segment active', segment_stop)
             return
 
         # Set stop of current segment, add it to the segment list and clear the current segment
@@ -160,7 +162,7 @@ class HiActivity:
         - Pause and stop records are identified by tp=lbs;lat=90;lon=-80;alt=0;t=<valid epoch time value or zero>
         """
 
-        logging.debug('Adding location data %s', data)
+        logging.getLogger(PROGRAM_NAME).debug('Adding location data %s', data)
 
         try:
             # Create a dictionary from the key value pairs
@@ -170,9 +172,8 @@ class HiActivity:
             for keys in location_data:
                 location_data[keys] = float(location_data[keys])
         except Exception as e:
-            logging.error('One or more required data fields (t, lat, lon) missing or invalid in location data %s\n%s',
-                          data,
-                          e)
+            logging.getLogger(PROGRAM_NAME).error(
+                'One or more required data fields (t, lat, lon) missing or invalid in location data %s\n%s', data, e)
             raise Exception('One or more required data fields (t, lat, lon) missing or invalid in location data %s',
                             data)
 
@@ -256,7 +257,7 @@ class HiActivity:
             if abs(Lambda - LambdaPrev) < CONVERGENCE_THRESHOLD:
                 break
         else:
-            logging.error('Failed to calculate distance between %s and %s', point1, point2)
+            logging.getLogger(PROGRAM_NAME).error('Failed to calculate distance between %s and %s', point1, point2)
             raise Exception('Failed to calculate distance between %s and %s', point1, point2)
 
         uSq = cosSqAlpha * (a ** 2 - b ** 2) / (b ** 2)
@@ -273,7 +274,7 @@ class HiActivity:
         """Add heart rate data from a tp=h-r record in the HiTrack file
         """
         # Create a dictionary from the key value pairs
-        logging.debug('Adding heart rate data %s', data)
+        logging.getLogger(PROGRAM_NAME).debug('Adding heart rate data %s', data)
 
         try:
             hr_data = dict(data)
@@ -283,11 +284,10 @@ class HiActivity:
 
             # Ignore invalid heart rate data (for export)
             if hr_data['hr'] < 1 or hr_data['hr'] > 254:
-                logging.warning('Invalid heart rate data detected and ignored in data %s', data)
+                logging.getLogger(PROGRAM_NAME).warning('Invalid heart rate data detected and ignored in data %s', data)
         except Exception as e:
-            logging.error('One or more required data fields (k, v) missing or invalid in heart rate data %s\n%s',
-                          data,
-                          e)
+            logging.getLogger(PROGRAM_NAME).error(
+                'One or more required data fields (k, v) missing or invalid in heart rate data %s\n%s', data, e)
             raise Exception('One or more required data fields (k, v) missing or invalid in heart rate data %s\n%s',
                             data)
 
@@ -297,7 +297,7 @@ class HiActivity:
     def add_altitude_data(self, data: []):
         """Add altitude data from a tp=alti record in a HiTrack file"""
         # Create a dictionary from the key value pairs
-        logging.debug('Adding altitude data %s', data)
+        logging.getLogger(PROGRAM_NAME).debug('Adding altitude data %s', data)
 
         try:
             alti_data = dict(data)
@@ -307,12 +307,11 @@ class HiActivity:
 
             # Ignore invalid heart rate data (for export)
             if alti_data['alti'] < -1000 or alti_data['alti'] > 10000:
-                logging.warning('Invalid altitude data detected and ignored in data %s', data)
+                logging.getLogger(PROGRAM_NAME).warning('Invalid altitude data detected and ignored in data %s', data)
                 return
         except Exception as e:
-            logging.error('One or more required data fields (k, v) missing or invalid in altitude data %s\n%s',
-                          data,
-                          e)
+            logging.getLogger(PROGRAM_NAME).error(
+                'One or more required data fields (k, v) missing or invalid in altitude data %s\n%s', data, e)
             raise Exception('One or more required data fields (k, v) missing or invalid in altitude data %s\n%s', data)
 
         # Add altitude data
@@ -330,7 +329,8 @@ class HiActivity:
            the start of a new segments for swimming.
          """
 
-        logging.debug('Adding step frequency data or detect cycling or swimming activities %s', data)
+        logging.getLogger(PROGRAM_NAME).debug('Adding step frequency data or detect cycling or swimming activities %s',
+                                              data)
 
         try:
             # Create a dictionary from the key value pairs
@@ -339,9 +339,8 @@ class HiActivity:
             step_freq_data['t'] = _convert_hitrack_timestamp(float(step_freq_data.pop('k')))
             step_freq_data['s-r'] = int(step_freq_data.pop('v'))
         except Exception as e:
-            logging.error('One or more required data fields (k, v) missing or invalid in step frequency data %s\n%s',
-                          data,
-                          e)
+            logging.getLogger(PROGRAM_NAME).error(
+                'One or more required data fields (k, v) missing or invalid in step frequency data %s\n%s', data, e)
             raise Exception('One or more required data fields (k, v) missing or invalid in step frequency data %s\n%s',
                             data)
 
@@ -369,7 +368,7 @@ class HiActivity:
         SWOLF value = time to swim one pool length + number of strokes
         """
 
-        logging.debug('Adding SWOLF swim data %s', data)
+        logging.getLogger(PROGRAM_NAME).debug('Adding SWOLF swim data %s', data)
 
         try:
             # Create a dictionary from the key value pairs
@@ -402,11 +401,9 @@ class HiActivity:
             # Remember this SWOLF data as last parsed SWOLF data.
             self.last_swolf_data = swolf_data
         except Exception as e:
-            logging.error('One or more required data fields (k, v) missing or invalid in SWOLF data %s\n%s',
-                          data,
-                          e)
-            raise Exception('One or more required data fields (k, v) missing or invalid in SWOLF data %s\n%s',
-                            data)
+            logging.getLogger(PROGRAM_NAME).error(
+                'One or more required data fields (k, v) missing or invalid in SWOLF data %s\n%s', data, e)
+            raise Exception('One or more required data fields (k, v) missing or invalid in SWOLF data %s\n%s', data)
 
         # Add SWOLF data
         self._add_data_detail(swolf_data)
@@ -414,7 +411,7 @@ class HiActivity:
     def add_stroke_frequency_data(self, data: []):
         """ Add stroke frequency (swimming) data (in strokes/minute) from a tp=p-f record in a HiTrack file """
 
-        logging.debug('Adding stroke frequency swim data %s', data)
+        logging.getLogger(PROGRAM_NAME).debug('Adding stroke frequency swim data %s', data)
 
         try:
             # Create a dictionary from the key value pairs
@@ -425,12 +422,10 @@ class HiActivity:
             stroke_freq_data['t'] = self.start + dts_delta(seconds=int(stroke_freq_data.pop('k')) + 5)
             stroke_freq_data['p-f'] = int(stroke_freq_data.pop('v'))
         except Exception as e:
-            logging.error('One or more required data fields (k, v) missing or invalid in stroke frequency data %s\n%s',
-                          data,
-                          e)
+            logging.getLogger(PROGRAM_NAME).error(
+                'One or more required data fields (k, v) missing or invalid in stroke frequency data %s\n%s', data, e)
             raise Exception(
-                'One or more required data fields (k, v) missing or invalid in stroke frequency data %s\n%s',
-                data)
+                'One or more required data fields (k, v) missing or invalid in stroke frequency data %s\n%s', data)
 
         # Add stroke frequency data
         self._add_data_detail(stroke_freq_data)
@@ -438,7 +433,7 @@ class HiActivity:
     def add_speed_data(self, data: []):
         """ Add speed data (in decimeter/second) from a tp=rs record in a HiTrack file """
 
-        logging.debug('Adding speed data %s', data)
+        logging.getLogger(PROGRAM_NAME).debug('Adding speed data %s', data)
 
         try:
             # Create a dictionary from the key value pairs
@@ -449,11 +444,9 @@ class HiActivity:
             speed_data['t'] = self.start + dts_delta(seconds=int(speed_data.pop('k')) + 5)
             speed_data['rs'] = int(speed_data.pop('v'))
         except Exception as e:
-            logging.error('One or more required data fields (k, v) missing or invalid in speed data %s\n%s',
-                          data,
-                          e)
-            raise Exception('One or more required data fields (k, v) missing or invalid in speed data %s\n%s',
-                            data)
+            logging.getLogger(PROGRAM_NAME).error(
+                'One or more required data fields (k, v) missing or invalid in speed data %s\n%s', data, e)
+            raise Exception('One or more required data fields (k, v) missing or invalid in speed data %s\n%s', data)
 
         # Add speed data
         self._add_data_detail(speed_data)
@@ -492,7 +485,7 @@ class HiActivity:
 
     def _detect_activity_type(self) -> str:
         """"Auto-detection of the activity type. Only valid when called after all data has been parsed."""
-        logging.debug('Detecting activity type for activity %s with parameters %s',
+        logging.getLogger(PROGRAM_NAME).debug('Detecting activity type for activity %s with parameters %s',
                       self.activity_id, self.activity_params)
 
         # Filter out swimming
@@ -502,7 +495,8 @@ class HiActivity:
                 self._activity_type = self.TYPE_POOL_SWIM
             else:
                 self._activity_type = self.TYPE_OPEN_WATER_SWIM
-            logging.debug('Activity type %s detected for activity %s', self._activity_type, self.activity_id)
+            logging.getLogger(PROGRAM_NAME).debug('Activity type %s detected for activity %s',
+                                                  self._activity_type, self.activity_id)
             return self._activity_type
 
         # Walk / Run / Cycle
@@ -517,7 +511,7 @@ class HiActivity:
                 step_freq_sum += step_freq
 
             step_freq_avg = step_freq_sum / (n + 1)
-            logging.debug('Activity %s has a calculated average step frequency of %d', self.activity_id, step_freq_avg)
+            logging.getLogger(PROGRAM_NAME).debug('Activity %s has a calculated average step frequency of %d', self.activity_id, step_freq_avg)
 
             if self.activity_params['step frequency min'] == 0 and self.activity_params['step frequency max'] == 0:
                 # Specific check for cycling - all step frequency records being zero
@@ -535,7 +529,7 @@ class HiActivity:
             else:
                 self._activity_type = self.TYPE_RUN
 
-            logging.debug('Activity type %s detected using step frequency data for activity %s',
+            logging.getLogger(PROGRAM_NAME).debug('Activity type %s detected using step frequency data for activity %s',
                           self._activity_type, self.activity_id)
             return self._activity_type
         else:
@@ -543,7 +537,7 @@ class HiActivity:
             # See above, since it is assumed that walking or running activities will always have step frequency records
             # regardless whether a fitness tracking device was used or not, this must be a cycling activity.
             self._activity_type = self.TYPE_CYCLE
-            logging.debug('Activity type %s detected using step frequency data for activity %s',
+            logging.getLogger(PROGRAM_NAME).debug('Activity type %s detected using step frequency data for activity %s',
                           self._activity_type, self.activity_id)
             return self._activity_type
 
@@ -564,7 +558,7 @@ class HiActivity:
         if self._segment_list:
             return
 
-        logging.debug('Calculating segment and distance data for activity %s', self.activity_id)
+        logging.getLogger(PROGRAM_NAME).debug('Calculating segment and distance data for activity %s', self.activity_id)
 
         # Sort the data dictionary by timestamp
         self.data_dict = collections.OrderedDict(sorted(self.data_dict.items()))
@@ -585,8 +579,9 @@ class HiActivity:
                     elif 'lat' not in last_location:
                         # GPS was lost and is now back. Set distance to last known distance and use this record as the
                         # last known location.
-                        logging.debug('GPS signal available at %s in %s. Calculating distance using location data.',
-                                      data['t'], self.activity_id)
+                        logging.getLogger(PROGRAM_NAME).debug(
+                            'GPS signal available at %s in %s. Calculating distance using location data.',
+                            data['t'], self.activity_id)
                         data['distance'] = last_location['distance']
                         # If no current segment, create one
                         if not self._current_segment:
@@ -610,9 +605,9 @@ class HiActivity:
                     time_delta = data['t'] - last_location['t']
                     if 'lat' not in last_location or time_delta > GPS_TIMEOUT:
                         # GPS signal lost for more than the GPS timeout period. Calculate distance based on speed records
-                        logging.debug('No GPS signal between %s and %s in %s. Calculating distance using speed data '
-                                      '(%s dm/s)',
-                                      last_location['t'], data['t'], self.activity_id, data['rs'])
+                        logging.getLogger(PROGRAM_NAME).debug(
+                            'No GPS signal between %s and %s in %s. Calculating distance using speed data (%s dm/s)',
+                            last_location['t'], data['t'], self.activity_id, data['rs'])
                         # If no current segment, create one
                         if not self._current_segment:
                             self._add_segment_start(data['t'])
@@ -679,7 +674,7 @@ class HiActivity:
            'distance' : estimated distance based on the average speed and the lap duration.
                         Note: this is an approximate value as the minimum resolution of the raw speed data is 1 dm/s
         """
-        logging.info('Calculating swim data for activity %s', self.activity_id)
+        logging.getLogger(PROGRAM_NAME).info('Calculating swim data for activity %s', self.activity_id)
 
         swim_data = []
 
@@ -724,7 +719,7 @@ class HiActivity:
             # Stop timestamp of lap
             lap_data['stop'] = lap_data['start'] + dts_delta(seconds=lap_data['duration'])
 
-            logging.debug('Calculated swim data for lap %d : %s', n + 1, lap_data)
+            logging.getLogger(PROGRAM_NAME).debug('Calculated swim data for lap %d : %s', n + 1, lap_data)
 
             swim_data.append(lap_data)
 
@@ -735,7 +730,7 @@ class HiActivity:
 
     def _get_open_water_swim_data(self) -> list:
         """" Calculates the real swim (lap) data based on the raw parsed open water swim data"""
-        logging.info('Calculating swim data for activity %s', self.activity_id)
+        logging.getLogger(PROGRAM_NAME).info('Calculating swim data for activity %s', self.activity_id)
 
         swim_data = []
 
@@ -784,7 +779,7 @@ class HiActivity:
         to_string = self.__class__.__name__ + \
                     '\nID       : ' + self.activity_id + \
                     '\nType     : ' + self._activity_type + \
-                    '\nDate     : ' + self.start.strftime("%Y-%m-%d") + ' (YYYY-MM-DD)' + \
+                    '\nDate     : ' + self.start.date().isoformat() + ' (YYYY-MM-DD)' + \
                     '\nDuration : ' + str(self.stop - self.start) + ' (H:MM:SS)' \
                                                                     '\nDistance : ' + str(self.distance) + 'm'
         return to_string
@@ -796,12 +791,12 @@ class HiTrackFile:
     def __init__(self, hitrack_filename: str, activity_type: str = HiActivity.TYPE_UNKNOWN):
         # Validate the file parameter and (try to) open the file for reading
         if not hitrack_filename:
-            logging.error('Parameter HiTrack filename is missing')
+            logging.getLogger(PROGRAM_NAME).error('Parameter HiTrack filename is missing')
 
         try:
             self.hitrack_file = open(hitrack_filename, 'r')
         except Exception as e:
-            logging.error('Error opening HiTrack file <%s>\n%s', hitrack_filename, e)
+            logging.getLogger(PROGRAM_NAME).error('Error opening HiTrack file <%s>\n%s', hitrack_filename, e)
             raise Exception('Error opening HiTrack file <%s>', hitrack_filename)
 
         self.activity = None
@@ -829,7 +824,7 @@ class HiTrackFile:
         if self.activity:
             return self.activity  # No need to parse a second time if the file was already parsed
 
-        logging.info('Parsing file <%s>', self.hitrack_file.name)
+        logging.getLogger(PROGRAM_NAME).info('Parsing file <%s>', self.hitrack_file.name)
 
         # Create a new activity object for the file
         self.activity = HiActivity(os.path.basename(self.hitrack_file.name), self.activity_type)
@@ -872,7 +867,7 @@ class HiTrackFile:
                         data_list.append(line[data_index].split('='))  # Parse values after the '=' character
                     self.activity.add_speed_data(data_list)
         except Exception as e:
-            logging.error('Error parsing file <%s> at line <%d>\nCSV data: %s\n%s',
+            logging.getLogger(PROGRAM_NAME).error('Error parsing file <%s> at line <%d>\nCSV data: %s\n%s',
                           self.hitrack_file.name, line_number, line, e)
             raise Exception('Error parsing file <%s> at line <%d>\n%s', self.hitrack_file.name, line_number)
 
@@ -885,9 +880,9 @@ class HiTrackFile:
         try:
             if self.hitrack_file and not self.hitrack_file.closed:
                 self.hitrack_file.close()
-                logging.debug('HiTrack file <%s> closed', self.hitrack_file.name)
+                logging.getLogger(PROGRAM_NAME).debug('HiTrack file <%s> closed', self.hitrack_file.name)
         except Exception as e:
-            logging.error('Error closing HiTrack file <%s>\n', self.hitrack_file.name, e)
+            logging.getLogger(PROGRAM_NAME).error('Error closing HiTrack file <%s>\n', self.hitrack_file.name, e)
 
     def __del__(self):
         self._close_file()
@@ -900,18 +895,18 @@ class HiTarBall:
     def __init__(self, tarball_filename: str, extract_dir: str = OUTPUT_DIR):
         # Validate the tarball file parameter
         if not tarball_filename:
-            logging.error('Parameter HiHealth tarball filename is missing')
+            logging.getLogger(PROGRAM_NAME).error('Parameter HiHealth tarball filename is missing')
 
         try:
             self.tarball = tarfile.open(tarball_filename, 'r')
         except Exception as e:
-            logging.error('Error opening tarball file <%s>\n%s', tarball_filename, e)
+            logging.getLogger(PROGRAM_NAME).error('Error opening tarball file <%s>\n%s', tarball_filename, e)
             raise Exception('Error opening tarball file <%s>', tarball_filename)
 
         self.extract_dir = extract_dir
         self.hi_activity_list = []
 
-    def parse(self, from_date: dts = dts(1970, 1, 1)) -> list:
+    def parse(self, from_date: datetime.date = datetime.date(1970, 1, 1)) -> list:
         try:
             # Look for HiTrack files in directory com.huawei.health/files in tarball
             tar_info: tarfile.TarInfo
@@ -919,17 +914,18 @@ class HiTarBall:
                 if tar_info.path.startswith(self._TAR_HITRACK_DIR) \
                         and os.path.basename(tar_info.path).startswith(self._HITRACK_FILE_START):
                     hitrack_filename = os.path.basename(tar_info.path)
-                    logging.info('Found HiTrack file <%s> in tarball <%s>', hitrack_filename, self.tarball.name)
+                    logging.getLogger(PROGRAM_NAME).info('Found HiTrack file <%s> in tarball <%s>',
+                                                         hitrack_filename, self.tarball.name)
                     if from_date:
                         # Is file from or later than start date parameter?
                         hitrack_file_date = _convert_hitrack_timestamp(
-                            float(hitrack_filename[len(self._HITRACK_FILE_START):len(self._HITRACK_FILE_START) + 10]))
+                            float(hitrack_filename[len(self._HITRACK_FILE_START):len(self._HITRACK_FILE_START) + 10])).date()
                         if hitrack_file_date >= from_date:
                             # Parse Hitrack file from tar ball
                             self._extract_and_parse_hitrack_file(tar_info)
                         else:
                             # TODO verify timezone (un)aware display date / time
-                            logging.info(
+                            logging.getLogger(PROGRAM_NAME).info(
                                 'Skipped parsing HiTrack file <%s> being an activity from %s before %s (YYYYMMDD).',
                                 hitrack_filename, hitrack_file_date.isoformat(), from_date.isoformat())
                     else:
@@ -937,7 +933,7 @@ class HiTarBall:
                         self._extract_and_parse_hitrack_file(tar_info)
             return self.hi_activity_list
         except Exception as e:
-            logging.error('Error parsing tarball <%s>\n%s', self.tarball.name, e)
+            logging.getLogger(PROGRAM_NAME).error('Error parsing tarball <%s>\n%s', self.tarball.name, e)
             raise Exception('Error parsing tarball <%s>', self.tarball.name)
 
     def _extract_and_parse_hitrack_file(self, tar_info):
@@ -949,15 +945,16 @@ class HiTarBall:
             hi_activity = hitrack_file.parse()
             self.hi_activity_list.append(hi_activity)
         except Exception as e:
-            logging.error('Error parsing HiTrack file <%s> in tarball <%s>', tar_info.path, self.tarball.name, e)
+            logging.getLogger(PROGRAM_NAME).error('Error parsing HiTrack file <%s> in tarball <%s>',
+                                                  tar_info.path, self.tarball.name, e)
 
     def _close_tarball(self):
         try:
             if self.tarball and not self.tarball.closed:
                 self.tarball.close()
-                logging.debug('Tarball <%s> closed', self.tarball.name)
+                logging.getLogger(PROGRAM_NAME).debug('Tarball <%s> closed', self.tarball.name)
         except Exception as e:
-            logging.error('Error closing tarball <%s>\n', self.tarball.name, e)
+            logging.getLogger(PROGRAM_NAME).error('Error closing tarball <%s>\n', self.tarball.name, e)
 
     def __del__(self):
         self._close_tarball()
@@ -974,12 +971,12 @@ class HiJson:
     def __init__(self, json_filename: str, output_dir: str = OUTPUT_DIR):
         # Validate the tarball file parameter
         if not json_filename:
-            logging.error('Parameter for JSON filename is missing')
+            logging.getLogger(PROGRAM_NAME).error('Parameter for JSON filename is missing')
 
         try:
             self.json_file = open(json_filename, 'r')
         except Exception as e:
-            logging.error('Error opening JSON file <%s>\n%s', json_filename, e)
+            logging.getLogger(PROGRAM_NAME).error('Error opening JSON file <%s>\n%s', json_filename, e)
             raise Exception('Error opening JSON file <%s>', json_filename)
 
         self.output_dir = output_dir
@@ -989,7 +986,7 @@ class HiJson:
 
         self.hi_activity_list = []
 
-    def parse(self, from_date: dts = dts(1970, 1, 1)) -> list:
+    def parse(self, from_date: datetime.date = datetime.date(1970, 1, 1)) -> list:
         try:
             # Look for HiTrack information in JSON file
 
@@ -1013,11 +1010,12 @@ class HiJson:
             #         attribute {str} 'HW_EXT_TRACK_DETAIL@is<HiTrack File Data>&&HW_EXT_TRACK_SIMPLIFY@is<Other Data>
             #     recordDay {int} 'YYYYMMDD'
             for n, activity_dict in enumerate(data):
-                activity_date = dts.strptime(str(activity_dict['recordDay']), "%Y%m%d")
+                activity_date = dts.strptime(str(activity_dict['recordDay']), "%Y%m%d").date()
                 if activity_date >= from_date:
                     # TODO verify timezone (un)aware display date / time
-                    logging.info('Found one or more activities in JSON at index %d to parse from %s (YYY-MM-DD)',
-                                 n, activity_date.isoformat())
+                    logging.getLogger(PROGRAM_NAME).info(
+                        'Found one or more activities in JSON at index %d to parse from %s (YYY-MM-DD)',
+                        n, activity_date.isoformat())
                     for motion_path_dict in activity_dict['motionPathData']:
                         # Create a HiTrack file from the HiTrack data
                         hitrack_data = motion_path_dict['attribute']
@@ -1047,20 +1045,22 @@ class HiJson:
                                            (self.output_dir,
                                             activity_start.strftime('%Y%m%d_%H%M%S')
                                             )
-                        logging.info('Saving activity at index %d from %s to HiTrack file %s for parsing',
-                                     n, activity_date, hitrack_filename)
+                        logging.getLogger(PROGRAM_NAME).info(
+                            'Saving activity at index %d from %s to HiTrack file %s for parsing',
+                            n, activity_date, hitrack_filename)
                         try:
                             hitrack_file = open(hitrack_filename, "w+")
                             hitrack_file.write(hitrack_data)
                         except Exception as e:
-                            logging.error('Error saving activity at index %d from %s to HiTrack file for parsing.\n%s',
-                                          n, activity_date, e)
+                            logging.getLogger(PROGRAM_NAME).error(
+                                'Error saving activity at index %d from %s to HiTrack file for parsing.\n%s',
+                                n, activity_date, e)
                         finally:
                             try:
                                 if hitrack_file:
                                     hitrack_file.close()
                             except Exception as e:
-                                logging.error('Error closing HiTrack file <%s>\n', hitrack_filename, e)
+                                logging.getLogger(PROGRAM_NAME).error('Error closing HiTrack file <%s>\n', hitrack_filename, e)
 
                         # Parse the HiTrack file
                         hitrack_file = HiTrackFile(hitrack_filename)
@@ -1094,21 +1094,22 @@ class HiJson:
                         self.hi_activity_list.append(hi_activity)
                 else:
                     # TODO verify timezone (un)aware display date / time
-                    logging.info('Skipped parsing activity at index %d being an activity from %s before %s (YYYYMMDD).',
-                                 n, activity_date.isoformat(), from_date.isoformat())
+                    logging.getLogger(PROGRAM_NAME).info(
+                        'Skipped parsing activity at index %d being an activity from %s before %s (YYYY-MM-DD).',
+                        n, activity_date.isoformat(), from_date.isoformat())
 
             return self.hi_activity_list
         except Exception as e:
-            logging.error('Error parsing JSON file <%s>\n%s', self.json_file.name, e)
+            logging.getLogger(PROGRAM_NAME).error('Error parsing JSON file <%s>\n%s', self.json_file.name, e)
             raise Exception('Error parsing JSON file <%s>', self.json_file.name)
 
     def _close_json(self):
         try:
             if self.json_file and not self.json_file.closed:
                 self.json_file.close()
-                logging.debug('JSON file <%s> closed', self.json_file.name)
+                logging.getLogger(PROGRAM_NAME).debug('JSON file <%s> closed', self.json_file.name)
         except Exception as e:
-            logging.error('Error closing JSON file <%s>\n', self.json_file.name, e)
+            logging.getLogger(PROGRAM_NAME).error('Error closing JSON file <%s>\n', self.json_file.name, e)
 
     def __del__(self):
         self._close_json()
@@ -1136,7 +1137,7 @@ class TcxActivity:
     def __init__(self, hi_activity: HiActivity, tcx_xml_schema=None, save_dir: str = OUTPUT_DIR,
                  filename_prefix: str = None):
         if not hi_activity:
-            logging.error("No valid HiTrack activity specified to construct TCX activity.")
+            logging.getLogger(PROGRAM_NAME).error("No valid HiTrack activity specified to construct TCX activity.")
             raise Exception("No valid HiTrack activity specified to construct TCX activity.")
         self.hi_activity = hi_activity
         self.training_center_database = None
@@ -1149,7 +1150,7 @@ class TcxActivity:
 
     def generate_xml(self) -> xml_et.Element:
         """"Generates the TCX XML content."""
-        logging.debug('Generating TCX XML data for activity %s', self.hi_activity.activity_id)
+        logging.getLogger(PROGRAM_NAME).debug('Generating TCX XML data for activity %s', self.hi_activity.activity_id)
         try:
             # * TrainingCenterDatabase
             training_center_database = xml_et.Element('TrainingCenterDatabase')
@@ -1179,7 +1180,7 @@ class TcxActivity:
                          item[0] == self.hi_activity.get_activity_type()][0]
             finally:
                 if sport == '':
-                    logging.warning('Activity <%s> has an undetermined/unknown sport type.',
+                    logging.getLogger(PROGRAM_NAME).warning('Activity <%s> has an undetermined/unknown sport type.',
                                     self.hi_activity.activity_id)
                     sport = self._SPORT_OTHER
 
@@ -1239,7 +1240,7 @@ class TcxActivity:
             el_part_number.text = '000-00000-00'
 
         except Exception as e:
-            logging.error('Error generating TCX XML content for activity <%s>\n%s', self.hi_activity.activity_id, e)
+            logging.getLogger(PROGRAM_NAME).error('Error generating TCX XML content for activity <%s>\n%s', self.hi_activity.activity_id, e)
             raise Exception('Error generating TCX XML content for activity <%s>\n%s', self.hi_activity.activity_id, e)
 
         self.training_center_database = training_center_database
@@ -1363,7 +1364,7 @@ class TcxActivity:
                 tcx_filename += dts.strftime(self.hi_activity.start, self.filename_prefix)
             tcx_filename += self.hi_activity.activity_id + '.tcx'
         try:
-            logging.info('Saving TCX file <%s> for HiTrack activity <%s>', tcx_filename, self.hi_activity.activity_id)
+            logging.getLogger(PROGRAM_NAME).info('Saving TCX file <%s> for HiTrack activity <%s>', tcx_filename, self.hi_activity.activity_id)
             self._format_xml(self.training_center_database)
             xml_element_tree = xml_et.ElementTree(self.training_center_database)
             # If output directory doesn't exist, make it.
@@ -1374,16 +1375,16 @@ class TcxActivity:
                 tcx_file.write('<?xml version="1.0" encoding="UTF-8"?>'.encode('utf8'))
                 xml_element_tree.write(tcx_file, 'utf-8')
         except Exception as e:
-            logging.error('Error saving TCX file <%s> for HiTrack activity <%s> to file <%s>\n%s',
+            logging.getLogger(PROGRAM_NAME).error('Error saving TCX file <%s> for HiTrack activity <%s> to file <%s>\n%s',
                           tcx_filename, self.hi_activity.activity_id, e)
             return
         finally:
             try:
                 if tcx_file and not tcx_file.closed:
                     tcx_file.close()
-                    logging.debug('TCX file <%s> closed', tcx_file.name)
+                    logging.getLogger(PROGRAM_NAME).debug('TCX file <%s> closed', tcx_file.name)
             except Exception as e:
-                logging.error('Error closing TCX file <%s>\n', tcx_file.name, e)
+                logging.getLogger(PROGRAM_NAME).error('Error closing TCX file <%s>\n', tcx_file.name, e)
 
         # Validate the TCX XML file if option enabled
         if self.tcx_xml_schema:
@@ -1407,13 +1408,13 @@ class TcxActivity:
 
     def _validate_xml(self, tcx_xml_filename: str):
         """ Validates the generated TCX XML file against the Garmin TrainingCenterDatabase version 2 XSD """
-        logging.info("Validating generated TCX XML file <%s> for activity <%s>", tcx_xml_filename,
+        logging.getLogger(PROGRAM_NAME).info("Validating generated TCX XML file <%s> for activity <%s>", tcx_xml_filename,
                      self.hi_activity.activity_id)
 
         try:
             self.tcx_xml_schema.validate(tcx_xml_filename)
         except Exception as e:
-            logging.error('Error validating TCX XML for activity <%s>\n%s', self.hi_activity.activity_id, e)
+            logging.getLogger(PROGRAM_NAME).error('Error validating TCX XML for activity <%s>\n%s', self.hi_activity.activity_id, e)
             raise Exception('Error validating TCX XML for activity <%s>\n%s', self.hi_activity.activity_id, e)
 
 
@@ -1426,18 +1427,18 @@ def _init_tcx_xml_schema():
     with tempfile.TemporaryDirectory(PROGRAM_NAME) as tempdir:
         # Download and import schema to check against
         try:
-            logging.info("Retrieving TCX XSD from the internet. Please wait.")
+            logging.getLogger(PROGRAM_NAME).info("Retrieving TCX XSD from the internet. Please wait.")
             url = 'https://www8.garmin.com/xmlschemas/TrainingCenterDatabasev2.xsd'
             url_req.urlretrieve(url, tempdir + '/' + _TCX_XSD_FILE)
         except:
-            logging.warning('Unable to retrieve TCX XML XSD schema from the web. Validation will not be performed.')
+            logging.getLogger(PROGRAM_NAME).warning('Unable to retrieve TCX XML XSD schema from the web. Validation will not be performed.')
             return None
 
         try:
             tcx_xml_schema = xmlschema.XMLSchema(tempdir + '/' + _TCX_XSD_FILE)
             return tcx_xml_schema
         except:
-            logging.warning('Unable to initialize XSD xchema for TCX XML. Validation will not be performed.\n' +
+            logging.getLogger(PROGRAM_NAME).warning('Unable to initialize XSD xchema for TCX XML. Validation will not be performed.\n' +
                             'Is library xmlschema installed?')
             return None
 
@@ -1457,17 +1458,25 @@ def _convert_hitrack_timestamp(hitrack_timestamp: float) -> datetime:
 
 def _init_logging(level: str = 'INFO'):
     """"
-    Initializes the Python logging
+    Initializes the Python logging.getLogger(PROGRAM_NAME). A program specifoc Logger is created.
 
     Parameters:
     level (int): Optional - The level to which the logger will be initialized.
-        Use any of the available logging.LEVEL values.
-        If not specified, the default level will be set to logging.INFO
+        Use any of the available logging.getLogger(PROGRAM_NAME).LEVEL values.
+        If not specified, the default level will be set to logging.getLogger(PROGRAM_NAME).INFO
 
     """
-
-    logging.basicConfig(format='%(asctime)s - %(levelname)s - %(funcName)s - %(message)s',
-                        level=level)
+    logger = logging.getLogger(PROGRAM_NAME)
+    console = logging.StreamHandler()
+    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(funcName)s - %(message)s')
+    console.setFormatter(formatter)
+    if level == 'INFO':
+       console.setLevel(logging.INFO)
+    elif level == 'DEBUG':
+        logger.setLevel(logging.DEBUG)
+    logger.addHandler(console)
+    logger.propagate = False
+    logger.debug('test')
 
 
 def _init_argument_parser() -> argparse.ArgumentParser:
@@ -1494,7 +1503,7 @@ def _init_argument_parser() -> argparse.ArgumentParser:
 
     def from_date_type(arg):
         try:
-            return dts.strptime(arg, '%Y-%m-%d')
+            return dts.strptime(arg, '%Y-%m-%d').date()
         except ValueError:
             msg = "Invalid date or date format (expected YYYY-MM-DD): '{0}'.".format(arg)
             raise argparse.ArgumentTypeError(msg)
@@ -1548,8 +1557,13 @@ def main():
     else:
         _init_logging()
 
-    logging.debug("%s version %s.%s (%s.%s) started with arguments %s", PROGRAM_NAME, PROGRAM_MAJOR_VERSION,
-                  PROGRAM_MINOR_VERSION, PROGRAM_MAJOR_BUILD, PROGRAM_MINOR_BUILD, str(sys.argv[1:]))
+    logging.getLogger(PROGRAM_NAME).debug("%s version %s.%s (%s.%s) started with arguments %s",
+                                          PROGRAM_NAME,
+                                          PROGRAM_MAJOR_VERSION,
+                                          PROGRAM_MINOR_VERSION,
+                                          PROGRAM_MAJOR_BUILD,
+                                          PROGRAM_MINOR_BUILD,
+                                          str(sys.argv[1:]))
 
     tcx_xml_schema = None if not args.validate_xml else _init_tcx_xml_schema()
 
@@ -1563,7 +1577,7 @@ def main():
             hi_activity.set_pool_length(args.pool_length)
         tcx_activity = TcxActivity(hi_activity, tcx_xml_schema, args.output_dir, args.output_file_prefix)
         tcx_activity.save()
-        logging.info('Converted %s', hi_activity)
+        logging.getLogger(PROGRAM_NAME).info('Converted %s', hi_activity)
     elif args.tar:
         hi_tarball = HiTarBall(args.tar)
         hi_activity_list = hi_tarball.parse(args.from_date)
@@ -1572,7 +1586,7 @@ def main():
                 hi_activity.set_pool_length(args.pool_length)
             tcx_activity = TcxActivity(hi_activity, tcx_xml_schema, args.output_dir, args.output_file_prefix)
             tcx_activity.save()
-            logging.info('Converted %s', hi_activity)
+            logging.getLogger(PROGRAM_NAME).info('Converted %s', hi_activity)
     elif args.json:
         hi_json = HiJson(args.json, args.output_dir)
         hi_activity_list = hi_json.parse(args.from_date)
@@ -1581,7 +1595,7 @@ def main():
                 hi_activity.set_pool_length(args.pool_length)
             tcx_activity = TcxActivity(hi_activity, tcx_xml_schema, args.output_dir, args.output_file_prefix)
             tcx_activity.save()
-            logging.info('Converted %s', hi_activity)
+            logging.getLogger(PROGRAM_NAME).info('Converted %s', hi_activity)
 
 
 if __name__ == '__main__':
