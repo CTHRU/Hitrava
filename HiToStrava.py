@@ -35,8 +35,8 @@ except:
 PROGRAM_NAME = 'HiToStrava'
 PROGRAM_MAJOR_VERSION = '3'
 PROGRAM_MINOR_VERSION = '0'
-PROGRAM_MAJOR_BUILD = '1912'
-PROGRAM_MINOR_BUILD = '1902'
+PROGRAM_MAJOR_BUILD = '2001'
+PROGRAM_MINOR_BUILD = '1301'
 
 OUTPUT_DIR = './output'
 GPS_TIMEOUT = dts_delta(seconds=10)
@@ -1552,6 +1552,9 @@ def _init_argument_parser() -> argparse.ArgumentParser:
 def main():
     parser = _init_argument_parser()
     args = parser.parse_args()
+    if len(sys.argv) == 1:
+        parser.print_help(sys.stderr)
+        sys.exit()
     if args.log_level:
         _init_logging(args.log_level)
     else:
