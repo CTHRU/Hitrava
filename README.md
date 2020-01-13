@@ -127,6 +127,14 @@ later will be extracted and converted to the ./output directory.
  
 ## Release Notes
 
+### Version 3.0 Build 2001.1301
+#### New features and changes
+<li>
+    <p>
+    Display help message when no arguments are passed.
+    </p>
+</li>
+
 ### Version 3.0 Build 1912.1902
 #### New features and changes
 <li>
@@ -142,7 +150,7 @@ later will be extracted and converted to the ./output directory.
     <p>
     JSON conversion now uses the following detailed information available in the JSON data:<br>
     - Sport types for walking and cycling activities are automatically set (instead of being detected based on the Hitrack
-    data.<br>
+    data).<br>
     - All date and time information in the converted TCX files includes the time zone information of the
     local time when the activity took place.<br>     
     </p>
