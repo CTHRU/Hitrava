@@ -36,7 +36,7 @@ PROGRAM_NAME = 'HiToStrava'
 PROGRAM_MAJOR_VERSION = '3'
 PROGRAM_MINOR_VERSION = '0'
 PROGRAM_MAJOR_BUILD = '2001'
-PROGRAM_MINOR_BUILD = '1301'
+PROGRAM_MINOR_BUILD = '2001'
 
 OUTPUT_DIR = './output'
 GPS_TIMEOUT = dts_delta(seconds=10)
@@ -76,7 +76,10 @@ class HiActivity:
         self.start = None
         self.stop = None
         self.time_zone = None
+        # Huawei Health provided distance or in absence the calculated distance derived from GPS data.
         self.distance = -1
+        # Calculated distance derived from GPS data may differ from Huawei Health recorded distance
+        self.calculated_distance = -1
         self.calories = -1
 
         # Create an empty segment and segment list
@@ -626,7 +629,9 @@ class HiActivity:
             self._add_segment_stop(last_location['t'], last_location['distance'])
 
         # Set the total distance of the activity
-        self.distance = int(last_location['distance'])
+        self.calculated_distance = int(last_location['distance'])
+        if self.distance < 0:
+            self.distance = self.calculated_distance
 
     def get_segment_data(self, segment: dict) -> list:
         """" Returns a filtered and sorted data set containing all raw parsed data from the requested segment """
@@ -724,7 +729,9 @@ class HiActivity:
             swim_data.append(lap_data)
 
         # Update activity distance
-        self.distance = total_distance
+        self.calculated_distance = total_distance
+        if self.distance < 0:
+            self.distance = self.calculated_distance
 
         return swim_data
 
@@ -781,7 +788,7 @@ class HiActivity:
                     '\nType     : ' + self._activity_type + \
                     '\nDate     : ' + self.start.date().isoformat() + ' (YYYY-MM-DD)' + \
                     '\nDuration : ' + str(self.stop - self.start) + ' (H:MM:SS)' \
-                                                                    '\nDistance : ' + str(self.distance) + 'm'
+                    '\nDistance : ' + str(self.calculated_distance) + 'm (Huawei: ' + str(self.distance) + ' m)'
         return to_string
 
 
@@ -1060,7 +1067,7 @@ class HiJson:
                                 if hitrack_file:
                                     hitrack_file.close()
                             except Exception as e:
-                                logging.getLogger(PROGRAM_NAME).error('Error closing HiTrack file <%s>\n', hitrack_filename, e)
+                                logging.getLogger(PROGRAM_NAME).error('Error closing HiTrack file <%s>\n%s', hitrack_filename, e)
 
                         # Parse the HiTrack file
                         hitrack_file = HiTrackFile(hitrack_filename)
@@ -1079,13 +1086,16 @@ class HiJson:
 
                         # Time zone - Use time zone from JSON activity data
                         hi_activity.time_zone = time_zone
-
                         # TODO Duration
                         # hi_activity.duration
 
-                        # TODO Total distance
+                        # Total distance
+                        if 'totalDistance' in activity_detail_dict:
+                            hi_activity.distance = activity_detail_dict['totalDistance']
 
-                        # TODO Total calories
+                        # Total calories
+                        if 'totalCalories' in activity_detail_dict:
+                            hi_activity.calories = activity_detail_dict['totalCalories'] / 1000
 
                         # Swimming pool length
                         if 'swim_pool_length' in activity_detail_dict['wearSportData']:
@@ -1240,7 +1250,8 @@ class TcxActivity:
             el_part_number.text = '000-00000-00'
 
         except Exception as e:
-            logging.getLogger(PROGRAM_NAME).error('Error generating TCX XML content for activity <%s>\n%s', self.hi_activity.activity_id, e)
+            logging.getLogger(PROGRAM_NAME).error('Error generating TCX XML content for activity <%s>\n%s',
+                                                  self.hi_activity.activity_id, e)
             raise Exception('Error generating TCX XML content for activity <%s>\n%s', self.hi_activity.activity_id, e)
 
         self.training_center_database = training_center_database
@@ -1253,10 +1264,18 @@ class TcxActivity:
             el_lap.set('StartTime', self.hi_activity.get_tz_aware_datetime(segment['start']).isoformat('T', 'seconds'))
             el_total_time_seconds = xml_et.SubElement(el_lap, 'TotalTimeSeconds')
             el_total_time_seconds.text = str(segment['duration'])
+            # Distance per segment. Use calculated distances. Although they may be off from the total distance provided
+            # in the Huawei Health data, there is no straightforward way to derive the real distance per segment.
             el_distance_meters = xml_et.SubElement(el_lap, 'DistanceMeters')
             el_distance_meters.text = str(segment['distance'])
-            el_calories = xml_et.SubElement(el_lap, 'Calories')  # TODO verify if required/correct
-            el_calories.text = '0'
+            # Calories per segment. Assume even calorie consumption over all segments and distribute calories
+            # per segment based on the ratio segment distance / calculated total distance
+            if self.hi_activity.calories > 0 and segment['distance'] > 0 and self.hi_activity.calculated_distance > 0:
+                segment_calories = round(self.hi_activity.calories * segment['distance'] / self.hi_activity.calculated_distance)
+            else:
+                segment_calories = 0
+            el_calories = xml_et.SubElement(el_lap, 'Calories')
+            el_calories.text = str(segment_calories)
             el_intensity = xml_et.SubElement(el_lap, 'Intensity')  # TODO verify if required/correct
             el_intensity.text = 'Active'
             el_trigger_method = xml_et.SubElement(el_lap, 'TriggerMethod')  # TODO verify if required/correct
@@ -1313,8 +1332,14 @@ class TcxActivity:
             el_total_time_seconds.text = str(lap['duration'])
             el_distance_meters = xml_et.SubElement(el_lap, 'DistanceMeters')
             el_distance_meters.text = str(lap['distance'])
-            el_calories = xml_et.SubElement(el_lap, 'Calories')  # TODO verify if required/correct
-            el_calories.text = '0'
+            # Calories per segment. Assume even calorie consumption over all laps and distribute calories
+            # per lap based on the ratio lap distance / calculated total distance
+            if self.hi_activity.calories > 0 and lap['distance'] > 0 and self.hi_activity.calculated_distance > 0:
+                segment_calories = round(self.hi_activity.calories * lap['distance'] / self.hi_activity.calculated_distance)
+            else:
+                segment_calories = 0
+            el_calories = xml_et.SubElement(el_lap, 'Calories')
+            el_calories.text = str(segment_calories)
             el_intensity = xml_et.SubElement(el_lap, 'Intensity')  # TODO verify if required/correct
             el_intensity.text = 'Active'
             el_trigger_method = xml_et.SubElement(el_lap, 'TriggerMethod')  # TODO verify if required/correct
