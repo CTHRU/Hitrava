@@ -134,6 +134,10 @@ later will be extracted and converted to the ./output directory.
 >python HiToStrava --tar com.huawei.health.tar --from_date 20190820
  
 ## Release Notes
+### Version 3.0 Build 2001.2301
+#### Solved issues
+- INFO logging level now works again.
+
 ### Version 3.0 Build 2001.2001
 #### New features and changes
 - JSON conversion: Use calories burned information from Huawei Health data.
