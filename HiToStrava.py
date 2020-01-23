@@ -36,7 +36,7 @@ PROGRAM_NAME = 'HiToStrava'
 PROGRAM_MAJOR_VERSION = '3'
 PROGRAM_MINOR_VERSION = '0'
 PROGRAM_MAJOR_BUILD = '2001'
-PROGRAM_MINOR_BUILD = '2001'
+PROGRAM_MINOR_BUILD = '2301'
 
 OUTPUT_DIR = './output'
 GPS_TIMEOUT = dts_delta(seconds=10)
@@ -1496,7 +1496,7 @@ def _init_logging(level: str = 'INFO'):
     formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(funcName)s - %(message)s')
     console.setFormatter(formatter)
     if level == 'INFO':
-       console.setLevel(logging.INFO)
+        logger.setLevel(logging.INFO)
     elif level == 'DEBUG':
         logger.setLevel(logging.DEBUG)
     logger.addHandler(console)
