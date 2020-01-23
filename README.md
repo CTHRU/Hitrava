@@ -95,9 +95,10 @@ This will generate both the original HiTrack files and the converted TCX files.
                         
 ### Usage Examples
 #### JSON file conversion example
-Use the command below to convert all activities available in the motion path JSON file from the requested Huawei Privacy data that were started
-on October, 3rd, 2019 or later. Source HiTrack files and converted TCX files will be generated in folder /my_output_dir/json 
->python HiToStrava --json "motion path detail data.json" --from_date 2019-10-03 --output_dir /my_output_dir/json
+Use the command below to convert all activities available in the motion path JSON file from the requested Huawei 
+Privacy data that were started on October, 3rd, 2019 or later. Source HiTrack files and converted TCX files will be 
+generated in folder ./my_output_dir/json 
+>python HiToStrava --json "motion path detail data.json" --from_date 2019-10-03 --output_dir my_output_dir/json
 
 #### Single file conversion examples
 The example below converts extracted file HiTrack_12345678901212345678912 to HiTrack_12345678901212345678912.tcx in 
@@ -106,10 +107,10 @@ the ./output directory
 >python HiToStrava --file HiTrack_12345678901212345678912
 
 The next example converts extracted file HiTrack_12345678901212345678912 to HiTrack_12345678901212345678912.tcx in 
-the /my_output_dir directory. The program logging level is set to display debug messages. The converted file is validated against the TCX XSD schema (requires installed xmlschema 
-library and an intenet connection). 
+the ./my_output_dir directory. The program logging level is set to display debug messages. The converted file is 
+validated against the TCX XSD schema (requires installed xmlschema library and an internet connection). 
 
->python HiToStrava --file HiTrack_12345678901212345678912 --output_dir /my_output_dir --validate_xml --log_level DEBUG
+>python HiToStrava --file HiTrack_12345678901212345678912 --output_dir my_output_dir --validate_xml --log_level DEBUG
 
 The following example converts an extracted file HiTrack_12345678901212345678912 to HiTrack_12345678901212345678912.tcx 
 in the ./output directory and forces the sport to walking. 
