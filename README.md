@@ -3,7 +3,7 @@
 HiToStrava converts health activities registered in the Huawei Health app into a file format that can be directly
 imported in Strava.
 
-The activities are converted to Garmin TCX XML files which can be directly imported in Strava. 
+The activities are converted to Garmin TCX XML files which can be directly [`imported in Strava`](https://www.strava.com/upload/select). 
 
 ## How it works
 All users can use conversion from a JSON file using the --json option. For users with rooted phones, legacy file and tar
@@ -28,6 +28,9 @@ You will receive a mail with a link to download the zip file.
 - Once downloaded, open the zip file and go to the "data/Motion path detail data & description" folder.
 - Extract the file "motion path detail data.json" from the zip file. Use this file in the --json command line option.  
 This will generate both the original HiTrack files and the converted TCX files.
+
+Go to the [`'Upload and Sync Your Activities'`](https://www.strava.com/upload/select) page on the Strava website and log in to your account. Once logged in, use the 'Browse...' button on the
+page and select the converted TCX files (up to 25 at once) to import. 
 
 ## Requirements
 - [`Python 3.7.3`](https://www.python.org/downloads/) or higher.
@@ -149,7 +152,7 @@ later will be extracted and converted to the ./output directory.
 ## Release Notes
 ### Version 3.1 Build 2002.0101
 #### New features and changes
-- JSON conversion: new command line argument --json_export that exports a file with the JSON data of each single
+- JSON conversion: new command line argument **--json_export** that exports a file with the JSON data of each single
   activity that is converted from the JSON file in the --json argument. The file will be exported to the directory in 
   the --output_dir argument with a .json file extension. The exported file can be reused in the --json argument to e.g. 
   run the conversion again for the JSON activity or for debugging purposes.
@@ -342,4 +345,5 @@ GPS signal at all.
 
 ## Copyright and License
 Copyright (c) 2019 Ari Cooper Davis, Christoph Vanthuyne
+
 Copyright (C) 2019-2020 Christoph Vanthuyne
