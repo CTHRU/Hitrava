@@ -108,6 +108,10 @@ Privacy data that were started on October, 3rd, 2019 or later. Source HiTrack fi
 generated in folder ./my_output_dir/json 
 >python HiToStrava --json "motion path detail data.json" --from_date 2019-10-03 --output_dir my_output_dir/json
 
+Same as above, but also create an additional export file for each converted activity containing the raw JSON data of
+that activity from the motion path JSON file.
+>python HiToStrava --json "motion path detail data.json" --json_export --from_date 2019-10-03 --output_dir my_output_dir/json
+
 #### Single file conversion examples
 The example below converts extracted file HiTrack_12345678901212345678912 to HiTrack_12345678901212345678912.tcx in 
 the ./output directory
@@ -338,3 +342,4 @@ GPS signal at all.
 
 ## Copyright and License
 Copyright (c) 2019 Ari Cooper Davis, Christoph Vanthuyne
+Copyright (C) 2019-2020 Christoph Vanthuyne
