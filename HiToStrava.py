@@ -1,5 +1,6 @@
 # HiToStrava.py
 # Copyright (c) 2019 Ari Cooper-Davis / Christoph Vanthuyne
+# Copyright (c) 2019-2020 Christoph Vanthuyne
 
 import argparse
 import collections
@@ -29,14 +30,14 @@ try:
 except:
     print('Info - External library xmlschema could not be imported.\n' +
           'It is required when using the --validate_xml argument.\n' +
-          'It can be installed using: pip install xmlschema')
+          'It can be installed using: pip install xmlschema\n')
 
 # Global Constants
 PROGRAM_NAME = 'HiToStrava'
 PROGRAM_MAJOR_VERSION = '3'
-PROGRAM_MINOR_VERSION = '0'
-PROGRAM_MAJOR_BUILD = '2001'
-PROGRAM_MINOR_BUILD = '2301'
+PROGRAM_MINOR_VERSION = '1'
+PROGRAM_MAJOR_BUILD = '2002'
+PROGRAM_MINOR_BUILD = '0101'
 
 OUTPUT_DIR = './output'
 GPS_TIMEOUT = dts_delta(seconds=10)
@@ -975,7 +976,7 @@ class HiJson:
                          (-2, HiActivity.TYPE_POOL_SWIM),
                          (-3, HiActivity.TYPE_OPEN_WATER_SWIM)]
 
-    def __init__(self, json_filename: str, output_dir: str = OUTPUT_DIR):
+    def __init__(self, json_filename: str, output_dir: str = OUTPUT_DIR, export_json_data: bool = False):
         # Validate the tarball file parameter
         if not json_filename:
             logging.getLogger(PROGRAM_NAME).error('Parameter for JSON filename is missing')
@@ -990,6 +991,8 @@ class HiJson:
         # If output directory doesn't exist, make it.
         if not os.path.exists(self.output_dir):
             os.makedirs(self.output_dir)
+
+        self.export_json_data = export_json_data
 
         self.hi_activity_list = []
 
@@ -1052,11 +1055,35 @@ class HiJson:
                                            (self.output_dir,
                                             activity_start.strftime('%Y%m%d_%H%M%S')
                                             )
+
+                        if self.export_json_data:
+                            # TODO Save a copy of the JSON data of a single activity. Allows re-processing for debugging reasons.
+                            json_filename = hitrack_filename + '.json'
+                            logging.getLogger(PROGRAM_NAME).info(
+                                'Exporting JSON data of activity at index %d from %s to file %s',
+                                n, activity_date, json_filename)
+                            try:
+                                with open(json_filename, 'w+') as json_file:
+                                    json_file.write('[')    # Encapsulate the exported JSON data in a list
+                                    json.dump(activity_dict, json_file)
+                                    json_file.write(']')
+                            except Exception as e:
+                                logging.getLogger(PROGRAM_NAME).error(
+                                    'Error exporting JSON data of activity at index %d from %s.\n%s',
+                                    n, activity_date, e)
+                            finally:
+                                try:
+                                    if json_file:
+                                        json_file.close()
+                                except Exception as e:
+                                    logging.getLogger(PROGRAM_NAME).error('Error closing JSON export file <%s>\n%s',
+                                                                          json_filename, e)
+
                         logging.getLogger(PROGRAM_NAME).info(
                             'Saving activity at index %d from %s to HiTrack file %s for parsing',
                             n, activity_date, hitrack_filename)
                         try:
-                            hitrack_file = open(hitrack_filename, "w+")
+                            hitrack_file = open(hitrack_filename, 'w+')
                             hitrack_file.write(hitrack_data)
                         except Exception as e:
                             logging.getLogger(PROGRAM_NAME).error(
@@ -1069,7 +1096,7 @@ class HiJson:
                             except Exception as e:
                                 logging.getLogger(PROGRAM_NAME).error('Error closing HiTrack file <%s>\n%s', hitrack_filename, e)
 
-                        # Parse the HiTrack file
+                    # Parse the HiTrack file
                         hitrack_file = HiTrackFile(hitrack_filename)
                         hi_activity = hitrack_file.parse()
 
@@ -1128,12 +1155,13 @@ class HiJson:
 class TcxActivity:
     # Strava accepts following sports: walking, running, biking, swimming.
     # Note: TCX XSD only accepts Running, Biking, Other
+    _SPORT_OTHER = 'Other'
     _TCX_SPORT_TYPES = [(HiActivity.TYPE_WALK, 'Running'),
                         (HiActivity.TYPE_RUN, 'Running'),
                         (HiActivity.TYPE_CYCLE, 'Biking'),
-                        (HiActivity.TYPE_POOL_SWIM, 'Other'),
-                        (HiActivity.TYPE_OPEN_WATER_SWIM, 'Other'),
-                        (HiActivity.TYPE_UNKNOWN, 'Other')]
+                        (HiActivity.TYPE_POOL_SWIM, _SPORT_OTHER),
+                        (HiActivity.TYPE_OPEN_WATER_SWIM, _SPORT_OTHER),
+                        (HiActivity.TYPE_UNKNOWN, _SPORT_OTHER)]
 
     # TODO Customize XSD schema in the _validate_xml() function to validate Strava sport types.
     # TODO Upload activities directly into Strava using Strava API
@@ -1142,7 +1170,7 @@ class TcxActivity:
                            (HiActivity.TYPE_CYCLE, 'biking'),
                            (HiActivity.TYPE_POOL_SWIM, 'swimming'),
                            (HiActivity.TYPE_OPEN_WATER_SWIM, 'swimming'),
-                           (HiActivity.TYPE_UNKNOWN, 'Other')]
+                           (HiActivity.TYPE_UNKNOWN, _SPORT_OTHER)]
 
     def __init__(self, hi_activity: HiActivity, tcx_xml_schema=None, save_dir: str = OUTPUT_DIR,
                  filename_prefix: str = None):
@@ -1157,6 +1185,30 @@ class TcxActivity:
             self.tcx_xml_schema = None
         self.save_dir = save_dir
         self.filename_prefix = filename_prefix
+        self.tcx_filename = None
+
+    def _get_sport(self):
+        sport = ''
+
+        try:
+            if self.tcx_xml_schema:
+                # Use TCX XML compliant sport types when XML validation is used
+                sport = \
+                    [item[1] for item in self._TCX_SPORT_TYPES if item[0] == self.hi_activity.get_activity_type()][
+                        0]
+            else:
+                # Use Strava sport types when XML validation is NOT used
+                sport = \
+                    [item[1] for item in self._STRAVA_SPORT_TYPES if
+                     item[0] == self.hi_activity.get_activity_type()][0]
+        finally:
+            if sport == '':
+                logging.getLogger(PROGRAM_NAME).warning('Activity <%s> has an undetermined/unknown sport type.',
+                                                        self.hi_activity.activity_id)
+                sport = self._SPORT_OTHER
+
+        return sport
+
 
     def generate_xml(self) -> xml_et.Element:
         """"Generates the TCX XML content."""
@@ -1176,25 +1228,9 @@ class TcxActivity:
 
             # *** Activity
             el_activity = xml_et.SubElement(el_activities, 'Activity')
-            sport = ''
-            try:
-                if self.tcx_xml_schema:
-                    # Use TCX XML compliant sport types when XML validation is used
-                    sport = \
-                        [item[1] for item in self._TCX_SPORT_TYPES if item[0] == self.hi_activity.get_activity_type()][
-                            0]
-                else:
-                    # Use Strava sport types when XML validation is NOT used
-                    sport = \
-                        [item[1] for item in self._STRAVA_SPORT_TYPES if
-                         item[0] == self.hi_activity.get_activity_type()][0]
-            finally:
-                if sport == '':
-                    logging.getLogger(PROGRAM_NAME).warning('Activity <%s> has an undetermined/unknown sport type.',
-                                    self.hi_activity.activity_id)
-                    sport = self._SPORT_OTHER
-
+            sport = self._get_sport()
             el_activity.set('Sport', sport)
+
             # Strange enough, according to TCX XSD the Id should be a date.
             # TODO verify if this is the case for Strava too or if something more meaningful can be passed.
             el_id = xml_et.SubElement(el_activity, 'Id')
@@ -1382,26 +1418,26 @@ class TcxActivity:
             self.generate_xml()
 
         # Format and save the TCX XML file
-        if not tcx_filename:
-            tcx_filename = self.save_dir + '/'
+        if not self.tcx_filename:
+            self.tcx_filename = self.save_dir + '/'
             if self.filename_prefix:
                 # TODO verify timezone (un)aware display date / time
-                tcx_filename += dts.strftime(self.hi_activity.start, self.filename_prefix)
-            tcx_filename += self.hi_activity.activity_id + '.tcx'
+                self.tcx_filename += dts.strftime(self.hi_activity.start, self.filename_prefix)
+            self.tcx_filename += self.hi_activity.activity_id + '.tcx'
         try:
-            logging.getLogger(PROGRAM_NAME).info('Saving TCX file <%s> for HiTrack activity <%s>', tcx_filename, self.hi_activity.activity_id)
+            logging.getLogger(PROGRAM_NAME).info('Saving TCX file <%s> for HiTrack activity <%s>', self.tcx_filename, self.hi_activity.activity_id)
             self._format_xml(self.training_center_database)
             xml_element_tree = xml_et.ElementTree(self.training_center_database)
             # If output directory doesn't exist, make it.
             if not os.path.exists(self.save_dir):
                 os.makedirs(self.save_dir)
             # Save the TCX file
-            with open(tcx_filename, 'wb') as tcx_file:
+            with open(self.tcx_filename, 'wb') as tcx_file:
                 tcx_file.write('<?xml version="1.0" encoding="UTF-8"?>'.encode('utf8'))
                 xml_element_tree.write(tcx_file, 'utf-8')
         except Exception as e:
             logging.getLogger(PROGRAM_NAME).error('Error saving TCX file <%s> for HiTrack activity <%s> to file <%s>\n%s',
-                          tcx_filename, self.hi_activity.activity_id, e)
+                          self.tcx_filename, self.hi_activity.activity_id, e)
             return
         finally:
             try:
@@ -1413,7 +1449,7 @@ class TcxActivity:
 
         # Validate the TCX XML file if option enabled
         if self.tcx_xml_schema:
-            self._validate_xml(tcx_filename)
+            self._validate_xml(self.tcx_filename)
 
     def _format_xml(self, element: xml_et.Element, level: int = 0):
         """ Formats XML data by separating lines and adding whitespaces related to level for the XML element """
@@ -1440,8 +1476,8 @@ class TcxActivity:
             self.tcx_xml_schema.validate(tcx_xml_filename)
         except Exception as e:
             logging.getLogger(PROGRAM_NAME).error('Error validating TCX XML for activity <%s>\n%s', self.hi_activity.activity_id, e)
-            raise Exception('Error validating TCX XML for activity <%s>\n%s', self.hi_activity.activity_id, e)
-
+            raise Exception('Error validating TCX XML for activity <%s>\n%s', self.hi_activity.activity_id, e
+                           )
 
 def _init_tcx_xml_schema():
     """ Retrieves the TCX XML XSD schema for validation of files from the intenet """
@@ -1509,7 +1545,13 @@ def _init_argument_parser() -> argparse.ArgumentParser:
     json_group = parser.add_argument_group('JSON options')
     json_group.add_argument('-j', '--json', help='The filename of a Huawei Cloud JSON file containing the motion path \
                                                   detail data.')
-
+    json_group.add_argument('--json_export', help='Exports a file with the JSON data of each single activity that is \
+                                                   converted from the JSON file in the --json argument. The file will \
+                                                   be exported to the directory in the --output_dir argument with a \
+                                                   .json file extension. The exported file can be reused in the \
+                                                   --json argument to e.g. run the conversion again for the JSON \
+                                                   activity or for debugging purposes.',
+                            action='store_true')
     file_group = parser.add_argument_group('FILE options')
     file_group.add_argument('-f', '--file', help='The filename of a single HiTrack file to convert.')
     file_group.add_argument('-s', '--sport', help='Force sport for the conversion. Sport will be auto-detected when \
@@ -1616,7 +1658,7 @@ def main():
             tcx_activity.save()
             logging.getLogger(PROGRAM_NAME).info('Converted %s', hi_activity)
     elif args.json:
-        hi_json = HiJson(args.json, args.output_dir)
+        hi_json = HiJson(args.json, args.output_dir, args.json_export)
         hi_activity_list = hi_json.parse(args.from_date)
         for hi_activity in hi_activity_list:
             if args.pool_length:
