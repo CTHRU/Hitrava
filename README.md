@@ -19,7 +19,7 @@ specify your extracted "motion path detail data.json" file.
 To be able to request your data in the Huawei Health app, a prerequisite is to have an enabled Huawei account in the app.
 
 To request your data:
-- Tap the "Me" button in the lower right-hand corner, then tap on your account name on top of 
+- Tap the 'Me' button in the lower right-hand corner, then tap on your account name on top of 
 the screen.
 - Tap on 'Privacy Center' (one but last option just above 'Settings'). 
 - Tap 'Request Your Data' You can now request ALL your Huawei Health app data in a zip file. 
@@ -30,8 +30,8 @@ You will receive a mail with a link to download the zip file.
 This will generate both the original HiTrack files and the converted TCX files.
 
 ## Requirements
-- [`Python 3.7.3`](https://www.python.org/downloads/) or higher
-- A Huawei account to request your health data
+- [`Python 3.7.3`](https://www.python.org/downloads/) or higher.
+- A Huawei account to request your health data.
 
 ## Usage
 ### Command Line Arguments Overview
@@ -58,6 +58,14 @@ This will generate both the original HiTrack files and the converted TCX files.
 >JSON options:
 >>  -j JSON, --json JSON  The filename of a Huawei Cloud JSON file containing
 >>                        the motion path detail data.
+
+>>  --json_export         Exports a file with the JSON data of each single
+>>                        activity that is converted from the JSON file in the
+>>                        --json argument. The file will be exported to the
+>>                        directory in the --output_dir argument with a .json
+>>                        file extension. The exported file can be reused in the
+>>                        --json argument to e.g. run the conversion again for
+>>                        the JSON activity or for debugging purposes.
 
 >TAR options:
 >>  -t TAR, --tar TAR     The filename of an (unencrypted) tarball with HiTrack
@@ -135,6 +143,17 @@ later will be extracted and converted to the ./output directory.
 >python HiToStrava --tar com.huawei.health.tar --from_date 20190820
  
 ## Release Notes
+### Version 3.1 Build 2002.0101
+#### New features and changes
+- JSON conversion: new command line argument --json_export that exports a file with the JSON data of each single
+  activity that is converted from the JSON file in the --json argument. The file will be exported to the directory in 
+  the --output_dir argument with a .json file extension. The exported file can be reused in the --json argument to e.g. 
+  run the conversion again for the JSON activity or for debugging purposes.
+
+#### Solved issues
+- Corrected a potential bug for activities with an unknown sport type.
+
+
 ### Version 3.0 Build 2001.2301
 #### Solved issues
 - INFO logging level now works again.
@@ -273,7 +292,9 @@ later will be extracted and converted to the ./output directory.
 
 ### Version 2.0 Build 1908.2201
 #### New features and changes
-- Support for swimming activities<br>In this version duration and distances are supported. SWOLF data is available 
+- Support for swimming activities
+
+  In this version duration and distances are supported. SWOLF data is available 
   from the HiTrack files but is not exported (yet) since we don't have the information how to pass it in the TCX 
   format or if Strava supports it natively.
 - Direct conversion from tarball
