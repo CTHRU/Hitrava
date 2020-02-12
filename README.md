@@ -179,4 +179,4 @@ make sure the help information is displayed.
 Copyright (c) 2019 Ari Cooper Davis, Christoph Vanthuyne  
 Copyright (C) 2019-2020 Christoph Vanthuyne
 
-Read the license [`here`](./LICENSE).
+Read the license [`here`](./LICENSE.md).
