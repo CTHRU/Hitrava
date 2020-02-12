@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # HiToStrava.py
 # Copyright (c) 2019 Ari Cooper-Davis / Christoph Vanthuyne
 # Copyright (c) 2019-2020 Christoph Vanthuyne
@@ -28,16 +29,25 @@ from typing import List, Optional
 try:
     import xmlschema  # (only) needed to validate the generated TCX XML.
 except:
-    print('Info - External library xmlschema could not be imported.\n' +
+    sys.stderr.write('Info - External library xmlschema could not be imported.\n' +
           'It is required when using the --validate_xml argument.\n' +
           'It can be installed using: pip install xmlschema\n')
+
+if sys.version_info < (3, 7, 3):
+    sys.stderr.write('You need Python 3.7.3 or later (You are using Python %s.%s.%s).\n' %
+                     (sys.version_info.major,
+                      sys.version_info.minor,
+                      sys.version_info.micro))
+    sys.exit()
+
 
 # Global Constants
 PROGRAM_NAME = 'HiToStrava'
 PROGRAM_MAJOR_VERSION = '3'
 PROGRAM_MINOR_VERSION = '1'
+PROGRAM_PATCH_VERSION = '1'
 PROGRAM_MAJOR_BUILD = '2002'
-PROGRAM_MINOR_BUILD = '0101'
+PROGRAM_MINOR_BUILD = '1201'
 
 OUTPUT_DIR = './output'
 GPS_TIMEOUT = dts_delta(seconds=10)
@@ -1476,9 +1486,9 @@ class TcxActivity:
             self.tcx_xml_schema.validate(tcx_xml_filename)
         except Exception as e:
             logging.getLogger(PROGRAM_NAME).error('Error validating TCX XML for activity <%s>\n%s', self.hi_activity.activity_id, e)
-            raise Exception('Error validating TCX XML for activity <%s>\n%s', self.hi_activity.activity_id, e
-                           )
+            raise Exception('Error validating TCX XML for activity <%s>\n%s', self.hi_activity.activity_id, e)
 
+            
 def _init_tcx_xml_schema():
     """ Retrieves the TCX XML XSD schema for validation of files from the intenet """
 
@@ -1519,7 +1529,7 @@ def _convert_hitrack_timestamp(hitrack_timestamp: float) -> datetime:
 
 def _init_logging(level: str = 'INFO'):
     """"
-    Initializes the Python logging.getLogger(PROGRAM_NAME). A program specifoc Logger is created.
+    Initializes the Python logging.getLogger(PROGRAM_NAME). A program specific Logger is created.
 
     Parameters:
     level (int): Optional - The level to which the logger will be initialized.
@@ -1621,16 +1631,18 @@ def main():
     args = parser.parse_args()
     if len(sys.argv) == 1:
         parser.print_help(sys.stderr)
+        input('\nPress enter to exit.')
         sys.exit()
     if args.log_level:
         _init_logging(args.log_level)
     else:
         _init_logging()
 
-    logging.getLogger(PROGRAM_NAME).debug("%s version %s.%s (%s.%s) started with arguments %s",
+    logging.getLogger(PROGRAM_NAME).debug("%s version %s.%s.%s (build %s.%s) started with arguments %s",
                                           PROGRAM_NAME,
                                           PROGRAM_MAJOR_VERSION,
                                           PROGRAM_MINOR_VERSION,
+                                          PROGRAM_PATCH_VERSION,
                                           PROGRAM_MAJOR_BUILD,
                                           PROGRAM_MINOR_BUILD,
                                           str(sys.argv[1:]))
