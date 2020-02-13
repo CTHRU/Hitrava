@@ -30,24 +30,23 @@ try:
     import xmlschema  # (only) needed to validate the generated TCX XML.
 except:
     sys.stderr.write('Info - External library xmlschema could not be imported.\n' +
-          'It is required when using the --validate_xml argument.\n' +
-          'It can be installed using: pip install xmlschema\n')
+                     'It is required when using the --validate_xml argument.\n' +
+                     'It can be installed using: pip install xmlschema\n')
 
 if sys.version_info < (3, 7, 3):
     sys.stderr.write('You need Python 3.7.3 or later (You are using Python %s.%s.%s).\n' %
                      (sys.version_info.major,
                       sys.version_info.minor,
                       sys.version_info.micro))
-    sys.exit()
-
+    sys.exit(1)
 
 # Global Constants
 PROGRAM_NAME = 'HiToStrava'
 PROGRAM_MAJOR_VERSION = '3'
 PROGRAM_MINOR_VERSION = '1'
-PROGRAM_PATCH_VERSION = '1'
+PROGRAM_PATCH_VERSION = '2'
 PROGRAM_MAJOR_BUILD = '2002'
-PROGRAM_MINOR_BUILD = '1201'
+PROGRAM_MINOR_BUILD = '1301'
 
 OUTPUT_DIR = './output'
 GPS_TIMEOUT = dts_delta(seconds=10)
@@ -500,7 +499,7 @@ class HiActivity:
     def _detect_activity_type(self) -> str:
         """"Auto-detection of the activity type. Only valid when called after all data has been parsed."""
         logging.getLogger(PROGRAM_NAME).debug('Detecting activity type for activity %s with parameters %s',
-                      self.activity_id, self.activity_params)
+                                              self.activity_id, self.activity_params)
 
         # Filter out swimming
         if 'swim' in self.activity_params:
@@ -525,7 +524,8 @@ class HiActivity:
                 step_freq_sum += step_freq
 
             step_freq_avg = step_freq_sum / (n + 1)
-            logging.getLogger(PROGRAM_NAME).debug('Activity %s has a calculated average step frequency of %d', self.activity_id, step_freq_avg)
+            logging.getLogger(PROGRAM_NAME).debug('Activity %s has a calculated average step frequency of %d',
+                                                  self.activity_id, step_freq_avg)
 
             if self.activity_params['step frequency min'] == 0 and self.activity_params['step frequency max'] == 0:
                 # Specific check for cycling - all step frequency records being zero
@@ -544,7 +544,7 @@ class HiActivity:
                 self._activity_type = self.TYPE_RUN
 
             logging.getLogger(PROGRAM_NAME).debug('Activity type %s detected using step frequency data for activity %s',
-                          self._activity_type, self.activity_id)
+                                                  self._activity_type, self.activity_id)
             return self._activity_type
         else:
             # Walk / Run / Cycle - no step frequency data available (e.g. activities registered using phone only).
@@ -552,7 +552,7 @@ class HiActivity:
             # regardless whether a fitness tracking device was used or not, this must be a cycling activity.
             self._activity_type = self.TYPE_CYCLE
             logging.getLogger(PROGRAM_NAME).debug('Activity type %s detected using step frequency data for activity %s',
-                          self._activity_type, self.activity_id)
+                                                  self._activity_type, self.activity_id)
             return self._activity_type
 
     def _calc_segments_and_distances(self):
@@ -579,6 +579,7 @@ class HiActivity:
 
         # Do calculations
         last_location = None
+        paused = False
 
         # Start first segment at earliest data found while adding the data
         self._add_segment_start(self.start)
@@ -589,10 +590,15 @@ class HiActivity:
                     if data['lat'] == 90 and data['lon'] == -80:
                         # Pause or stop records (lat = 90, long = -80, alt = 0) and handle segment data creation
                         # Use timestamp and distance of last (location) record
+                        logging.getLogger(PROGRAM_NAME).debug('Start pause at %s in %s', data['t'], self.activity_id)
+                        paused = True
                         self._add_segment_stop(last_location['t'], last_location['distance'])
                     elif 'lat' not in last_location:
                         # GPS was lost and is now back. Set distance to last known distance and use this record as the
                         # last known location.
+                        if paused:
+                            logging.getLogger(PROGRAM_NAME).debug('Stop pause at %s in %s', data['t'], self.activity_id)
+                            paused = False
                         logging.getLogger(PROGRAM_NAME).debug(
                             'GPS signal available at %s in %s. Calculating distance using location data.',
                             data['t'], self.activity_id)
@@ -605,6 +611,9 @@ class HiActivity:
                         # Regular location record. If no current segment, create one
                         if not self._current_segment:
                             self._add_segment_start(data['t'])
+                        if paused:
+                            logging.getLogger(PROGRAM_NAME).debug('Stop pause at %s in %s', data['t'], self.activity_id)
+                            paused = False
                         # Calculate and set the accumulative distance of the location record
                         data['distance'] = self._vincenty((last_location['lat'], last_location['lon']),
                                                           (data['lat'], data['lon'])) + \
@@ -617,7 +626,7 @@ class HiActivity:
             elif 'rs' in data:
                 if last_location:
                     time_delta = data['t'] - last_location['t']
-                    if 'lat' not in last_location or time_delta > GPS_TIMEOUT:
+                    if not paused and ('lat' not in last_location or time_delta > GPS_TIMEOUT):
                         # GPS signal lost for more than the GPS timeout period. Calculate distance based on speed records
                         logging.getLogger(PROGRAM_NAME).debug(
                             'No GPS signal between %s and %s in %s. Calculating distance using speed data (%s dm/s)',
@@ -799,7 +808,8 @@ class HiActivity:
                     '\nType     : ' + self._activity_type + \
                     '\nDate     : ' + self.start.date().isoformat() + ' (YYYY-MM-DD)' + \
                     '\nDuration : ' + str(self.stop - self.start) + ' (H:MM:SS)' \
-                    '\nDistance : ' + str(self.calculated_distance) + 'm (Huawei: ' + str(self.distance) + ' m)'
+                                                                    '\nDistance : ' + str(
+            self.calculated_distance) + 'm (Huawei: ' + str(self.distance) + ' m)'
         return to_string
 
 
@@ -886,7 +896,7 @@ class HiTrackFile:
                     self.activity.add_speed_data(data_list)
         except Exception as e:
             logging.getLogger(PROGRAM_NAME).error('Error parsing file <%s> at line <%d>\nCSV data: %s\n%s',
-                          self.hitrack_file.name, line_number, line, e)
+                                                  self.hitrack_file.name, line_number, line, e)
             raise Exception('Error parsing file <%s> at line <%d>\n%s', self.hitrack_file.name, line_number)
 
         finally:
@@ -937,7 +947,8 @@ class HiTarBall:
                     if from_date:
                         # Is file from or later than start date parameter?
                         hitrack_file_date = _convert_hitrack_timestamp(
-                            float(hitrack_filename[len(self._HITRACK_FILE_START):len(self._HITRACK_FILE_START) + 10])).date()
+                            float(hitrack_filename[
+                                  len(self._HITRACK_FILE_START):len(self._HITRACK_FILE_START) + 10])).date()
                         if hitrack_file_date >= from_date:
                             # Parse Hitrack file from tar ball
                             self._extract_and_parse_hitrack_file(tar_info)
@@ -1074,7 +1085,7 @@ class HiJson:
                                 n, activity_date, json_filename)
                             try:
                                 with open(json_filename, 'w+') as json_file:
-                                    json_file.write('[')    # Encapsulate the exported JSON data in a list
+                                    json_file.write('[')  # Encapsulate the exported JSON data in a list
                                     json.dump(activity_dict, json_file)
                                     json_file.write(']')
                             except Exception as e:
@@ -1104,9 +1115,10 @@ class HiJson:
                                 if hitrack_file:
                                     hitrack_file.close()
                             except Exception as e:
-                                logging.getLogger(PROGRAM_NAME).error('Error closing HiTrack file <%s>\n%s', hitrack_filename, e)
+                                logging.getLogger(PROGRAM_NAME).error('Error closing HiTrack file <%s>\n%s',
+                                                                      hitrack_filename, e)
 
-                    # Parse the HiTrack file
+                        # Parse the HiTrack file
                         hitrack_file = HiTrackFile(hitrack_filename)
                         hi_activity = hitrack_file.parse()
 
@@ -1219,7 +1231,6 @@ class TcxActivity:
 
         return sport
 
-
     def generate_xml(self) -> xml_et.Element:
         """"Generates the TCX XML content."""
         logging.getLogger(PROGRAM_NAME).debug('Generating TCX XML data for activity %s', self.hi_activity.activity_id)
@@ -1277,9 +1288,9 @@ class TcxActivity:
 
             # * Author
             el_author = xml_et.SubElement(training_center_database, 'Author')
-            el_author.set('xsi:type', 'Application_t')  # TODO verify if required/correct
+            el_author.set('xsi:type', 'Application_t')
             el_name = xml_et.SubElement(el_author, 'Name')
-            el_name.text = PROGRAM_NAME
+            el_name.text = 'HiToStrava'
             el_build = xml_et.SubElement(el_author, 'Build')
             el_version = xml_et.SubElement(el_build, 'Version')
             el_version_major = xml_et.SubElement(el_version, 'VersionMajor')
@@ -1306,26 +1317,7 @@ class TcxActivity:
     def _generate_walk_run_cycle_xml_data(self, el_activity):
         # **** Lap (a lap in the TCX XML corresponds to a segment in the HiActivity)
         for n, segment in enumerate(self.hi_activity.get_segments()):
-            el_lap = xml_et.SubElement(el_activity, 'Lap')
-            el_lap.set('StartTime', self.hi_activity.get_tz_aware_datetime(segment['start']).isoformat('T', 'seconds'))
-            el_total_time_seconds = xml_et.SubElement(el_lap, 'TotalTimeSeconds')
-            el_total_time_seconds.text = str(segment['duration'])
-            # Distance per segment. Use calculated distances. Although they may be off from the total distance provided
-            # in the Huawei Health data, there is no straightforward way to derive the real distance per segment.
-            el_distance_meters = xml_et.SubElement(el_lap, 'DistanceMeters')
-            el_distance_meters.text = str(segment['distance'])
-            # Calories per segment. Assume even calorie consumption over all segments and distribute calories
-            # per segment based on the ratio segment distance / calculated total distance
-            if self.hi_activity.calories > 0 and segment['distance'] > 0 and self.hi_activity.calculated_distance > 0:
-                segment_calories = round(self.hi_activity.calories * segment['distance'] / self.hi_activity.calculated_distance)
-            else:
-                segment_calories = 0
-            el_calories = xml_et.SubElement(el_lap, 'Calories')
-            el_calories.text = str(segment_calories)
-            el_intensity = xml_et.SubElement(el_lap, 'Intensity')  # TODO verify if required/correct
-            el_intensity.text = 'Active'
-            el_trigger_method = xml_et.SubElement(el_lap, 'TriggerMethod')  # TODO verify if required/correct
-            el_trigger_method.text = 'Manual'
+            el_lap = self._generate_lap_header_xml_data(el_activity, segment)
             el_track = xml_et.SubElement(el_lap, 'Track')
 
             # ***** Track
@@ -1372,24 +1364,7 @@ class TcxActivity:
 
         cumulative_distance = 0
         for n, lap in enumerate(self.hi_activity.get_swim_data()):
-            el_lap = xml_et.SubElement(el_activity, 'Lap')
-            el_lap.set('StartTime', self.hi_activity.get_tz_aware_datetime(lap['start']).isoformat('T', 'seconds'))
-            el_total_time_seconds = xml_et.SubElement(el_lap, 'TotalTimeSeconds')
-            el_total_time_seconds.text = str(lap['duration'])
-            el_distance_meters = xml_et.SubElement(el_lap, 'DistanceMeters')
-            el_distance_meters.text = str(lap['distance'])
-            # Calories per segment. Assume even calorie consumption over all laps and distribute calories
-            # per lap based on the ratio lap distance / calculated total distance
-            if self.hi_activity.calories > 0 and lap['distance'] > 0 and self.hi_activity.calculated_distance > 0:
-                segment_calories = round(self.hi_activity.calories * lap['distance'] / self.hi_activity.calculated_distance)
-            else:
-                segment_calories = 0
-            el_calories = xml_et.SubElement(el_lap, 'Calories')
-            el_calories.text = str(segment_calories)
-            el_intensity = xml_et.SubElement(el_lap, 'Intensity')  # TODO verify if required/correct
-            el_intensity.text = 'Active'
-            el_trigger_method = xml_et.SubElement(el_lap, 'TriggerMethod')  # TODO verify if required/correct
-            el_trigger_method.text = 'Manual'
+            el_lap = self._generate_lap_header_xml_data(el_activity, lap)
             el_track = xml_et.SubElement(el_lap, 'Track')
 
             # Add first TrackPoint for start of lap
@@ -1404,7 +1379,8 @@ class TcxActivity:
                 if 'lat' in lap_detail_data:
                     el_trackpoint = xml_et.SubElement(el_track, 'Trackpoint')
                     el_time = xml_et.SubElement(el_trackpoint, 'Time')
-                    el_time.text = self.hi_activity.get_tz_aware_datetime(lap_detail_data['t']).isoformat('T', 'seconds')
+                    el_time.text = self.hi_activity.get_tz_aware_datetime(lap_detail_data['t']).isoformat('T',
+                                                                                                          'seconds')
 
                     el_position = xml_et.SubElement(el_trackpoint, 'Position')
                     el_latitude_degrees = xml_et.SubElement(el_position, 'LatitudeDegrees')
@@ -1422,6 +1398,32 @@ class TcxActivity:
             el_distance_meters.text = str(cumulative_distance)
         return
 
+    def _generate_lap_header_xml_data(self, el_activity, segment) -> xml_et.Element:
+        """ Generates the TCX XML lap header content part """
+        el_lap = xml_et.SubElement(el_activity, 'Lap')
+        el_lap.set('StartTime', self.hi_activity.get_tz_aware_datetime(segment['start']).isoformat('T', 'seconds'))
+        el_total_time_seconds = xml_et.SubElement(el_lap, 'TotalTimeSeconds')
+        el_total_time_seconds.text = str(segment['duration'])
+        # Distance per segment. Use calculated distances. Although they may be off from the total distance provided
+        # in the Huawei Health data, there is no straightforward way to derive the real distance per segment.
+        el_distance_meters = xml_et.SubElement(el_lap, 'DistanceMeters')
+        el_distance_meters.text = str(segment['distance'])
+        # Calories per segment. Assume even calorie consumption over all segments and distribute calories
+        # per segment based on the ratio segment distance / calculated total distance
+        if self.hi_activity.calories > 0 and segment['distance'] > 0 and self.hi_activity.calculated_distance > 0:
+            segment_calories = round(
+                self.hi_activity.calories * segment['distance'] / self.hi_activity.calculated_distance)
+        else:
+            segment_calories = 0
+        el_calories = xml_et.SubElement(el_lap, 'Calories')
+        el_calories.text = str(segment_calories)
+        el_intensity = xml_et.SubElement(el_lap, 'Intensity')  # TODO verify if required/correct
+        el_intensity.text = 'Active'
+        el_trigger_method = xml_et.SubElement(el_lap, 'TriggerMethod')  # TODO verify if required/correct
+        el_trigger_method.text = 'Manual'
+
+        return el_lap
+
     def save(self, tcx_filename: str = None):
         if not self.training_center_database:
             # Call generation of TCX XML date if not already done
@@ -1435,7 +1437,8 @@ class TcxActivity:
                 self.tcx_filename += dts.strftime(self.hi_activity.start, self.filename_prefix)
             self.tcx_filename += self.hi_activity.activity_id + '.tcx'
         try:
-            logging.getLogger(PROGRAM_NAME).info('Saving TCX file <%s> for HiTrack activity <%s>', self.tcx_filename, self.hi_activity.activity_id)
+            logging.getLogger(PROGRAM_NAME).info('Saving TCX file <%s> for HiTrack activity <%s>', self.tcx_filename,
+                                                 self.hi_activity.activity_id)
             self._format_xml(self.training_center_database)
             xml_element_tree = xml_et.ElementTree(self.training_center_database)
             # If output directory doesn't exist, make it.
@@ -1446,8 +1449,9 @@ class TcxActivity:
                 tcx_file.write('<?xml version="1.0" encoding="UTF-8"?>'.encode('utf8'))
                 xml_element_tree.write(tcx_file, 'utf-8')
         except Exception as e:
-            logging.getLogger(PROGRAM_NAME).error('Error saving TCX file <%s> for HiTrack activity <%s> to file <%s>\n%s',
-                          self.tcx_filename, self.hi_activity.activity_id, e)
+            logging.getLogger(PROGRAM_NAME).error(
+                'Error saving TCX file <%s> for HiTrack activity <%s> to file <%s>\n%s',
+                self.tcx_filename, self.hi_activity.activity_id, e)
             return
         finally:
             try:
@@ -1479,16 +1483,17 @@ class TcxActivity:
 
     def _validate_xml(self, tcx_xml_filename: str):
         """ Validates the generated TCX XML file against the Garmin TrainingCenterDatabase version 2 XSD """
-        logging.getLogger(PROGRAM_NAME).info("Validating generated TCX XML file <%s> for activity <%s>", tcx_xml_filename,
-                     self.hi_activity.activity_id)
+        logging.getLogger(PROGRAM_NAME).info("Validating generated TCX XML file <%s> for activity <%s>",
+                                             tcx_xml_filename, self.hi_activity.activity_id)
 
         try:
             self.tcx_xml_schema.validate(tcx_xml_filename)
         except Exception as e:
-            logging.getLogger(PROGRAM_NAME).error('Error validating TCX XML for activity <%s>\n%s', self.hi_activity.activity_id, e)
+            logging.getLogger(PROGRAM_NAME).error('Error validating TCX XML for activity <%s>\n%s',
+                                                  self.hi_activity.activity_id, e)
             raise Exception('Error validating TCX XML for activity <%s>\n%s', self.hi_activity.activity_id, e)
 
-            
+
 def _init_tcx_xml_schema():
     """ Retrieves the TCX XML XSD schema for validation of files from the intenet """
 
@@ -1502,16 +1507,22 @@ def _init_tcx_xml_schema():
             url = 'https://www8.garmin.com/xmlschemas/TrainingCenterDatabasev2.xsd'
             url_req.urlretrieve(url, tempdir + '/' + _TCX_XSD_FILE)
         except:
-            logging.getLogger(PROGRAM_NAME).warning('Unable to retrieve TCX XML XSD schema from the web. Validation will not be performed.')
+            logging.getLogger(PROGRAM_NAME).warning(
+                'Unable to retrieve TCX XML XSD schema from the web. Validation will not be performed.')
             return None
 
         try:
             tcx_xml_schema = xmlschema.XMLSchema(tempdir + '/' + _TCX_XSD_FILE)
             return tcx_xml_schema
-        except:
-            logging.getLogger(PROGRAM_NAME).warning('Unable to initialize XSD xchema for TCX XML. Validation will not be performed.\n' +
-                            'Is library xmlschema installed?')
+        except NameError:
+            logging.getLogger(PROGRAM_NAME).warning(
+                'Unable to initialize XSD xchema for TCX XML. Validation will not be performed.\n' +
+                'Is library xmlschema installed?')
             return None
+        except Exception as e:
+            logging.getLogger(PROGRAM_NAME).warning('TCX XML XSD schema was successfully retrieved from the web ' +
+                                                    'but could not be initialized. Validation will not be performed. ' +
+                                                    'The following exception occured: %s', e)
 
 
 def _convert_hitrack_timestamp(hitrack_timestamp: float) -> datetime:
@@ -1632,7 +1643,7 @@ def main():
     if len(sys.argv) == 1:
         parser.print_help(sys.stderr)
         input('\nPress enter to exit.')
-        sys.exit()
+        sys.exit(2)
     if args.log_level:
         _init_logging(args.log_level)
     else:
