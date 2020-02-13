@@ -154,29 +154,20 @@ later will be extracted and converted to the ./output directory.
  
 ## Release Notes
 The release notes of the latest release can be found below.  
-For a full changelog of earlier version, please look [`here`](./CHANGELOG.md).
+For a full changelog of earlier versions, please look [`here`](./CHANGELOG.md).
 
-### Version 3.1.1 (Build 2002.1201)
+### Version 3.1.2 (Build 2002.1301)
 #### New features and changes
-- Added Python version check (minimum 3.7.3) and message if used version doesn't comply.   
-- The program can now be executed without typing 'python' at the beginning of the
-command line. Added a wait message when HiToStrava is run without arguments (from prompt or by double-clicking it) to
-make sure the help information is displayed.
-- Changed versioning (added patch to version number) to comply with Semantic Versioning.
-- From this version onward, a Non-Profit Open Software License 3.0 (NPOSL-3.0) license applies to all new changes.
-
-### Version 3.1 Build 2002.0101
-#### New features and changes
-- JSON conversion: new command line argument **--json_export** that exports a file with the JSON data of each single
-  activity that is converted from the JSON file in the --json argument. The file will be exported to the directory in 
-  the --output_dir argument with a .json file extension. The exported file can be reused in the --json argument to e.g. 
-  run the conversion again for the JSON activity or for debugging purposes.
+- Changed program exit codes for wrong Python version (1) or no arguments (2) 
+- Extended error logging related to the TCX XSD schema.
+- Code optimization in TCX XML generation.
 
 #### Solved issues
-- Corrected a potential bug for activities with an unknown sport type.
+- Distance calculation for activities with pauses is corrected. Closes #3.
 
 ## Copyright and License
 Copyright (c) 2019 Ari Cooper Davis, Christoph Vanthuyne  
 Copyright (C) 2019-2020 Christoph Vanthuyne
 
-Read the license [`here`](./LICENSE.md).
+NPOSL-3.0 license from version 3.1.1 onward.  
+Read the license information [`here`](./LICENSE.md).
