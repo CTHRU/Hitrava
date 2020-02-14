@@ -214,8 +214,8 @@ For a full changelog of earlier versions, please look [`here`](./CHANGELOG.md).
 - Distance calculation for activities with pauses is corrected. Closes #3.
 
 ## Copyright and License
-Copyright (c) 2019 Ari Cooper Davis, Christoph Vanthuyne  
-Copyright (C) 2019-2020 Christoph Vanthuyne
+Original Work Copyright (c) 2019 Ari Cooper Davis, Christoph Vanthuyne  
+Modified Work Copyright (c) 2019-2020 Christoph Vanthuyne
 
 Licensed under the Non-Profit Open Software License version 3.0 from HiToStrava version 3.1.1 onward.  
 Read the license information [`here`](./LICENSE.md).
