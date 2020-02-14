@@ -156,48 +156,48 @@ Use the command below to convert all activities available in the motion path JSO
 Privacy data that were started on October, 3rd, 2019 or later. Source HiTrack files and converted TCX files will be 
 generated in folder ./my_output_dir/json 
 ```
- python HiToStrava --json "motion path detail data.json" --from_date 2019-10-03 --output_dir my_output_dir/json
+ python HiToStrava.py --json "motion path detail data.json" --from_date 2019-10-03 --output_dir my_output_dir/json
 ```
 Same as above, but also create an additional export file for each converted activity containing the raw JSON data of
 that activity from the motion path JSON file.
 ``` 
-python HiToStrava --json "motion path detail data.json" --json_export --from_date 2019-10-03 --output_dir my_output_dir/json
+python HiToStrava.py --json "motion path detail data.json" --json_export --from_date 2019-10-03 --output_dir my_output_dir/json
 ```
 
 #### Single file conversion examples
 The example below converts extracted file HiTrack_12345678901212345678912 to HiTrack_12345678901212345678912.tcx in 
 the ./output directory
 ```
-python HiToStrava --file HiTrack_12345678901212345678912
+python HiToStrava.py --file HiTrack_12345678901212345678912
 ```
 The next example converts extracted file HiTrack_12345678901212345678912 to HiTrack_12345678901212345678912.tcx in 
 the ./my_output_dir directory. The program logging level is set to display debug messages. The converted file is 
 validated against the TCX XSD schema (requires installed xmlschema library and an internet connection). 
 ```
-python HiToStrava --file HiTrack_12345678901212345678912 --output_dir my_output_dir --validate_xml --log_level DEBUG
+python HiToStrava.py --file HiTrack_12345678901212345678912 --output_dir my_output_dir --validate_xml --log_level DEBUG
 ```
 The following example converts an extracted file HiTrack_12345678901212345678912 to HiTrack_12345678901212345678912.tcx 
 in the ./output directory and forces the sport to walking. 
 ```
-python HiToStrava --file HiTrack_12345678901212345678912 --sport Walk
+python HiToStrava.py --file HiTrack_12345678901212345678912 --sport Walk
 ```
 The next example converts an indoor swimming activity in an extracted file HiTrack_12345678901212345678912 to 
 HiTrack_12345678901212345678912.tcx. The length of the pool in meters is specified to have a more accurate swimming data
 calculation.  
 ```
-python HiToStrava --file HiTrack_12345678901212345678912 --pool_length 25
+python HiToStrava.py --file HiTrack_12345678901212345678912 --pool_length 25
 ```
  
 #### Tar file conversion examples
 The first example extracts and converts any HiTrack file found in tar file com.huawei.health.tar into the ./output 
 directory. The output directory will contain both the extracted HiTrack file and the converted TCX XML file. 
 ```
-python HiToStrava --tar com.huawei.health.tar
+python HiToStrava.py --tar com.huawei.health.tar
 ```
 In the example below, only activities in the com.huawei.health.tar tarball that were started on August 20th, 2019 or 
 later will be extracted and converted to the ./output directory.
 ```
-python HiToStrava --tar com.huawei.health.tar --from_date 20190820
+python HiToStrava.py --tar com.huawei.health.tar --from_date 20190820
 ```
   
 ## Release Notes
