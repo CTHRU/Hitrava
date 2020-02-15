@@ -1,4 +1,7 @@
-# HiToStrava
+<img align="left" width="58" height="58" src="./images/HiToStrava_Logo_100x100.png" alt="HiToStrava Logo">
+
+# HiToStrava   
+
 ## Table of Contents
 - [Introduction](#introduction)  
 - [Installation](#installation)  
@@ -49,7 +52,7 @@ the Huawei Health app. If you don't have a Huawei account, you can create one in
 - Now tap on your account name on top of the screen.
 - Tap on **'Privacy Center'**. 
 - Tap **'Request Your Data'**. 
-- Select **'Health Kit'** from the list. Confirm your selection and follow the in-app instructions.
+- Select **'Health'** from the list. Confirm your selection and follow the in-app instructions.
 - Wait for the mail from Huawei to arrive with a link to download the data (ZIP file). 
 
 #### Step 2 - Download your requested data and extract the JSON file 
