@@ -3,6 +3,12 @@
 All notable changes to this project are documented in this file. 
 
 ## Release Notes
+### Version 3.2.0 (Build 2002.1501)
+#### New features and changes
+- JSON conversion: it is now possible to directly pass the ZIP file with the health data from Huawei in the --json 
+argument. The program will extract the "motion path detail data.json" file and start conversion.
+- Added Windows batch file HiToStrava.cmd for quick execution of JSON conversion with default arguments. 
+
 ### Version 3.1.2 (Build 2002.1301)
 #### New features and changes
 - Changed program exit codes for wrong Python version (1) or no arguments (2) 
