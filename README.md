@@ -1,7 +1,4 @@
-<img align="left" width="58" height="58" src="./images/HiToStrava_Logo_100x100.png" alt="HiToStrava Logo">
-
-# HiToStrava   
-
+![HiToStrava](./images/HiToStrava_Logo_With_Name.png)
 ## Table of Contents
 - [Introduction](#introduction)  
 - [Installation](#installation)  
