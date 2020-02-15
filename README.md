@@ -99,7 +99,11 @@ optional arguments:
 
 JSON options:
   -j JSON, --json JSON  The filename of a Huawei Cloud JSON file containing
-                        the motion path detail data.
+                        the motion path detail data or the filename of the
+                        Huawei Cloud ZIP file containing the JSON file with
+                        the motion path detail data. In the latter case, the
+                        JSON file will be extracted to the directory in the
+                        --output_dir argument.
   --json_export         Exports a file with the JSON data of each single
                         activity that is converted from the JSON file in the
                         --json argument. The file will be exported to the
@@ -201,11 +205,11 @@ python HiToStrava.py --tar com.huawei.health.tar --from_date 20190820
 The release notes of the latest release can be found below.  
 For a full changelog of earlier versions, please look [`here`](./CHANGELOG.md).
 
-### Version 3.1.2 (Build 2002.1301)
+### Version 3.2.0 (Build 2002.1501)
 #### New features and changes
-- Changed program exit codes for wrong Python version (1) or no arguments (2) 
-- Extended error logging related to the TCX XSD schema.
-- Code optimization in TCX XML generation.
+- JSON conversion: it is now possible to directly pass the ZIP file with the health data from Huawei in the --json 
+argument. The program will extract the "motion path detail data.json" file and start conversion.
+- Added Windows batch file HiToStrava.cmd for quick execution of JSON conversion with default arguments. 
 
 #### Solved issues
 - Distance calculation for activities with pauses is corrected. Closes #3.
