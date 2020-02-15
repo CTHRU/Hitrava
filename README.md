@@ -84,71 +84,68 @@ extension, up to 25 at once) to upload.
 
 ## Usage
 ### Command Line Arguments Overview
-> usage: HiToStrava.py [-h] [-f FILE]
->                     [-s {Walk,Run,Cycle,Swim_Pool,Swim_Open_Water}] [-j JSON]
->                     [-t TAR] [--from_date FROM_DATE]
->                     [--pool_length POOL_LENGTH] [--output_dir OUTPUT_DIR]
->                     [--output_file_prefix OUTPUT_FILE_PREFIX]
->                     [--validate_xml] [--log_level {INFO,DEBUG}]
->
->optional arguments:
->>  -h, --help            show this help message and exit
+```
+usage: HiToStrava.py [-h] [-j JSON] [--json_export] [-f FILE]
+                     [-s {Walk,Run,Cycle,Swim_Pool,Swim_Open_Water}] [-t TAR]
+                     [--from_date FROM_DATE] [--pool_length POOL_LENGTH]
+                     [--output_dir OUTPUT_DIR]
+                     [--output_file_prefix OUTPUT_FILE_PREFIX]
+                     [--validate_xml] [--log_level {INFO,DEBUG}]
 
->>  --log_level {INFO,DEBUG}
->>                        Set the logging level.
+optional arguments:
+  -h, --help            show this help message and exit
+  --log_level {INFO,DEBUG}
+                        Set the logging level.
 
->FILE options:
->>  -f FILE, --file FILE  The filename of a single HiTrack file to convert.
->
->> -s {Walk,Run,Cycle,Swim_Pool,Swim_Open_Water}, --sport {Walk,Run,Cycle,Swim_Pool,Swim_Open_Water}
->>                        Force sport for the conversion. Sport will be auto-
->>                        detected when this option is not used.
+JSON options:
+  -j JSON, --json JSON  The filename of a Huawei Cloud JSON file containing
+                        the motion path detail data.
+  --json_export         Exports a file with the JSON data of each single
+                        activity that is converted from the JSON file in the
+                        --json argument. The file will be exported to the
+                        directory in the --output_dir argument with a .json
+                        file extension. The exported file can be reused in the
+                        --json argument to e.g. run the conversion again for
+                        the JSON activity or for debugging purposes.
 
->JSON options:
->>  -j JSON, --json JSON  The filename of a Huawei Cloud JSON file containing
->>                        the motion path detail data.
+FILE options:
+  -f FILE, --file FILE  The filename of a single HiTrack file to convert.
+  -s {Walk,Run,Cycle,Swim_Pool,Swim_Open_Water}, --sport {Walk,Run,Cycle,Swim_Pool,Swim_Open_Water}
+                        Force sport for the conversion. Sport will be auto-
+                        detected when this option is not used.
 
->>  --json_export         Exports a file with the JSON data of each single
->>                        activity that is converted from the JSON file in the
->>                        --json argument. The file will be exported to the
->>                        directory in the --output_dir argument with a .json
->>                        file extension. The exported file can be reused in the
->>                        --json argument to e.g. run the conversion again for
->>                        the JSON activity or for debugging purposes.
+TAR options:
+  -t TAR, --tar TAR     The filename of an (unencrypted) tarball with HiTrack
+                        files to convert.
 
->TAR options:
->>  -t TAR, --tar TAR     The filename of an (unencrypted) tarball with HiTrack
->>                        files to convert.
+DATE options:
+  --from_date FROM_DATE
+                        Applicable to --json and --tar options only. Only
+                        convert HiTrack information from the JSON file or from
+                        HiTrack files in the tarball if the activity started
+                        on FROM_DATE or later. Format YYYY-MM-DD
 
->DATE options:
->>  --from_date FROM_DATE
->>                        Applicable to --json and --tar options only. Only
->>                        convert HiTrack information from the JSON file or from
->>                        HiTrack files in the tarball if the activity started
->>                        on FROM_DATE or later. Format YYYY-MM-DD
+SWIM options:
+  --pool_length POOL_LENGTH
+                        The pool length in meters to use for swimming
+                        activities. If the option is not set, the estimated
+                        pool length derived from the available speed data in
+                        the HiTrack file will be used. Note that the available
+                        speed data has a minimum resolution of 1 dm/s.
 
->SWIM options:
->>  --pool_length POOL_LENGTH
->>                        The pool length in meters to use for swimming
->>                        activities. If the option is not set, the estimated
->>                        pool length derived from the available speed data in
->>                        the HiTrack file will be used. Note that the available
->>                        speed data has a minimum resolution of 1 dm/s.
-
->OUTPUT options:
->>  --output_dir OUTPUT_DIR
->>                        The path to the directory to store the output files.
->>                        The default directory is ./output.
-
->>  --output_file_prefix OUTPUT_FILE_PREFIX
->>                        Adds the strftime representation of this argument as a
->>                        prefix to the generated TCX XML file(s). E.g. use
->>                        %Y-%m-%d- to add human readable year-month-day
->>                        information in the name of the generated TCX file.
-
->>  --validate_xml        Validate generated TCX XML file(s). NOTE: requires
->>                        xmlschema library and an internet connection to
->>                        retrieve the TCX XSD.
+OUTPUT options:
+  --output_dir OUTPUT_DIR
+                        The path to the directory to store the output files.
+                        The default directory is ./output.
+  --output_file_prefix OUTPUT_FILE_PREFIX
+                        Adds the strftime representation of this argument as a
+                        prefix to the generated TCX XML file(s). E.g. use
+                        %Y-%m-%d- to add human readable year-month-day
+                        information in the name of the generated TCX file.
+  --validate_xml        Validate generated TCX XML file(s). NOTE: requires
+                        xmlschema library and an internet connection to
+                        retrieve the TCX XSD.
+```
                         
 ### Usage Examples
 #### JSON file conversion example
