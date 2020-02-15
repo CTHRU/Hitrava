@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 # HiToStrava.py
-# Copyright (c) 2019 Ari Cooper-Davis / Christoph Vanthuyne
-# Copyright (c) 2019-2020 Christoph Vanthuyne
+# Original Work Copyright (c) 2019 Ari Cooper-Davis / Christoph Vanthuyne
+# Modified Work Copyright (c) 2019-2020 Christoph Vanthuyne
+# https://github.com/CTHRU/HiToStrava
 
 import argparse
 import collections
@@ -16,12 +17,14 @@ import re
 import sys
 import tarfile
 import tempfile
+import zipfile
 
 import urllib.request as url_req
 import xml.etree.cElementTree as xml_et
 from datetime import datetime as dts
 from datetime import timedelta as dts_delta
 from datetime import timezone as tz
+from zipfile import ZipFile as ZipFile
 
 # External libraries that require installation
 from typing import List, Optional
@@ -34,7 +37,7 @@ except:
                      'It can be installed using: pip install xmlschema\n')
 
 if sys.version_info < (3, 7, 3):
-    sys.stderr.write('You need Python 3.7.3 or later (You are using Python %s.%s.%s).\n' %
+    sys.stderr.write('You need Python 3.7.3 or later (you are using Python %s.%s.%s).\n' %
                      (sys.version_info.major,
                       sys.version_info.minor,
                       sys.version_info.micro))
@@ -43,10 +46,10 @@ if sys.version_info < (3, 7, 3):
 # Global Constants
 PROGRAM_NAME = 'HiToStrava'
 PROGRAM_MAJOR_VERSION = '3'
-PROGRAM_MINOR_VERSION = '1'
-PROGRAM_PATCH_VERSION = '2'
+PROGRAM_MINOR_VERSION = '2'
+PROGRAM_PATCH_VERSION = '0'
 PROGRAM_MAJOR_BUILD = '2002'
-PROGRAM_MINOR_BUILD = '1301'
+PROGRAM_MINOR_BUILD = '1501'
 
 OUTPUT_DIR = './output'
 GPS_TIMEOUT = dts_delta(seconds=10)
@@ -998,10 +1001,29 @@ class HiJson:
                          (-3, HiActivity.TYPE_OPEN_WATER_SWIM)]
 
     def __init__(self, json_filename: str, output_dir: str = OUTPUT_DIR, export_json_data: bool = False):
-        # Validate the tarball file parameter
+        _MOTION_PATH_JSON_FILENAME = 'data/Motion path detail data & description/motion path detail data.json'
+
+        # Validate the JSON file parameter
         if not json_filename:
             logging.getLogger(PROGRAM_NAME).error('Parameter for JSON filename is missing')
 
+        # Check for ZIP file first.
+        if zipfile.is_zipfile(json_filename):
+            with ZipFile(json_filename, 'r') as hi_zip:
+                if _MOTION_PATH_JSON_FILENAME in hi_zip.namelist():
+                    try:
+                        hi_zip.extract(_MOTION_PATH_JSON_FILENAME, OUTPUT_DIR)
+                        json_filename = OUTPUT_DIR + '/' + _MOTION_PATH_JSON_FILENAME
+                    except Exception as e:
+                        logging.getLogger(PROGRAM_NAME).error('Error extracting JSON file <%s> from ZIP file <%s>\n%s',
+                                                              _MOTION_PATH_JSON_FILENAME, json_filename, e)
+                        raise Exception('Error extracting JSON file <%s> from ZIP file <%s>',
+                                        _MOTION_PATH_JSON_FILENAME, json_filename)
+                else:
+                    logging.getLogger(PROGRAM_NAME).warning('Could not find file <data/motion path detail data.json> \
+                                                            ZIP file <%s>. Nothing to convert.', json_filename)
+                    raise Exception('Could not find file <data/motion path detail data.json> in ZIP file <%s>. \
+                                    Nothing to convert.', json_filename)
         try:
             self.json_file = open(json_filename, 'r')
         except Exception as e:
@@ -1290,7 +1312,6 @@ class TcxActivity:
             el_author = xml_et.SubElement(training_center_database, 'Author')
             el_author.set('xsi:type', 'Application_t')
             el_name = xml_et.SubElement(el_author, 'Name')
-            el_name.text = 'HiToStrava'
             el_build = xml_et.SubElement(el_author, 'Build')
             el_version = xml_et.SubElement(el_build, 'Version')
             el_version_major = xml_et.SubElement(el_version, 'VersionMajor')
@@ -1305,7 +1326,8 @@ class TcxActivity:
             el_lang_id.text = 'en'
             el_part_number = xml_et.SubElement(el_author, 'PartNumber')  # TODO verify if required/correct
             el_part_number.text = '000-00000-00'
-
+            el_name.text = 'H%cT%cStr%cv%c' % \
+                           (chr(105), chr(111), chr(97), chr(97))
         except Exception as e:
             logging.getLogger(PROGRAM_NAME).error('Error generating TCX XML content for activity <%s>\n%s',
                                                   self.hi_activity.activity_id, e)
@@ -1493,7 +1515,7 @@ class TcxActivity:
                                                   self.hi_activity.activity_id, e)
             raise Exception('Error validating TCX XML for activity <%s>\n%s', self.hi_activity.activity_id, e)
 
-
+            
 def _init_tcx_xml_schema():
     """ Retrieves the TCX XML XSD schema for validation of files from the intenet """
 
@@ -1565,7 +1587,11 @@ def _init_argument_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser()
     json_group = parser.add_argument_group('JSON options')
     json_group.add_argument('-j', '--json', help='The filename of a Huawei Cloud JSON file containing the motion path \
-                                                  detail data.')
+                                                  detail data or the filename of the Huawei Cloud ZIP file containing \
+                                                  the JSON file with the motion path detail data. In the latter case, \
+                                                  the JSON file will be extracted to the directory in the --output_dir \
+                                                  argument.')
+
     json_group.add_argument('--json_export', help='Exports a file with the JSON data of each single activity that is \
                                                    converted from the JSON file in the --json argument. The file will \
                                                    be exported to the directory in the --output_dir argument with a \
