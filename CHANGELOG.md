@@ -3,6 +3,10 @@
 All notable changes to this project are documented in this file. 
 
 ## Release Notes
+### Version 3.2.1 (Build 2002.1801)
+#### New features and changes
+- Small code changes to make HiToStrava compatible with Python versions 3.5.1 or above (was 3.7.3 or above).
+
 ### Version 3.2.0 (Build 2002.1501)
 #### New features and changes
 - JSON conversion: it is now possible to directly pass the ZIP file with the health data from Huawei in the --json 
