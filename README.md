@@ -17,7 +17,9 @@ directly uploaded to [`Strava`](https://strava.com).
 ## Installation
 ### Requirements
 To use HiToStrava, you need:
-- [`Python 3.7.3`](https://www.python.org/downloads/) or higher.
+- [`Python 3.7.x`](https://www.python.org/downloads/) or higher.
+    - Python 3.7.6 is the lowest recommended version (developed and tested on this version).
+    - Python 3.5.1 is the lowest minimum required version (compatibility tested on this version). 
 - A Huawei account to request your health data.
 
 ### Installation Procedure
@@ -64,7 +66,7 @@ HiToStrava.
   >**Tip**: If you're on Windows and you're not familiar with the Command Prompt or just want to do a quick
   > conversion with default arguments, double-click the _Run_HiToStrava.cmd_ file in the installation folder of HiToStrava.                                                                                                                    
                                                                                                                                                
-- In the Command Prompt, run the HiToStrava.py with the --json command line argument. You can use the default example 
+- In the Command Prompt, run HiToStrava.py with the --json command line argument. You can use the default example 
 command below or [add / change command line arguments](#command-line-arguments-overview) as you need.
   ```
   HiToStrava.py --json "motion path detail data.json" --json_export
@@ -205,14 +207,9 @@ python HiToStrava.py --tar com.huawei.health.tar --from_date 20190820
 The release notes of the latest release can be found below.  
 For a full changelog of earlier versions, please look [`here`](./CHANGELOG.md).
 
-### Version 3.2.0 (Build 2002.1501)
+### Version 3.2.1 (Build 2002.1801)
 #### New features and changes
-- JSON conversion: it is now possible to directly pass the ZIP file with the health data from Huawei in the --json 
-argument. The program will extract the "motion path detail data.json" file and start conversion.
-- Added Windows batch file HiToStrava.cmd for quick execution of JSON conversion with default arguments. 
-
-#### Solved issues
-- Distance calculation for activities with pauses is corrected. Closes #3.
+- Small code changes to make HiToStrava compatible with Python versions 3.5.1 or above (was 3.7.3 or above).
 
 ## Copyright and License
 Original Work Copyright (c) 2019 Ari Cooper Davis, Christoph Vanthuyne  
