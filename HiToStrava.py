@@ -36,8 +36,8 @@ except:
                      'It is required when using the --validate_xml argument.\n' +
                      'It can be installed using: pip install xmlschema\n')
 
-if sys.version_info < (3, 7, 3):
-    sys.stderr.write('You need Python 3.7.3 or later (you are using Python %s.%s.%s).\n' %
+if sys.version_info < (3, 5, 1):
+    sys.stderr.write('You need Python 3.5.1 or later (you are using Python %s.%s.%s).\n' %
                      (sys.version_info.major,
                       sys.version_info.minor,
                       sys.version_info.micro))
@@ -47,9 +47,9 @@ if sys.version_info < (3, 7, 3):
 PROGRAM_NAME = 'HiToStrava'
 PROGRAM_MAJOR_VERSION = '3'
 PROGRAM_MINOR_VERSION = '2'
-PROGRAM_PATCH_VERSION = '0'
+PROGRAM_PATCH_VERSION = '1'
 PROGRAM_MAJOR_BUILD = '2002'
-PROGRAM_MINOR_BUILD = '1501'
+PROGRAM_MINOR_BUILD = '1801'
 
 OUTPUT_DIR = './output'
 GPS_TIMEOUT = dts_delta(seconds=10)
@@ -97,7 +97,7 @@ class HiActivity:
 
         # Create an empty segment and segment list
         self._current_segment = None
-        self._segment_list: List = None
+        self._segment_list = None
 
         # Create an empty detail data dictionary. key = timestamp, value = dict{t, lat, lon, alt, hr)
         self.data_dict = {}
@@ -940,7 +940,6 @@ class HiTarBall:
     def parse(self, from_date: datetime.date = datetime.date(1970, 1, 1)) -> list:
         try:
             # Look for HiTrack files in directory com.huawei.health/files in tarball
-            tar_info: tarfile.TarInfo
             for tar_info in self.tarball.getmembers():
                 if tar_info.path.startswith(self._TAR_HITRACK_DIR) \
                         and os.path.basename(tar_info.path).startswith(self._HITRACK_FILE_START):
@@ -1100,7 +1099,7 @@ class HiJson:
                                             )
 
                         if self.export_json_data:
-                            # TODO Save a copy of the JSON data of a single activity. Allows re-processing for debugging reasons.
+                            # Save a copy of the JSON data of a single activity. Allows re-processing for debugging.
                             json_filename = hitrack_filename + '.json'
                             logging.getLogger(PROGRAM_NAME).info(
                                 'Exporting JSON data of activity at index %d from %s to file %s',
@@ -1224,7 +1223,7 @@ class TcxActivity:
         self.hi_activity = hi_activity
         self.training_center_database = None
         if tcx_xml_schema:
-            self.tcx_xml_schema: xmlschema = tcx_xml_schema
+            self.tcx_xml_schema = tcx_xml_schema
         else:
             self.tcx_xml_schema = None
         self.save_dir = save_dir
@@ -1277,7 +1276,7 @@ class TcxActivity:
             # Strange enough, according to TCX XSD the Id should be a date.
             # TODO verify if this is the case for Strava too or if something more meaningful can be passed.
             el_id = xml_et.SubElement(el_activity, 'Id')
-            el_id.text = self.hi_activity.get_tz_aware_datetime(self.hi_activity.start).isoformat('T', 'seconds')
+            el_id.text = self.hi_activity.get_tz_aware_datetime(self.hi_activity.start).isoformat('T')
             # Generate the activity xml content based on the type of activity
             if self.hi_activity.get_activity_type() in [HiActivity.TYPE_WALK,
                                                         HiActivity.TYPE_RUN,
@@ -1347,7 +1346,7 @@ class TcxActivity:
             for data in segment_data:
                 el_trackpoint = xml_et.SubElement(el_track, 'Trackpoint')
                 el_time = xml_et.SubElement(el_trackpoint, 'Time')
-                el_time.text = self.hi_activity.get_tz_aware_datetime(data['t']).isoformat('T', 'seconds')
+                el_time.text = self.hi_activity.get_tz_aware_datetime(data['t']).isoformat('T')
 
                 if 'lat' in data:
                     el_position = xml_et.SubElement(el_trackpoint, 'Position')
@@ -1392,7 +1391,7 @@ class TcxActivity:
             # Add first TrackPoint for start of lap
             el_trackpoint = xml_et.SubElement(el_track, 'Trackpoint')
             el_time = xml_et.SubElement(el_trackpoint, 'Time')
-            el_time.text = self.hi_activity.get_tz_aware_datetime(lap['start']).isoformat('T', 'seconds')
+            el_time.text = self.hi_activity.get_tz_aware_datetime(lap['start']).isoformat('T')
             el_distance_meters = xml_et.SubElement(el_trackpoint, 'DistanceMeters')
             el_distance_meters.text = str(cumulative_distance)
 
@@ -1415,7 +1414,7 @@ class TcxActivity:
 
             el_trackpoint = xml_et.SubElement(el_track, 'Trackpoint')
             el_time = xml_et.SubElement(el_trackpoint, 'Time')
-            el_time.text = self.hi_activity.get_tz_aware_datetime(lap['stop']).isoformat('T', 'seconds')
+            el_time.text = self.hi_activity.get_tz_aware_datetime(lap['stop']).isoformat('T')
             el_distance_meters = xml_et.SubElement(el_trackpoint, 'DistanceMeters')
             el_distance_meters.text = str(cumulative_distance)
         return
@@ -1423,7 +1422,7 @@ class TcxActivity:
     def _generate_lap_header_xml_data(self, el_activity, segment) -> xml_et.Element:
         """ Generates the TCX XML lap header content part """
         el_lap = xml_et.SubElement(el_activity, 'Lap')
-        el_lap.set('StartTime', self.hi_activity.get_tz_aware_datetime(segment['start']).isoformat('T', 'seconds'))
+        el_lap.set('StartTime', self.hi_activity.get_tz_aware_datetime(segment['start']).isoformat('T'))
         el_total_time_seconds = xml_et.SubElement(el_lap, 'TotalTimeSeconds')
         el_total_time_seconds.text = str(segment['duration'])
         # Distance per segment. Use calculated distances. Although they may be off from the total distance provided
@@ -1515,7 +1514,7 @@ class TcxActivity:
                                                   self.hi_activity.activity_id, e)
             raise Exception('Error validating TCX XML for activity <%s>\n%s', self.hi_activity.activity_id, e)
 
-            
+
 def _init_tcx_xml_schema():
     """ Retrieves the TCX XML XSD schema for validation of files from the intenet """
 
