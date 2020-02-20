@@ -87,7 +87,7 @@ extension, up to 25 at once) to upload.
 ## Usage
 ### Command Line Arguments Overview
 ```
-usage: HiToStrava.py [-h] [-j JSON] [--json_export] [-f FILE]
+usage: HiToStrava.py [-h] [-z ZIP] [-j JSON] [--json_export] [-f FILE]
                      [-s {Walk,Run,Cycle,Swim_Pool,Swim_Open_Water}] [-t TAR]
                      [--from_date FROM_DATE] [--pool_length POOL_LENGTH]
                      [--output_dir OUTPUT_DIR]
@@ -100,12 +100,16 @@ optional arguments:
                         Set the logging level.
 
 JSON options:
+  -z ZIP, --zip ZIP     The filename of the Huawei Cloud ZIP file containing
+                        the JSON file with the motion path detail data to
+                        convert. The JSON file will be extracted to the
+                        directory in the --output_dir argument and conversion
+                        will be performed.
   -j JSON, --json JSON  The filename of a Huawei Cloud JSON file containing
-                        the motion path detail data or the filename of the
-                        Huawei Cloud ZIP file containing the JSON file with
-                        the motion path detail data. In the latter case, the
-                        JSON file will be extracted to the directory in the
-                        --output_dir argument.
+                        the motion path detail data to convert or the filename
+                        of the Huawei Cloud ZIP file containing the JSON file
+                        with the motion path detail data (this will work
+                        identical to --zip argument above).
   --json_export         Exports a file with the JSON data of each single
                         activity that is converted from the JSON file in the
                         --json argument. The file will be exported to the
@@ -207,13 +211,28 @@ python HiToStrava.py --tar com.huawei.health.tar --from_date 20190820
 The release notes of the latest release can be found below.  
 For a full changelog of earlier versions, please look [`here`](./CHANGELOG.md).
 
-### Version 3.2.1 (Build 2002.1801)
+### Version 3.2.2 (build 2002.2001)
 #### New features and changes
-- Small code changes to make HiToStrava compatible with Python versions 3.5.1 or above (was 3.7.3 or above).
+- ZIP conversion: made ZIP conversion explicit with new -z or --zip arguments and in usage. JSON conversion with -j or
+--json arguments also still checks for ZIP file and will extract JSON before starting conversion.
+
+#### Solved issues
+- ZIP conversion: the --output_dir argument was ignored when extracting the JSON file from the ZIP file.
+
+#### Known Issues
+- There seems to be a problem lately to properly initialize the TCX XSD schema when using the --validate_xml argument. 
 
 ## Copyright and License
-Original Work Copyright (c) 2019 Ari Cooper Davis, Christoph Vanthuyne  
-Modified Work Copyright (c) 2019-2020 Christoph Vanthuyne
+[![nposl3.0][shield nposl3.0]][tldrlegal nposl3.0]  
+
+[shield nposl3.0]: https://img.shields.io/badge/license-nposl--3.0-blue
+[tldrlegal nposl3.0]: https://tldrlegal.com/license/non-profit-open-software-license-3.0-(nposl-3.0)
+[nposl3.0]: https://opensource.org/licenses/NPOSL-3.0
+
+Copyright (c) 2019-2020 Christoph Vanthuyne
 
 Licensed under the Non-Profit Open Software License version 3.0 from HiToStrava version 3.1.1 onward.  
-Read the license information [`here`](./LICENSE.md).
+
+Read the full license information [`here`](./LICENSE.md).
+
+If you're more into a TL;DR approach, start [`here`][tldrlegal nposl3.0]
