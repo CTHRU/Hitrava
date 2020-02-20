@@ -3,6 +3,17 @@
 All notable changes to this project are documented in this file. 
 
 ## Release Notes
+### Version 3.2.2 (build 2002.2001)
+#### New features and changes
+- ZIP conversion: made ZIP conversion explicit with new -z or --zip arguments and in usage. JSON conversion with -j or
+--json arguments also still checks for ZIP file and will extract JSON before starting conversion.
+
+#### Solved issues
+- ZIP conversion: the --output_dir argument was ignored when extracting the JSON file from the ZIP file.
+
+#### Known Issues
+- There seems to be a problem lately to properly initialize the TCX XSD schema when using the --validate_xml argument. 
+
 ### Version 3.2.1 (Build 2002.1801)
 #### New features and changes
 - Small code changes to make HiToStrava compatible with Python versions 3.5.1 or above (was 3.7.3 or above).
