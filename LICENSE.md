@@ -1,7 +1,6 @@
 Non-Profit Open Software License 3.0 (NPOSL-3.0)
 
-Original Work Copyright (c) 2019 Ari Cooper Davis, Christoph Vanthuyne  
-Modified Work Copyright (c) 2019-2020 Christoph Vanthuyne
+Copyright (c) 2019-2020 Christoph Vanthuyne
 
 This Non-Profit Open Software License ("Non-Profit OSL") version 3.0 (the "License") applies to any original work of authorship (the "Original Work") whose owner (the "Licensor") has placed the following licensing notice adjacent to the copyright notice for the Original Work:
 
@@ -65,7 +64,6 @@ e) to display the Original Work publicly.
 
 This program is derived from [`aricooperdavis/Huawei-TCX-Converter`](https://github.com/aricooperdavis/Huawei-TCX-Converter).  
 For versions of this program lower than 3.1.1 (before February 12, 2020), the license below applies. 
-
 
 MIT License
 
