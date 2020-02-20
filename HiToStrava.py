@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
+
 # HiToStrava.py
-# Original Work Copyright (c) 2019 Ari Cooper-Davis / Christoph Vanthuyne
-# Modified Work Copyright (c) 2019-2020 Christoph Vanthuyne
-# https://github.com/CTHRU/HiToStrava
+# Original Work Copyright (c) 2019 Ari Cooper-Davis / Christoph Vanthuyne - github.com/aricooperdavis/Huawei-TCX-Converter
+# Modified Work Copyright (c) 2019-2020 Christoph Vanthuyne - https://github.com/CTHRU/HiToStrava
+# Released under the Non-Profit Open Software License version 3.0
+
 
 import argparse
 import collections
@@ -47,9 +49,9 @@ if sys.version_info < (3, 5, 1):
 PROGRAM_NAME = 'HiToStrava'
 PROGRAM_MAJOR_VERSION = '3'
 PROGRAM_MINOR_VERSION = '2'
-PROGRAM_PATCH_VERSION = '1'
+PROGRAM_PATCH_VERSION = '2'
 PROGRAM_MAJOR_BUILD = '2002'
-PROGRAM_MINOR_BUILD = '1801'
+PROGRAM_MINOR_BUILD = '2001'
 
 OUTPUT_DIR = './output'
 GPS_TIMEOUT = dts_delta(seconds=10)
@@ -217,8 +219,13 @@ class HiActivity:
         # Empty data dictionary or no last location found in dictionary
         return None
 
+    # TODO - Discovered on 18 Feb 2020 that this method is a 1:1 copy of the code in the vincenty 0.1.4 package on pypi.org (https://pypi.org/project/vincenty/)
+    # TODO - Evaluate to either keep this method (facilitates easier install) versus import the vincenty 0.1.4 package
     def _vincenty(self, point1: tuple, point2: tuple) -> float:
         """
+        Update 2020-02-18 - Discovered that this method is a 1:1 copy of the code in the vincenty 0.1.4 package
+        on pypi.org (https://pypi.org/project/vincenty/) released under the Public Domain Unlicense license.
+
         Determine distance between two coordinates
 
         Parameters
@@ -991,6 +998,29 @@ class HiTarBall:
         self._close_tarball()
 
 
+class HiZip:
+    @staticmethod
+    def extract_json(zip_filename: str, output_dir: str = OUTPUT_DIR):
+        _MOTION_PATH_JSON_FILENAME = 'data/Motion path detail data & description/motion path detail data.json'
+        if zipfile.is_zipfile(zip_filename):
+            with ZipFile(zip_filename, 'r') as hi_zip:
+                if _MOTION_PATH_JSON_FILENAME in hi_zip.namelist():
+                    try:
+                        hi_zip.extract(_MOTION_PATH_JSON_FILENAME, output_dir)
+                        json_filename = output_dir + '/' + _MOTION_PATH_JSON_FILENAME
+                        return json_filename
+                    except Exception as e:
+                        logging.getLogger(PROGRAM_NAME).error('Error extracting JSON file <%s> from ZIP file <%s>\n%s',
+                                                              _MOTION_PATH_JSON_FILENAME, zip_filename, e)
+                        raise Exception('Error extracting JSON file <%s> from ZIP file <%s>',
+                                        _MOTION_PATH_JSON_FILENAME, zip_filename)
+                else:
+                    logging.getLogger(PROGRAM_NAME).warning('Could not find file <data/motion path detail data.json> \
+                                                            ZIP file <%s>. Nothing to convert.', zip_filename)
+                    raise Exception('Could not find file <data/motion path detail data.json> in ZIP file <%s>. \
+                                    Nothing to convert.', zip_filename)
+
+
 class HiJson:
     # TODO find the correct values for the unknown/undocumented JSON sport types
     _JSON_SPORT_TYPES = [(5, HiActivity.TYPE_WALK),
@@ -1006,23 +1036,6 @@ class HiJson:
         if not json_filename:
             logging.getLogger(PROGRAM_NAME).error('Parameter for JSON filename is missing')
 
-        # Check for ZIP file first.
-        if zipfile.is_zipfile(json_filename):
-            with ZipFile(json_filename, 'r') as hi_zip:
-                if _MOTION_PATH_JSON_FILENAME in hi_zip.namelist():
-                    try:
-                        hi_zip.extract(_MOTION_PATH_JSON_FILENAME, OUTPUT_DIR)
-                        json_filename = OUTPUT_DIR + '/' + _MOTION_PATH_JSON_FILENAME
-                    except Exception as e:
-                        logging.getLogger(PROGRAM_NAME).error('Error extracting JSON file <%s> from ZIP file <%s>\n%s',
-                                                              _MOTION_PATH_JSON_FILENAME, json_filename, e)
-                        raise Exception('Error extracting JSON file <%s> from ZIP file <%s>',
-                                        _MOTION_PATH_JSON_FILENAME, json_filename)
-                else:
-                    logging.getLogger(PROGRAM_NAME).warning('Could not find file <data/motion path detail data.json> \
-                                                            ZIP file <%s>. Nothing to convert.', json_filename)
-                    raise Exception('Could not find file <data/motion path detail data.json> in ZIP file <%s>. \
-                                    Nothing to convert.', json_filename)
         try:
             self.json_file = open(json_filename, 'r')
         except Exception as e:
@@ -1516,7 +1529,7 @@ class TcxActivity:
 
 
 def _init_tcx_xml_schema():
-    """ Retrieves the TCX XML XSD schema for validation of files from the intenet """
+    """ Retrieves the TCX XML XSD schema for validation of files from the internet """
 
     _TCX_XSD_FILE = 'TrainingCenterDatabasev2.xsd'
 
@@ -1585,11 +1598,15 @@ def _init_logging(level: str = 'INFO'):
 def _init_argument_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser()
     json_group = parser.add_argument_group('JSON options')
+    json_group.add_argument('-z', '--zip', help='The filename of the Huawei Cloud ZIP file containing \
+                                                 the JSON file with the motion path detail data to convert. \
+                                                 The JSON file will be extracted to the directory in the --output_dir \
+                                                 argument and conversion will be performed.')
+
     json_group.add_argument('-j', '--json', help='The filename of a Huawei Cloud JSON file containing the motion path \
-                                                  detail data or the filename of the Huawei Cloud ZIP file containing \
-                                                  the JSON file with the motion path detail data. In the latter case, \
-                                                  the JSON file will be extracted to the directory in the --output_dir \
-                                                  argument.')
+                                                  detail data to convert or the filename of the Huawei Cloud ZIP file \
+                                                  containing the JSON file with the motion path detail data (this will \
+                                                  work identical to --zip argument above).')
 
     json_group.add_argument('--json_export', help='Exports a file with the JSON data of each single activity that is \
                                                    converted from the JSON file in the --json argument. The file will \
@@ -1705,8 +1722,14 @@ def main():
             tcx_activity = TcxActivity(hi_activity, tcx_xml_schema, args.output_dir, args.output_file_prefix)
             tcx_activity.save()
             logging.getLogger(PROGRAM_NAME).info('Converted %s', hi_activity)
-    elif args.json:
-        hi_json = HiJson(args.json, args.output_dir, args.json_export)
+    elif args.json or args.zip:
+        if args.zip:
+            json_filename = HiZip.extract_json(args.zip, args.output_dir)
+        elif args.json and zipfile.is_zipfile(args.json):
+            json_filename = HiZip.extract_json(args.json, args.output_dir)
+        else:
+            json_filename = args.json
+        hi_json = HiJson(json_filename, args.output_dir, args.json_export)
         hi_activity_list = hi_json.parse(args.from_date)
         for hi_activity in hi_activity_list:
             if args.pool_length:
