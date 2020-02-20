@@ -1,4 +1,10 @@
-![HiToStrava](./images/HiToStrava_Logo_With_Name.png)
+![HiToStrava](./images/HiToStrava_Logo_With_Name.png)  
+
+[![nposl3.0][shield nposl3.0]][tldrlegal nposl3.0]
+[![GitHub release (latest by date)][shield release]](#Release)
+[![GitHub Release Date][shield release date]](#Release)
+![GitHub All Releases][shield downloads]
+----------
 ## Table of Contents
 - [Introduction](#introduction)  
 - [Installation](#installation)  
@@ -225,14 +231,17 @@ For a full changelog of earlier versions, please look [`here`](./CHANGELOG.md).
 ## Copyright and License
 [![nposl3.0][shield nposl3.0]][tldrlegal nposl3.0]  
 
-[shield nposl3.0]: https://img.shields.io/badge/license-nposl--3.0-blue
-[tldrlegal nposl3.0]: https://tldrlegal.com/license/non-profit-open-software-license-3.0-(nposl-3.0)
-[nposl3.0]: https://opensource.org/licenses/NPOSL-3.0
-
 Copyright (c) 2019-2020 Christoph Vanthuyne
 
 Licensed under the Non-Profit Open Software License version 3.0 from HiToStrava version 3.1.1 onward.  
 
 Read the full license information [`here`](./LICENSE.md).
 
-If you're more into a TL;DR approach, start [`here`][tldrlegal nposl3.0]
+If you're more into a TL;DR approach, start [`here`][tldrlegal nposl3.0].
+
+[shield nposl3.0]: https://img.shields.io/badge/license-nposl--3.0-blue
+[tldrlegal nposl3.0]: https://tldrlegal.com/license/non-profit-open-software-license-3.0-(nposl-3.0)
+[nposl3.0]: https://opensource.org/licenses/NPOSL-3.0
+[shield release]: https://img.shields.io/github/v/release/CTHRU/HiToStrava
+[shield release date]: https://img.shields.io/github/release-date/CTHRU/HiToStrava
+[shield downloads]: https://img.shields.io/github/downloads/CTHRU/HiToStrava/total?color=green
