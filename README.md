@@ -1,8 +1,8 @@
 ![HiToStrava](./images/HiToStrava_Logo_With_Name.png)  
 
 [![nposl3.0][shield nposl3.0]][tldrlegal nposl3.0]
-[![GitHub release (latest by date)][shield release]](#Release)
-[![GitHub Release Date][shield release date]](#Release)
+![GitHub release (latest by date)][shield release]
+![GitHub Release Date][shield release date]
 ----------
 ## Table of Contents
 - [Introduction](#introduction)  
