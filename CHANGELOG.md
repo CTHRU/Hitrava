@@ -1,8 +1,22 @@
-# HiToStrava Changelog
+# Hitrava Changelog
 
 All notable changes to this project are documented in this file. 
 
 ## Release Notes
+### Version 3.2.3 (build 2002.2901)
+#### New features and changes
+- Oops, made a mistake. Didn't think about the Swedish word for 'to strive' being a Trademark.
+The application has been gracefully renamed to Hitrava, a convenient abbreviation of h(uawe)i, tra(ck) and the last 2
+characters of the Swedish word for 'to strive'.  
+All application name references in text and code have been changed too. You will have to adapt your scripts to use the 
+new application name, sorry for the inconvenience.  
+- Changed the conversion procedure in the _README_ to use the direct ZIP conversion (requires less steps than the JSON 
+conversion) and changed the _Run_Hitrava.cmd_ batch script accordingly. 
+- Cleaned up some superfluous code and comments. Did a technical correction to a regexp in code.
+
+#### Solved issues
+- Removed erroneous 'test' logging message when program runs in debug mode.
+
 ### Version 3.2.2 (build 2002.2001)
 #### New features and changes
 - ZIP conversion: made ZIP conversion explicit with new -z or --zip arguments and in usage. JSON conversion with -j or
@@ -16,13 +30,13 @@ All notable changes to this project are documented in this file.
 
 ### Version 3.2.1 (Build 2002.1801)
 #### New features and changes
-- Small code changes to make HiToStrava compatible with Python versions 3.5.1 or above (was 3.7.3 or above).
+- Small code changes to make Hitrava compatible with Python versions 3.5.1 or above (was 3.7.3 or above).
 
 ### Version 3.2.0 (Build 2002.1501)
 #### New features and changes
 - JSON conversion: it is now possible to directly pass the ZIP file with the health data from Huawei in the --json 
 argument. The program will extract the "motion path detail data.json" file and start conversion.
-- Added Windows batch file HiToStrava.cmd for quick execution of JSON conversion with default arguments. 
+- Added Windows batch file Hitrava.cmd for quick execution of JSON conversion with default arguments. 
 
 ### Version 3.1.2 (Build 2002.1301)
 #### New features and changes
@@ -37,7 +51,7 @@ argument. The program will extract the "motion path detail data.json" file and s
 #### New features and changes
 - Added Python version check (minimum 3.7.3) and accompanying error message if used version doesn't comply.   
 - The program can now be executed without typing 'python' at the beginning of the
-command line. Added a wait message when HiToStrava is run without arguments (from prompt or by double-clicking it) to
+command line. Added a wait message when Hitrava is run without arguments (from prompt or by double-clicking it) to
 make sure the help information is displayed.
 - Changed versioning (added patch to version number) to comply with Semantic Versioning.
 - From this version onward, a Non-Profit Open Software License 3.0 (NPOSL-3.0) license applies to all new changes.
