@@ -1,4 +1,4 @@
-![HiToStrava](./images/HiToStrava_Logo_With_Name.png)  
+![Hitrava](images/Hitrava_Logo_With_Name.png)  
 
 [![nposl3.0][shield nposl3.0]][tldrlegal nposl3.0]
 ![GitHub release (latest by date)][shield release]
@@ -15,13 +15,13 @@
 - [Copyright and License](#copyright-and-license)
 
 ## Introduction
-HiToStrava converts health activities registered using a Honor or Huawei activity tracker or smart watch in the 
+Hitrava converts health activities registered using a Honor or Huawei activity tracker or smart watch in the 
 [`Huawei Health`](https://play.google.com/store/apps/details?id=com.huawei.health) app into a file format that can be 
 directly uploaded to [`Strava`](https://strava.com).
 
 ## Installation
 ### Requirements
-To use HiToStrava, you need:
+To use Hitrava, you need:
 - [`Python 3.7.x`](https://www.python.org/downloads/) or higher.
     - Python 3.7.6 is the lowest recommended version (developed and tested on this version).
     - Python 3.5.1 is the lowest minimum required version (compatibility tested on this version). 
@@ -33,21 +33,22 @@ Only required if you don't have a (suitable) python installation on your system.
 - Download the latest Python version for your operating system from the [`Python website`](https://www.python.org/downloads/).
 - Run the Python installer (Windows) or follow the instructions for your operating system. 
 
-#### Step 2 - Download and Extract HiToStrava
-- Click the green **'Clone or Download'** button on the top of this page.
-- A small 'Clone With HTTPS' window will open. Click the **'Download ZIP'** button.
-- Save the _HiToStrava-master.zip_ file on your system.
-- Extract all contents of the _HiToStrava-master.zip_ file to a location of your choice on your system.
+#### Step 2 - Download and Extract Hitrava
+- Go to the [Releases page][latest release] to download the source code of the latest Hitrava release.
+- On the [Releases page][latest release], in the _Assets_ section, click on the _Source code (zip)_ link to download 
+  the sources.
+- Save the ZIP file with the sources on your system.
+- Extract all contents of the ZIP file with the sources to a location of your choice on your system.
 
 ## How to convert your health activities and import them in Strava
-All users can use conversion from a **[JSON](#json-conversion-procedure)** file.  
+All users can use conversion from a **[ZIP](#zip-file-conversion-example)** file or a **[JSON](#json-conversion-procedure)** file.  
 For users with rooted phones, legacy **[file](#single-file-conversion-examples)** and 
 **[tar](#tar-file-conversion-examples)** options are still available.
 
 ### JSON conversion procedure
 Activities can be mass converted using the data from a JSON file that you can request in the Huawei Health app.
 
-The procedure below assumes that you [installed HiToStrava](#installation) and are logged in with your Huawei account in
+The procedure below assumes that you [installed Hitrava](#installation) and are logged in with your Huawei account in
 the Huawei Health app. If you don't have a Huawei account, you can create one in the app.  
 
 #### Step 1 - Request your data in the Huawei Health app
@@ -59,25 +60,25 @@ the Huawei Health app. If you don't have a Huawei account, you can create one in
 - Select **'Health'** from the list. Confirm your selection and follow the in-app instructions.
 - Wait for the mail from Huawei to arrive with a link to download the data (ZIP file). 
 
-#### Step 2 - Download your requested data and extract the JSON file 
+#### Step 2 - Download your requested data
 - In the mail from Huawei, click on the link to download your data and follow the instructions.
-- Once downloaded, open the ZIP file and go to the _data/Motion path detail data & description_ folder.
-- Extract the file _motion path detail data.json_ from the ZIP file to the installtion folder of HiToStrava. 
+- Put (a copy of) the downloaded ZIP file in the Hitrava installation folder and rename it to _HiZip.zip_. 
 
-#### Step 3 - Convert the data with HiToStrava
+#### Step 3 - Convert the data with Hitrava
+
+>**Tip**: If you're on Windows and you're not familiar with the Command Prompt or just want to do a quick
+> conversion with default arguments, double-click the _Run_Hitrava.cmd_ file in the installation folder of Hitrava.  
+> This will convert all available activities in the ZIP file from the previous step.                                                                                                                   
+
 - Open a Command Prompt (Windows) or Terminal (Linux / Mac OS) and change the directory to the installation folder of 
-HiToStrava.
-
-  >**Tip**: If you're on Windows and you're not familiar with the Command Prompt or just want to do a quick
-  > conversion with default arguments, double-click the _Run_HiToStrava.cmd_ file in the installation folder of HiToStrava.                                                                                                                    
-                                                                                                                                               
-- In the Command Prompt, run HiToStrava.py with the --json command line argument. You can use the default example 
+Hitrava.
+- In the Command Prompt, run Hitrava.py with the --zip command line argument. You can use the default example 
 command below or [add / change command line arguments](#command-line-arguments-overview) as you need.
   ```
-  HiToStrava.py --json "motion path detail data.json" --json_export
+  Hitrava.py --zip HiZip.zip --json_export
   ```
   The above command will generate both the original HiTrack files and the converted TCX files for ALL activities to the
-  _output_ subfolder of the HiToStrava installation folder. In this folder:
+  _output_ subfolder of the Hitrava installation folder. In this folder:
   - Files without an extension are the Huawei HiTrack files which contain the raw unconverted data of an activity. 
   - Files with the _.json_ extension represent an exported copy of the JSON data of a single activity. 
   - Files with the **_.tcx_** extension are the **converted files** suitable for upload to Strava.
@@ -92,7 +93,7 @@ extension, up to 25 at once) to upload.
 ## Usage
 ### Command Line Arguments Overview
 ```
-usage: HiToStrava.py [-h] [-z ZIP] [-j JSON] [--json_export] [-f FILE]
+usage: Hitrava.py [-h] [-z ZIP] [-j JSON] [--json_export] [-f FILE]
                      [-s {Walk,Run,Cycle,Swim_Pool,Swim_Open_Water}] [-t TAR]
                      [--from_date FROM_DATE] [--pool_length POOL_LENGTH]
                      [--output_dir OUTPUT_DIR]
@@ -163,76 +164,88 @@ OUTPUT options:
 ```
                         
 ### Usage Examples
+#### ZIP file conversion example
+Use the command below to convert all activities available in the ZIP file with the Huawei 
+Privacy data (here with filename _HiZip.zip_) that were started on October, 3rd, 2019 or later. The following files will
+be generated in folder _./my_output_dir_:  
+- JSON files with the raw JSON data of a single activity (_.json_ file extension).
+- HiTrack files with the unconverted source data of a single activity (no extension, filenames start with _HiTrack__).
+- Converted TCX files for upload to Strava (_.tcx_ file extension).
+ 
+```
+ python Hitrava.py --zip myzip.zip --json_export --from_date 2019-10-03 --output_dir my_output_dir
+```
+
 #### JSON file conversion example
 Use the command below to convert all activities available in the motion path JSON file from the requested Huawei 
 Privacy data that were started on October, 3rd, 2019 or later. Source HiTrack files and converted TCX files will be 
-generated in folder ./my_output_dir/json 
+generated in folder _./my_output_dir/json_ 
 ```
- python HiToStrava.py --json "motion path detail data.json" --from_date 2019-10-03 --output_dir my_output_dir/json
+ python Hitrava.py --json "motion path detail data.json" --from_date 2019-10-03 --output_dir my_output_dir/json
 ```
 Same as above, but also create an additional export file for each converted activity containing the raw JSON data of
 that activity from the motion path JSON file.
 ``` 
-python HiToStrava.py --json "motion path detail data.json" --json_export --from_date 2019-10-03 --output_dir my_output_dir/json
+python Hitrava.py --json "motion path detail data.json" --json_export --from_date 2019-10-03 --output_dir my_output_dir/json
 ```
 
 #### Single file conversion examples
 The example below converts extracted file HiTrack_12345678901212345678912 to HiTrack_12345678901212345678912.tcx in 
 the ./output directory
 ```
-python HiToStrava.py --file HiTrack_12345678901212345678912
+python Hitrava.py --file HiTrack_12345678901212345678912
 ```
 The next example converts extracted file HiTrack_12345678901212345678912 to HiTrack_12345678901212345678912.tcx in 
-the ./my_output_dir directory. The program logging level is set to display debug messages. The converted file is 
+the _./my_output_dir_ directory. The program logging level is set to display debug messages. The converted file is 
 validated against the TCX XSD schema (requires installed xmlschema library and an internet connection). 
 ```
-python HiToStrava.py --file HiTrack_12345678901212345678912 --output_dir my_output_dir --validate_xml --log_level DEBUG
+python Hitrava.py --file HiTrack_12345678901212345678912 --output_dir my_output_dir --validate_xml --log_level DEBUG
 ```
 The following example converts an extracted file HiTrack_12345678901212345678912 to HiTrack_12345678901212345678912.tcx 
-in the ./output directory and forces the sport to walking. 
+in the _./output_ directory and forces the sport to walking. 
 ```
-python HiToStrava.py --file HiTrack_12345678901212345678912 --sport Walk
+python Hitrava.py --file HiTrack_12345678901212345678912 --sport Walk
 ```
 The next example converts an indoor swimming activity in an extracted file HiTrack_12345678901212345678912 to 
 HiTrack_12345678901212345678912.tcx. The length of the pool in meters is specified to have a more accurate swimming data
 calculation.  
 ```
-python HiToStrava.py --file HiTrack_12345678901212345678912 --pool_length 25
+python Hitrava.py --file HiTrack_12345678901212345678912 --pool_length 25
 ```
  
 #### Tar file conversion examples
-The first example extracts and converts any HiTrack file found in tar file com.huawei.health.tar into the ./output 
+The first example extracts and converts any HiTrack file found in tar file com.huawei.health.tar into the _./output_ 
 directory. The output directory will contain both the extracted HiTrack file and the converted TCX XML file. 
 ```
-python HiToStrava.py --tar com.huawei.health.tar
+python Hitrava.py --tar com.huawei.health.tar
 ```
 In the example below, only activities in the com.huawei.health.tar tarball that were started on August 20th, 2019 or 
-later will be extracted and converted to the ./output directory.
+later will be extracted and converted to the _./output_ directory.
 ```
-python HiToStrava.py --tar com.huawei.health.tar --from_date 20190820
+python Hitrava.py --tar com.huawei.health.tar --from_date 20190820
 ```
   
 ## Release Notes
 The release notes of the latest release can be found below.  
 For a full changelog of earlier versions, please look [`here`](./CHANGELOG.md).
 
-### Version 3.2.2 (build 2002.2001)
+### Version 3.2.3 (build 2002.2901)
 #### New features and changes
-- ZIP conversion: made ZIP conversion explicit with new -z or --zip arguments and in usage. JSON conversion with -j or
---json arguments also still checks for ZIP file and will extract JSON before starting conversion.
-
-#### Solved issues
-- ZIP conversion: the --output_dir argument was ignored when extracting the JSON file from the ZIP file.
-
-#### Known Issues
-- There seems to be a problem lately to properly initialize the TCX XSD schema when using the --validate_xml argument. 
+- Oops, made a mistake. Didn't think about the Swedish word for 'to strive' being a trademark.
+The application has been gracefully renamed to Hitrava, a convenient abbreviation of h(uawe)i, tra(ck) and the last 2
+characters of the Swedish word for 'to strive'.  
+All application name references in text and code have been changed too. You will have to adapt your scripts to use the 
+new application name, sorry for the inconvenience.  
+- Changed the conversion procedure in the _README_ to use the direct ZIP conversion (requires less steps than the JSON 
+conversion) and changed the _Run_Hitrava.cmd_ batch script accordingly. 
+- Cleaned up some superfluous code and comments. Did a technical correction to a regexp in code.
 
 ## Copyright and License
 [![nposl3.0][shield nposl3.0]][tldrlegal nposl3.0]  
 
 Copyright (c) 2019-2020 Christoph Vanthuyne
 
-Licensed under the Non-Profit Open Software License version 3.0 from HiToStrava version 3.1.1 onward.  
+Licensed under the Non-Profit Open Software License version 3.0 from Hitrava version 3.1.1 onward.  
 
 Read the full license information [`here`](./LICENSE.md).
 
@@ -241,5 +254,6 @@ If you're more into a TL;DR approach, start [`here`][tldrlegal nposl3.0].
 [shield nposl3.0]: https://img.shields.io/badge/license-nposl--3.0-blue
 [tldrlegal nposl3.0]: https://tldrlegal.com/license/non-profit-open-software-license-3.0-(nposl-3.0)
 [nposl3.0]: https://opensource.org/licenses/NPOSL-3.0
-[shield release]: https://img.shields.io/github/v/release/CTHRU/HiToStrava?color=orange
-[shield release date]: https://img.shields.io/github/release-date/CTHRU/HiToStrava?color=orange
+[shield release]: https://img.shields.io/github/v/release/CTHRU/Hitrava?color=orange
+[shield release date]: https://img.shields.io/github/release-date/CTHRU/Hitrava?color=orange
+[latest release]: https://github.com/CTHRU/Hitrava/releases/latest
