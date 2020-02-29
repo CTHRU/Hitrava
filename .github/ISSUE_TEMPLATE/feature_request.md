@@ -1,6 +1,6 @@
 ---
 name: Feature request
-about: Suggest an idea for HiToStrava
+about: Suggest an idea for Hitrava
 title: "[FEATURE]"
 labels: ''
 assignees: ''
