@@ -1,6 +1,6 @@
 ---
 name: Bug report
-about: Create a report to help us improve HiToStrava
+about: Create a report to help us improve Hitrava
 title: "[BUG]"
 labels: ''
 assignees: ''
