@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
-# HiToStrava.py
+# Hitrava.py
 # Original Work Copyright (c) 2019 Ari Cooper-Davis / Christoph Vanthuyne - github.com/aricooperdavis/Huawei-TCX-Converter
-# Modified Work Copyright (c) 2019-2020 Christoph Vanthuyne - https://github.com/CTHRU/HiToStrava
+# Modified Work Copyright (c) 2019-2020 Christoph Vanthuyne - https://github.com/CTHRU/Hitrava
 # Released under the Non-Profit Open Software License version 3.0
 
 
@@ -29,7 +29,7 @@ from datetime import timezone as tz
 from zipfile import ZipFile as ZipFile
 
 # External libraries that require installation
-from typing import List, Optional
+from typing import Optional
 
 try:
     import xmlschema  # (only) needed to validate the generated TCX XML.
@@ -46,12 +46,12 @@ if sys.version_info < (3, 5, 1):
     sys.exit(1)
 
 # Global Constants
-PROGRAM_NAME = 'HiToStrava'
+PROGRAM_NAME = 'Hitrava'
 PROGRAM_MAJOR_VERSION = '3'
 PROGRAM_MINOR_VERSION = '2'
-PROGRAM_PATCH_VERSION = '2'
+PROGRAM_PATCH_VERSION = '3'
 PROGRAM_MAJOR_BUILD = '2002'
-PROGRAM_MINOR_BUILD = '2001'
+PROGRAM_MINOR_BUILD = '2901'
 
 OUTPUT_DIR = './output'
 GPS_TIMEOUT = dts_delta(seconds=10)
@@ -328,7 +328,7 @@ class HiActivity:
             alti_data['t'] = _convert_hitrack_timestamp(float(alti_data.pop('k')))
             alti_data['alti'] = float(alti_data.pop('v'))
 
-            # Ignore invalid heart rate data (for export)
+            # Ignore invalid altitude data
             if alti_data['alti'] < -1000 or alti_data['alti'] > 10000:
                 logging.getLogger(PROGRAM_NAME).warning('Invalid altitude data detected and ignored in data %s', data)
                 return
@@ -352,7 +352,7 @@ class HiActivity:
            the start of a new segments for swimming.
          """
 
-        logging.getLogger(PROGRAM_NAME).debug('Adding step frequency data or detect cycling or swimming activities %s',
+        logging.getLogger(PROGRAM_NAME).debug('Adding step frequency data or detecting cycling or swimming activities %s',
                                               data)
 
         try:
@@ -877,8 +877,7 @@ class HiTrackFile:
                 data_list.clear()
                 if line[0] == 'tp=lbs':  # Location line format: tp=lbs;k=_;lat=_;lon=_;alt=_;t=_
                     for data_index in [5, 2, 3]:  # Parse parameters t, lat, lon parameters (alt not parsed)
-                        # data_list.append(line[data_index].split('=')[1])   # Parse values after the '=' character
-                        data_list.append(line[data_index].split('='))  # Parse key value pairs
+                        data_list.append(line[data_index].split('='))  # Parse values after the '=' character
                     self.activity.add_location_data(data_list)
                 elif line[0] == 'tp=h-r':  # Heart rate line format: tp=h-r;k=_;v=_
                     for data_index in [1, 2]:  # Parse parameters k (timestamp) and v (heart rate)
@@ -1015,8 +1014,9 @@ class HiZip:
                         raise Exception('Error extracting JSON file <%s> from ZIP file <%s>',
                                         _MOTION_PATH_JSON_FILENAME, zip_filename)
                 else:
-                    logging.getLogger(PROGRAM_NAME).warning('Could not find file <data/motion path detail data.json> \
-                                                            ZIP file <%s>. Nothing to convert.', zip_filename)
+                    logging.getLogger(PROGRAM_NAME).warning('Could not find JSON file <%s> in ZIP file <%s>. \
+                                                            Nothing to convert.',
+                                                            _MOTION_PATH_JSON_FILENAME, zip_filename)
                     raise Exception('Could not find file <data/motion path detail data.json> in ZIP file <%s>. \
                                     Nothing to convert.', zip_filename)
 
@@ -1030,8 +1030,6 @@ class HiJson:
                          (-3, HiActivity.TYPE_OPEN_WATER_SWIM)]
 
     def __init__(self, json_filename: str, output_dir: str = OUTPUT_DIR, export_json_data: bool = False):
-        _MOTION_PATH_JSON_FILENAME = 'data/Motion path detail data & description/motion path detail data.json'
-
         # Validate the JSON file parameter
         if not json_filename:
             logging.getLogger(PROGRAM_NAME).error('Parameter for JSON filename is missing')
@@ -1086,7 +1084,7 @@ class HiJson:
                         hitrack_data = motion_path_dict['attribute']
                         # Strip prefix and suffix from raw HiTrack data
                         hitrack_data = re.sub('HW_EXT_TRACK_DETAIL\@is', '', hitrack_data)
-                        hitrack_data = re.sub('\&\&HW_EXT_TRACK_SIMPLIFY\@is(.*?)', '', hitrack_data)
+                        hitrack_data = re.sub('\&\&HW_EXT_TRACK_SIMPLIFY\@is(.*)', '', hitrack_data, flags=re.DOTALL)
 
                         # Get additional activity detail data
                         activity_detail_data = motion_path_dict['attribute']
@@ -1338,8 +1336,8 @@ class TcxActivity:
             el_lang_id.text = 'en'
             el_part_number = xml_et.SubElement(el_author, 'PartNumber')  # TODO verify if required/correct
             el_part_number.text = '000-00000-00'
-            el_name.text = 'H%cT%cStr%cv%c' % \
-                           (chr(105), chr(111), chr(97), chr(97))
+            el_name.text = 'H%cTr%cv%c' % \
+                           (chr(105), chr(97), chr(97))
         except Exception as e:
             logging.getLogger(PROGRAM_NAME).error('Error generating TCX XML content for activity <%s>\n%s',
                                                   self.hi_activity.activity_id, e)
@@ -1562,7 +1560,7 @@ def _init_tcx_xml_schema():
 def _convert_hitrack_timestamp(hitrack_timestamp: float) -> datetime:
     """ Converts the different timestamp formats appearing in HiTrack files to a Python datetime.
 
-    Known formats are seconds (e.g. 1516273200 or 1.5162732E9) or microseconds (e.g. 1516273200000 or 1.5162732E12)
+    Known formats are seconds (e.g. 1516273200 or 1.5162732E9) or milliseconds (e.g. 1516273200000 or 1.5162732E12)
     """
     timestamp_digits = int(math.log10(hitrack_timestamp))
     if timestamp_digits == 9:
@@ -1592,7 +1590,6 @@ def _init_logging(level: str = 'INFO'):
         logger.setLevel(logging.DEBUG)
     logger.addHandler(console)
     logger.propagate = False
-    logger.debug('test')
 
 
 def _init_argument_parser() -> argparse.ArgumentParser:
