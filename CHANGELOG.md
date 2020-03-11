@@ -3,9 +3,21 @@
 All notable changes to this project are documented in this file. 
 
 ## Release Notes
+### Version 3.2.4 (build 2003.1101)
+#### Solved issues
+- Calories burned information was wrong for (non-swimming) activities with more than 1 segment/lap (e.g. when activity
+was paused or GPS loss occurred during activity). For each subsequent segment/lap, the calories of all preceding 
+segments were added again which caused a too high total calories burned value in Strava. Closes #5.
+- Segment/Lap distance information was wrong for (non-swimming) activities with more than 1 segment/lap.(e.g. when activity
+was paused or GPS loss occurred during activity). For each subsequent segment/lap, the distances of all preceding 
+segments were added again which caused a wrong value in the _Lap_ overview in Strava. Closes #6.
+
+#### Known Limitations
+- Calories burned information is not available for swimming activities (need real-life data to code/test).
+
 ### Version 3.2.3 (build 2002.2901)
 #### New features and changes
-- Oops, made a mistake. Didn't think about the Swedish word for 'to strive' being a Trademark.
+- Oops, made a mistake. Didn't think about the Swedish word for 'to strive' being a trademark.
 The application has been gracefully renamed to Hitrava, a convenient abbreviation of h(uawe)i, tra(ck) and the last 2
 characters of the Swedish word for 'to strive'.  
 All application name references in text and code have been changed too. You will have to adapt your scripts to use the 
