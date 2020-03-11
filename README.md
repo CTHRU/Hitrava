@@ -173,7 +173,7 @@ be generated in folder _./my_output_dir_:
 - Converted TCX files for upload to Strava (_.tcx_ file extension).
  
 ```
- python Hitrava.py --zip myzip.zip --json_export --from_date 2019-10-03 --output_dir my_output_dir
+ python Hitrava.py --zip HiZip.zip --json_export --from_date 2019-10-03 --output_dir my_output_dir
 ```
 
 #### JSON file conversion example
@@ -229,16 +229,17 @@ python Hitrava.py --tar com.huawei.health.tar --from_date 20190820
 The release notes of the latest release can be found below.  
 For a full changelog of earlier versions, please look [`here`](./CHANGELOG.md).
 
-### Version 3.2.3 (build 2002.2901)
-#### New features and changes
-- Oops, made a mistake. Didn't think about the Swedish word for 'to strive' being a trademark.
-The application has been gracefully renamed to Hitrava, a convenient abbreviation of h(uawe)i, tra(ck) and the last 2
-characters of the Swedish word for 'to strive'.  
-All application name references in text and code have been changed too. You will have to adapt your scripts to use the 
-new application name, sorry for the inconvenience.  
-- Changed the conversion procedure in the _README_ to use the direct ZIP conversion (requires less steps than the JSON 
-conversion) and changed the _Run_Hitrava.cmd_ batch script accordingly. 
-- Cleaned up some superfluous code and comments. Did a technical correction to a regexp in code.
+### Version 3.2.4 (build 2003.1101)
+#### Solved issues
+- Calories burned information was wrong for (non-swimming) activities with more than 1 segment/lap (e.g. when activity
+was paused or GPS loss occurred during activity). For each subsequent segment/lap, the calories of all preceding 
+segments were added again which caused a too high total calories burned value in Strava. Closes #5.
+- Segment/Lap distance information was wrong for (non-swimming) activities with more than 1 segment/lap.(e.g. when activity
+was paused or GPS loss occurred during activity). For each subsequent segment/lap, the distances of all preceding 
+segments were added again which caused a wrong value in the _Lap_ overview in Strava. Closes #6.
+
+#### Known Limitations
+- Calories burned information is not available for swimming activities (need real-life data to code/test).
 
 ## Copyright and License
 [![nposl3.0][shield nposl3.0]][tldrlegal nposl3.0]  
