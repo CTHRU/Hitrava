@@ -49,9 +49,9 @@ if sys.version_info < (3, 5, 1):
 PROGRAM_NAME = 'Hitrava'
 PROGRAM_MAJOR_VERSION = '3'
 PROGRAM_MINOR_VERSION = '2'
-PROGRAM_PATCH_VERSION = '3'
-PROGRAM_MAJOR_BUILD = '2002'
-PROGRAM_MINOR_BUILD = '2901'
+PROGRAM_PATCH_VERSION = '4'
+PROGRAM_MAJOR_BUILD = '2003'
+PROGRAM_MINOR_BUILD = '1101'
 
 OUTPUT_DIR = './output'
 GPS_TIMEOUT = dts_delta(seconds=10)
@@ -590,6 +590,7 @@ class HiActivity:
         # Do calculations
         last_location = None
         paused = False
+        segment_start_distance = 0
 
         # Start first segment at earliest data found while adding the data
         self._add_segment_start(self.start)
@@ -602,7 +603,7 @@ class HiActivity:
                         # Use timestamp and distance of last (location) record
                         logging.getLogger(PROGRAM_NAME).debug('Start pause at %s in %s', data['t'], self.activity_id)
                         paused = True
-                        self._add_segment_stop(last_location['t'], last_location['distance'])
+                        self._add_segment_stop(last_location['t'], last_location['distance'] - segment_start_distance)
                     elif 'lat' not in last_location:
                         # GPS was lost and is now back. Set distance to last known distance and use this record as the
                         # last known location.
@@ -616,22 +617,24 @@ class HiActivity:
                         # If no current segment, create one
                         if not self._current_segment:
                             self._add_segment_start(data['t'])
+                            segment_start_distance = last_location['distance']
                         last_location = data
                     else:
                         # Regular location record. If no current segment, create one
                         if not self._current_segment:
                             self._add_segment_start(data['t'])
+                            segment_start_distance = last_location['distance']
                         if paused:
                             logging.getLogger(PROGRAM_NAME).debug('Stop pause at %s in %s', data['t'], self.activity_id)
                             paused = False
                         # Calculate and set the accumulative distance of the location record
                         data['distance'] = self._vincenty((last_location['lat'], last_location['lon']),
-                                                          (data['lat'], data['lon'])) + \
-                                           last_location['distance']
+                                                          (data['lat'], data['lon'])) + last_location['distance']
                         last_location = data
                 else:
                     # First location. Set distance 0
                     data['distance'] = 0
+                    segment_start_distance = 0
                     last_location = data
             elif 'rs' in data:
                 if last_location:
@@ -644,19 +647,21 @@ class HiActivity:
                         # If no current segment, create one
                         if not self._current_segment:
                             self._add_segment_start(data['t'])
+                            segment_start_distance = last_location['distance']
                         data['distance'] = last_location['distance'] + (data['rs'] * time_delta.seconds / 10)
                         last_location = data
                 else:
                     # No location records processed and speed record available = start without GPS or no GPS at all.
                     # Set distance 0
                     data['distance'] = 0
+                    segment_start_distance = 0
                     last_location = data
 
         # Close last segment if it is still open
         if self._current_segment:
             # If the segment is open (no stop record for end of activity), use timestamp and distance of last location
             # record.
-            self._add_segment_stop(last_location['t'], last_location['distance'])
+            self._add_segment_stop(last_location['t'], last_location['distance'] - segment_start_distance)
 
         # Set the total distance of the activity
         self.calculated_distance = int(last_location['distance'])
@@ -782,12 +787,8 @@ class HiActivity:
         self._calc_segments_and_distances()
 
         # Create 1 large lap
-        lap_data = {}
-        lap_data['lap'] = 1
-        lap_data['start'] = self.start
-        lap_data['stop'] = self.stop
-        lap_data['duration'] = (self.stop - self.start).seconds
-        lap_data['distance'] = self.distance
+        lap_data = {'lap': 1, 'start': self.start, 'stop': self.stop, 'duration': (self.stop - self.start).seconds,
+                    'distance': self.distance}
         swim_data.append(lap_data)
 
         return swim_data
@@ -1336,7 +1337,7 @@ class TcxActivity:
             el_lang_id.text = 'en'
             el_part_number = xml_et.SubElement(el_author, 'PartNumber')  # TODO verify if required/correct
             el_part_number.text = '000-00000-00'
-            el_name.text = 'H%cTr%cv%c' % \
+            el_name.text = 'H%ctr%cv%c' % \
                            (chr(105), chr(97), chr(97))
         except Exception as e:
             logging.getLogger(PROGRAM_NAME).error('Error generating TCX XML content for activity <%s>\n%s',
