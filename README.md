@@ -229,17 +229,12 @@ python Hitrava.py --tar com.huawei.health.tar --from_date 20190820
 The release notes of the latest release can be found below.  
 For a full changelog of earlier versions, please look [`here`](./CHANGELOG.md).
 
-### Version 3.2.4 (build 2003.1101)
-#### Solved issues
-- Calories burned information was wrong for (non-swimming) activities with more than 1 segment/lap (e.g. when activity
-was paused or GPS loss occurred during activity). For each subsequent segment/lap, the calories of all preceding 
-segments were added again which caused a too high total calories burned value in Strava. Closes #5.
-- Segment/Lap distance information was wrong for (non-swimming) activities with more than 1 segment/lap.(e.g. when activity
-was paused or GPS loss occurred during activity). For each subsequent segment/lap, the distances of all preceding 
-segments were added again which caused a wrong value in the _Lap_ overview in Strava. Closes #6.
-
-#### Known Limitations
-- Calories burned information is not available for swimming activities (need real-life data to code/test).
+## Release Notes
+### Version 3.2.5 (build 2004.1101)
+#### New features and changes
+- ZIP and JSON conversion: Running and hiking activity types are now directly detected from the Huawei data.
+- Strava TCX: Hiking activities are generated with the corresponding Strava activity type. You don't need to 
+manually adjust the activity type for hiking activities in Strava after upload. See also #2.
 
 ## Copyright and License
 [![nposl3.0][shield nposl3.0]][tldrlegal nposl3.0]  
