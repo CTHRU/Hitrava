@@ -49,8 +49,8 @@ if sys.version_info < (3, 5, 1):
 PROGRAM_NAME = 'Hitrava'
 PROGRAM_MAJOR_VERSION = '3'
 PROGRAM_MINOR_VERSION = '2'
-PROGRAM_PATCH_VERSION = '4'
-PROGRAM_MAJOR_BUILD = '2003'
+PROGRAM_PATCH_VERSION = '5'
+PROGRAM_MAJOR_BUILD = '2004'
 PROGRAM_MINOR_BUILD = '1101'
 
 OUTPUT_DIR = './output'
@@ -65,9 +65,10 @@ class HiActivity:
     TYPE_CYCLE = 'Cycle'
     TYPE_POOL_SWIM = 'Swim_Pool'
     TYPE_OPEN_WATER_SWIM = 'Swim_Open_Water'
+    TYPE_HIKE = 'Hike'
     TYPE_UNKNOWN = '?'
 
-    _ACTIVITY_TYPE_LIST = (TYPE_WALK, TYPE_RUN, TYPE_CYCLE, TYPE_POOL_SWIM, TYPE_OPEN_WATER_SWIM)
+    _ACTIVITY_TYPE_LIST = (TYPE_WALK, TYPE_RUN, TYPE_CYCLE, TYPE_POOL_SWIM, TYPE_OPEN_WATER_SWIM, TYPE_HIKE)
 
     def __init__(self, activity_id: str, activity_type: str = TYPE_UNKNOWN):
         logging.getLogger(PROGRAM_NAME).debug('New HiTrack activity to process <%s>', activity_id)
@@ -1025,10 +1026,11 @@ class HiZip:
 class HiJson:
     # TODO find the correct values for the unknown/undocumented JSON sport types
     _JSON_SPORT_TYPES = [(5, HiActivity.TYPE_WALK),
-                         (-1, HiActivity.TYPE_RUN),
+                         (4, HiActivity.TYPE_RUN),
                          (3, HiActivity.TYPE_CYCLE),
                          (-2, HiActivity.TYPE_POOL_SWIM),
-                         (-3, HiActivity.TYPE_OPEN_WATER_SWIM)]
+                         (-3, HiActivity.TYPE_OPEN_WATER_SWIM),
+                         (282, HiActivity.TYPE_HIKE)]
 
     def __init__(self, json_filename: str, output_dir: str = OUTPUT_DIR, export_json_data: bool = False):
         # Validate the JSON file parameter
@@ -1216,6 +1218,7 @@ class TcxActivity:
                         (HiActivity.TYPE_CYCLE, 'Biking'),
                         (HiActivity.TYPE_POOL_SWIM, _SPORT_OTHER),
                         (HiActivity.TYPE_OPEN_WATER_SWIM, _SPORT_OTHER),
+                        (HiActivity.TYPE_HIKE, _SPORT_OTHER),
                         (HiActivity.TYPE_UNKNOWN, _SPORT_OTHER)]
 
     # TODO Customize XSD schema in the _validate_xml() function to validate Strava sport types.
@@ -1225,6 +1228,7 @@ class TcxActivity:
                            (HiActivity.TYPE_CYCLE, 'biking'),
                            (HiActivity.TYPE_POOL_SWIM, 'swimming'),
                            (HiActivity.TYPE_OPEN_WATER_SWIM, 'swimming'),
+                           (HiActivity.TYPE_HIKE, 'hiking'),
                            (HiActivity.TYPE_UNKNOWN, _SPORT_OTHER)]
 
     def __init__(self, hi_activity: HiActivity, tcx_xml_schema=None, save_dir: str = OUTPUT_DIR,
@@ -1293,6 +1297,7 @@ class TcxActivity:
             if self.hi_activity.get_activity_type() in [HiActivity.TYPE_WALK,
                                                         HiActivity.TYPE_RUN,
                                                         HiActivity.TYPE_CYCLE,
+                                                        HiActivity.TYPE_HIKE,
                                                         HiActivity.TYPE_UNKNOWN]:
                 self._generate_walk_run_cycle_xml_data(el_activity)
             elif self.hi_activity.get_activity_type() in [HiActivity.TYPE_POOL_SWIM,
