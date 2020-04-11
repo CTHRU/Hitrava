@@ -3,6 +3,12 @@
 All notable changes to this project are documented in this file. 
 
 ## Release Notes
+### Version 3.2.5 (build 2004.1101)
+#### New features and changes
+- ZIP and JSON conversion: Running and hiking activity types are now directly detected from the Huawei data.
+- Strava TCX: Hiking activities are generated with the corresponding Strava activity type. You don't need to 
+manually adjust the activity type for hiking activities in Strava after upload. See also #2.
+
 ### Version 3.2.4 (build 2003.1101)
 #### Solved issues
 - Calories burned information was wrong for (non-swimming) activities with more than 1 segment/lap (e.g. when activity
