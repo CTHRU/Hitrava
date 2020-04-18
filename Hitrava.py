@@ -49,9 +49,9 @@ if sys.version_info < (3, 5, 1):
 PROGRAM_NAME = 'Hitrava'
 PROGRAM_MAJOR_VERSION = '3'
 PROGRAM_MINOR_VERSION = '2'
-PROGRAM_PATCH_VERSION = '5'
+PROGRAM_PATCH_VERSION = '6'
 PROGRAM_MAJOR_BUILD = '2004'
-PROGRAM_MINOR_BUILD = '1101'
+PROGRAM_MINOR_BUILD = '1801'
 
 OUTPUT_DIR = './output'
 GPS_TIMEOUT = dts_delta(seconds=10)
@@ -1003,18 +1003,13 @@ class HiZip:
     @staticmethod
     def extract_json(zip_filename: str, output_dir: str = OUTPUT_DIR):
         _MOTION_PATH_JSON_FILENAME = 'data/Motion path detail data & description/motion path detail data.json'
+        _MOTION_PATH_JSON_FILENAME_ALT = 'Motion path detail data & description/motion path detail data.json'
         if zipfile.is_zipfile(zip_filename):
             with ZipFile(zip_filename, 'r') as hi_zip:
                 if _MOTION_PATH_JSON_FILENAME in hi_zip.namelist():
-                    try:
-                        hi_zip.extract(_MOTION_PATH_JSON_FILENAME, output_dir)
-                        json_filename = output_dir + '/' + _MOTION_PATH_JSON_FILENAME
-                        return json_filename
-                    except Exception as e:
-                        logging.getLogger(PROGRAM_NAME).error('Error extracting JSON file <%s> from ZIP file <%s>\n%s',
-                                                              _MOTION_PATH_JSON_FILENAME, zip_filename, e)
-                        raise Exception('Error extracting JSON file <%s> from ZIP file <%s>',
-                                        _MOTION_PATH_JSON_FILENAME, zip_filename)
+                    zip_json_filename = _MOTION_PATH_JSON_FILENAME
+                elif _MOTION_PATH_JSON_FILENAME_ALT in hi_zip.namelist():
+                    zip_json_filename = _MOTION_PATH_JSON_FILENAME_ALT
                 else:
                     logging.getLogger(PROGRAM_NAME).warning('Could not find JSON file <%s> in ZIP file <%s>. \
                                                             Nothing to convert.',
@@ -1022,6 +1017,15 @@ class HiZip:
                     raise Exception('Could not find file <data/motion path detail data.json> in ZIP file <%s>. \
                                     Nothing to convert.', zip_filename)
 
+                try:
+                    hi_zip.extract(zip_json_filename, output_dir)
+                    json_filename = output_dir + '/' + zip_json_filename
+                    return json_filename
+                except Exception as e:
+                    logging.getLogger(PROGRAM_NAME).error('Error extracting JSON file <%s> from ZIP file <%s>\n%s',
+                                                          zip_json_filename, zip_filename, e)
+                    raise Exception('Error extracting JSON file <%s> from ZIP file <%s>',
+                                    zip_json_filename, zip_filename)
 
 class HiJson:
     # TODO find the correct values for the unknown/undocumented JSON sport types
@@ -1031,6 +1035,8 @@ class HiJson:
                          (-2, HiActivity.TYPE_POOL_SWIM),
                          (-3, HiActivity.TYPE_OPEN_WATER_SWIM),
                          (282, HiActivity.TYPE_HIKE)]
+
+    _UNSUPPORTED_JSON_SPORT_TYPES = [101]
 
     def __init__(self, json_filename: str, output_dir: str = OUTPUT_DIR, export_json_data: bool = False):
         # Validate the JSON file parameter
@@ -1158,11 +1164,19 @@ class HiJson:
                         hi_activity = hitrack_file.parse()
 
                         # Use activity attributes available in JSON data
+                        # Do NOT process unsupported sport types
+                        sport_type = motion_path_dict['sportType']
+                        if sport_type in self._UNSUPPORTED_JSON_SPORT_TYPES:
+                            logging.getLogger(PROGRAM_NAME).warning('Activity at index %d from %s has an unsupported '
+                                                                    'activity type %d and will NOT be converted.',
+                                                                    n, activity_date, sport_type)
+                            continue
+
                         # Sport type
                         if any(motion_path_dict['sportType'] in i for i in self._JSON_SPORT_TYPES):
                             sport = \
                                 [item[1] for item in self._JSON_SPORT_TYPES if
-                                 item[0] == motion_path_dict['sportType']][0]
+                                 item[0] == sport_type][0]
                             hi_activity.set_activity_type(sport)
 
                         # TODO Start date and time (in UTC)
@@ -1182,8 +1196,9 @@ class HiJson:
                             hi_activity.calories = activity_detail_dict['totalCalories'] / 1000
 
                         # Swimming pool length
-                        if 'swim_pool_length' in activity_detail_dict['wearSportData']:
-                            hi_activity.set_pool_length(activity_detail_dict['wearSportData']['swim_pool_length'] / 100)
+                        if 'wearSportData' in activity_detail_dict:
+                            if 'swim_pool_length' in activity_detail_dict['wearSportData']:
+                                hi_activity.set_pool_length(activity_detail_dict['wearSportData']['swim_pool_length'] / 100)
 
                         self.hi_activity_list.append(hi_activity)
                 else:
