@@ -3,6 +3,17 @@
 All notable changes to this project are documented in this file. 
 
 ## Release Notes
+### Version 3.2.6 (build 2004.1801)
+#### Solved Issues
+- ZIP conversion: added support for the new folder structure of the Huawei Health ZIP files. See also #7. 
+- ZIP and JSON conversion: solved an issue that caused Hitrava to error out for activities without a 'wearSportData' 
+section. See also #7.  
+- ZIP and JSON conversion: activities of known unsupported (JSON) activity types will be skipped instead of stopping
+Hitrava with an error. A warning message is logged during parsing of the JSON data to inform you. See also #7. 
+
+#### Known Limitations
+- Activities with activity type '101' in the JSON data are currently (unknown and) unsupported.
+
 ### Version 3.2.5 (build 2004.1101)
 #### New features and changes
 - ZIP and JSON conversion: Running and hiking activity types are now directly detected from the Huawei data.
