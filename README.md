@@ -230,11 +230,16 @@ The release notes of the latest release can be found below.
 For a full changelog of earlier versions, please look [`here`](./CHANGELOG.md).
 
 ## Release Notes
-### Version 3.2.5 (build 2004.1101)
-#### New features and changes
-- ZIP and JSON conversion: Running and hiking activity types are now directly detected from the Huawei data.
-- Strava TCX: Hiking activities are generated with the corresponding Strava activity type. You don't need to 
-manually adjust the activity type for hiking activities in Strava after upload. See also #2.
+### Version 3.2.6 (build 2004.1801)
+#### Solved Issues
+- ZIP conversion: added support for the new folder structure of the Huawei Health ZIP files. See also #7. 
+- ZIP and JSON conversion: solved an issue that caused Hitrava to error out for activities without a 'wearSportData' 
+section. See also #7.  
+- ZIP and JSON conversion: activities of known unsupported (JSON) activity types will be skipped instead of stopping
+Hitrava with an error. A warning message is logged during parsing of the JSON data to inform you. See also #7. 
+
+#### Known Limitations
+- Activities with activity type '101' in the JSON data are currently (unknown and) unsupported.
 
 ## Copyright and License
 [![nposl3.0][shield nposl3.0]][tldrlegal nposl3.0]  
