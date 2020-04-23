@@ -45,8 +45,8 @@ All users can use conversion from a **[ZIP](#zip-file-conversion-example)** file
 For users with rooted phones, legacy **[file](#single-file-conversion-examples)** and 
 **[tar](#tar-file-conversion-examples)** options are still available.
 
-### JSON conversion procedure
-Activities can be mass converted using the data from a JSON file that you can request in the Huawei Health app.
+### ZIP conversion procedure
+Activities can be mass converted using the data in a ZIP file that you can request in the Huawei Health app.
 
 The procedure below assumes that you [installed Hitrava](#installation) and are logged in with your Huawei account in
 the Huawei Health app. If you don't have a Huawei account, you can create one in the app.  
@@ -230,16 +230,14 @@ The release notes of the latest release can be found below.
 For a full changelog of earlier versions, please look [`here`](./CHANGELOG.md).
 
 ## Release Notes
-### Version 3.2.6 (build 2004.1801)
-#### Solved Issues
-- ZIP conversion: added support for the new folder structure of the Huawei Health ZIP files. See also #7. 
-- ZIP and JSON conversion: solved an issue that caused Hitrava to error out for activities without a 'wearSportData' 
-section. See also #7.  
-- ZIP and JSON conversion: activities of known unsupported (JSON) activity types will be skipped instead of stopping
-Hitrava with an error. A warning message is logged during parsing of the JSON data to inform you. See also #7. 
+### Version 3.2.7 (build 2004.2301)
+#### New features and changes
+- ZIP conversion: added support for 'Indoor Run' activity types. Indoor run activities are uploaded to Strava as regular
+run activities (no specific activity type available for indoor run via file upload). Closes #7. 
 
-#### Known Limitations
-- Activities with activity type '101' in the JSON data are currently (unknown and) unsupported.
+#### Solved Issues
+- ZIP conversion: the filename of all generated files now contains the time zone aware local time from when the activity
+took place.
 
 ## Copyright and License
 [![nposl3.0][shield nposl3.0]][tldrlegal nposl3.0]  
