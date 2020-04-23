@@ -3,6 +3,15 @@
 All notable changes to this project are documented in this file. 
 
 ## Release Notes
+### Version 3.2.7 (build 2004.2301)
+#### New features and changes
+- ZIP conversion: added support for 'Indoor Run' activity types. Indoor run activities are uploaded to Strava as regular
+run activities (no specific activity type available for indoor run via file upload). Closes #7. 
+
+#### Solved Issues
+- ZIP conversion: the filename of all generated files now contains the time zone aware local time from when the activity
+took place.
+
 ### Version 3.2.6 (build 2004.1801)
 #### Solved Issues
 - ZIP conversion: added support for the new folder structure of the Huawei Health ZIP files. See also #7. 
