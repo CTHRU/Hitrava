@@ -49,9 +49,9 @@ if sys.version_info < (3, 5, 1):
 PROGRAM_NAME = 'Hitrava'
 PROGRAM_MAJOR_VERSION = '3'
 PROGRAM_MINOR_VERSION = '2'
-PROGRAM_PATCH_VERSION = '6'
+PROGRAM_PATCH_VERSION = '7'
 PROGRAM_MAJOR_BUILD = '2004'
-PROGRAM_MINOR_BUILD = '1801'
+PROGRAM_MINOR_BUILD = '2301'
 
 OUTPUT_DIR = './output'
 GPS_TIMEOUT = dts_delta(seconds=10)
@@ -66,9 +66,11 @@ class HiActivity:
     TYPE_POOL_SWIM = 'Swim_Pool'
     TYPE_OPEN_WATER_SWIM = 'Swim_Open_Water'
     TYPE_HIKE = 'Hike'
+    TYPE_INDOOR_RUN = 'Indoor_Run'
     TYPE_UNKNOWN = '?'
 
-    _ACTIVITY_TYPE_LIST = (TYPE_WALK, TYPE_RUN, TYPE_CYCLE, TYPE_POOL_SWIM, TYPE_OPEN_WATER_SWIM, TYPE_HIKE)
+    _ACTIVITY_TYPE_LIST = (TYPE_WALK, TYPE_RUN, TYPE_CYCLE, TYPE_POOL_SWIM, TYPE_OPEN_WATER_SWIM, TYPE_HIKE,
+                           TYPE_INDOOR_RUN)
 
     def __init__(self, activity_id: str, activity_type: str = TYPE_UNKNOWN):
         logging.getLogger(PROGRAM_NAME).debug('New HiTrack activity to process <%s>', activity_id)
@@ -353,8 +355,9 @@ class HiActivity:
            the start of a new segments for swimming.
          """
 
-        logging.getLogger(PROGRAM_NAME).debug('Adding step frequency data or detecting cycling or swimming activities %s',
-                                              data)
+        logging.getLogger(PROGRAM_NAME).debug(
+            'Adding step frequency data or detecting cycling or swimming activities %s',
+            data)
 
         try:
             # Create a dictionary from the key value pairs
@@ -660,12 +663,24 @@ class HiActivity:
 
         # Close last segment if it is still open
         if self._current_segment:
-            # If the segment is open (no stop record for end of activity), use timestamp and distance of last location
-            # record.
-            self._add_segment_stop(last_location['t'], last_location['distance'] - segment_start_distance)
+            # If the segment is open (no stop record for end of activity):
+            # - Outdoor activities -> calculated distance data is available, use timestamp and distance of last location record.
+            # - Indoor activities -> no calculated distance data available, use stop timestamp and total distance from the header information.
+            if last_location:
+                # Outdoor
+                self._add_segment_stop(last_location['t'], last_location['distance'] - segment_start_distance)
+            else:
+                # Indoor
+                self._add_segment_stop(self.stop, self.distance)
 
         # Set the total distance of the activity
-        self.calculated_distance = int(last_location['distance'])
+        if last_location:
+            # Outdoor
+            self.calculated_distance = int(last_location['distance'])
+        else:
+            # Indoor
+            self.calculated_distance = self.distance
+
         if self.distance < 0:
             self.distance = self.calculated_distance
 
@@ -793,25 +808,6 @@ class HiActivity:
         swim_data.append(lap_data)
 
         return swim_data
-
-    def get_tz_aware_datetime(self, naive_datetime: datetime):
-        """"All datetimes in the HiActivity are represented as UTC datetimes and are parsed as time zone unaware
-        (naive) datetime objects. This method returns the equivalent time zone aware datetime representation using the
-        time zone information of the HiTrack activity (if any). If the Hitrack activity has no time zone information,
-        UTC (GMT) time zone is assumed.
-
-        :type naive_datetime: datetime
-
-        :return
-        The (time zone) aware datetime corresponding to the naive datetime in the naive_datetime parameter
-        """
-        utc_datetime = dts.replace(naive_datetime, tzinfo=tz.utc)
-        if self.time_zone:
-            aware_datetime = utc_datetime.astimezone(self.time_zone)
-        else:
-            aware_datetime = utc_datetime
-
-        return aware_datetime
 
     def __repr__(self):
         # TODO verify timezone (un)aware display date / time
@@ -1027,6 +1023,7 @@ class HiZip:
                     raise Exception('Error extracting JSON file <%s> from ZIP file <%s>',
                                     zip_json_filename, zip_filename)
 
+
 class HiJson:
     # TODO find the correct values for the unknown/undocumented JSON sport types
     _JSON_SPORT_TYPES = [(5, HiActivity.TYPE_WALK),
@@ -1034,9 +1031,10 @@ class HiJson:
                          (3, HiActivity.TYPE_CYCLE),
                          (-2, HiActivity.TYPE_POOL_SWIM),
                          (-3, HiActivity.TYPE_OPEN_WATER_SWIM),
-                         (282, HiActivity.TYPE_HIKE)]
+                         (282, HiActivity.TYPE_HIKE),
+                         (101, HiActivity.TYPE_INDOOR_RUN)]
 
-    _UNSUPPORTED_JSON_SPORT_TYPES = [101]
+    _UNSUPPORTED_JSON_SPORT_TYPES = []
 
     def __init__(self, json_filename: str, output_dir: str = OUTPUT_DIR, export_json_data: bool = False):
         # Validate the JSON file parameter
@@ -1108,14 +1106,13 @@ class HiJson:
                         time_zone = tz(dts_delta(hours=time_zone_hours_offset,
                                                  minutes=time_zone_minutes_offset))
 
-                        # Get start date and time
-                        activity_start = dts.fromtimestamp(motion_path_dict['startTime'] / 1000)
+                        # Get start date and time in UTC
+                        activity_start = dts.utcfromtimestamp(motion_path_dict['startTime'] / 1000)
 
                         # Save HiTrack data to HiTrack file
-                        # TODO verify timezone (un)aware display date / time
                         hitrack_filename = "%s/HiTrack_%s" % \
                                            (self.output_dir,
-                                            activity_start.strftime('%Y%m%d_%H%M%S')
+                                            _get_tz_aware_datetime(activity_start, time_zone).strftime('%Y%m%d_%H%M%S')
                                             )
 
                         if self.export_json_data:
@@ -1179,13 +1176,14 @@ class HiJson:
                                  item[0] == sport_type][0]
                             hi_activity.set_activity_type(sport)
 
-                        # TODO Start date and time (in UTC)
-                        # hi_activity.start
+                        # Start date and time (in UTC)
+                        hi_activity.start = activity_start
 
                         # Time zone - Use time zone from JSON activity data
                         hi_activity.time_zone = time_zone
-                        # TODO Duration
-                        # hi_activity.duration
+
+                        # Stop date and time (in UTC) from duration
+                        hi_activity.stop = activity_start + dts_delta(milliseconds=motion_path_dict['totalTime'])
 
                         # Total distance
                         if 'totalDistance' in activity_detail_dict:
@@ -1198,7 +1196,8 @@ class HiJson:
                         # Swimming pool length
                         if 'wearSportData' in activity_detail_dict:
                             if 'swim_pool_length' in activity_detail_dict['wearSportData']:
-                                hi_activity.set_pool_length(activity_detail_dict['wearSportData']['swim_pool_length'] / 100)
+                                hi_activity.set_pool_length(
+                                    activity_detail_dict['wearSportData']['swim_pool_length'] / 100)
 
                         self.hi_activity_list.append(hi_activity)
                 else:
@@ -1234,6 +1233,7 @@ class TcxActivity:
                         (HiActivity.TYPE_POOL_SWIM, _SPORT_OTHER),
                         (HiActivity.TYPE_OPEN_WATER_SWIM, _SPORT_OTHER),
                         (HiActivity.TYPE_HIKE, _SPORT_OTHER),
+                        (HiActivity.TYPE_INDOOR_RUN, 'Running'),
                         (HiActivity.TYPE_UNKNOWN, _SPORT_OTHER)]
 
     # TODO Customize XSD schema in the _validate_xml() function to validate Strava sport types.
@@ -1244,6 +1244,7 @@ class TcxActivity:
                            (HiActivity.TYPE_POOL_SWIM, 'swimming'),
                            (HiActivity.TYPE_OPEN_WATER_SWIM, 'swimming'),
                            (HiActivity.TYPE_HIKE, 'hiking'),
+                           (HiActivity.TYPE_INDOOR_RUN, 'running'),
                            (HiActivity.TYPE_UNKNOWN, _SPORT_OTHER)]
 
     def __init__(self, hi_activity: HiActivity, tcx_xml_schema=None, save_dir: str = OUTPUT_DIR,
@@ -1307,12 +1308,13 @@ class TcxActivity:
             # Strange enough, according to TCX XSD the Id should be a date.
             # TODO verify if this is the case for Strava too or if something more meaningful can be passed.
             el_id = xml_et.SubElement(el_activity, 'Id')
-            el_id.text = self.hi_activity.get_tz_aware_datetime(self.hi_activity.start).isoformat('T')
+            el_id.text = _get_tz_aware_datetime(self.hi_activity.start, self.hi_activity.time_zone).isoformat('T')
             # Generate the activity xml content based on the type of activity
             if self.hi_activity.get_activity_type() in [HiActivity.TYPE_WALK,
                                                         HiActivity.TYPE_RUN,
                                                         HiActivity.TYPE_CYCLE,
                                                         HiActivity.TYPE_HIKE,
+                                                        HiActivity.TYPE_INDOOR_RUN,
                                                         HiActivity.TYPE_UNKNOWN]:
                 self._generate_walk_run_cycle_xml_data(el_activity)
             elif self.hi_activity.get_activity_type() in [HiActivity.TYPE_POOL_SWIM,
@@ -1371,46 +1373,62 @@ class TcxActivity:
         # **** Lap (a lap in the TCX XML corresponds to a segment in the HiActivity)
         for n, segment in enumerate(self.hi_activity.get_segments()):
             el_lap = self._generate_lap_header_xml_data(el_activity, segment)
-            el_track = xml_et.SubElement(el_lap, 'Track')
 
             # ***** Track
+            el_track = xml_et.SubElement(el_lap, 'Track')
+
             segment_data = self.hi_activity.get_segment_data(segment)
-            for data in segment_data:
+            if segment_data:
+                for data in segment_data:
+                    el_trackpoint = xml_et.SubElement(el_track, 'Trackpoint')
+                    el_time = xml_et.SubElement(el_trackpoint, 'Time')
+                    el_time.text = _get_tz_aware_datetime(data['t'], self.hi_activity.time_zone).isoformat('T')
+
+                    if 'lat' in data:
+                        el_position = xml_et.SubElement(el_trackpoint, 'Position')
+                        el_latitude_degrees = xml_et.SubElement(el_position, 'LatitudeDegrees')
+                        el_latitude_degrees.text = str(data['lat'])
+                        el_longitude_degrees = xml_et.SubElement(el_position, 'LongitudeDegrees')
+                        el_longitude_degrees.text = str(data['lon'])
+
+                    if 'alti' in data:
+                        el_altitude_meters = xml_et.SubElement(el_trackpoint, 'AltitudeMeters')
+                        el_altitude_meters.text = str(data['alti'])
+
+                    if 'distance' in data:
+                        el_distance_meters = xml_et.SubElement(el_trackpoint, 'DistanceMeters')
+                        el_distance_meters.text = str(data['distance'])
+
+                    if 'hr' in data:
+                        el_heart_rate_bpm = xml_et.SubElement(el_trackpoint, 'HeartRateBpm')
+                        el_heart_rate_bpm.set('xsi:type', 'HeartRateInBeatsPerMinute_t')
+                        value = xml_et.SubElement(el_heart_rate_bpm, 'Value')
+                        value.text = str(data['hr'])
+
+                    if 's-r' in data:  # Step frequency (for walking and running)
+                        if self.hi_activity.get_activity_type() in (HiActivity.TYPE_WALK, HiActivity.TYPE_RUN):
+                            el_extensions = xml_et.SubElement(el_trackpoint, 'Extensions')
+                            el_tpx = xml_et.SubElement(el_extensions, 'TPX')
+                            el_tpx.set('xmlns', 'http://www.garmin.com/xmlschemas/ActivityExtension/v2')
+                            el_run_cadence = xml_et.SubElement(el_tpx, 'RunCadence')
+                            # [Verified] Strava / TCX expects strides/minute (Strava displays steps/minute
+                            # in activity overview). The HiTrack information is in steps/minute. Divide by 2 to have
+                            # strides/minute in TCX.
+                            el_run_cadence.text = str(int(data['s-r'] / 2))
+            else:
+                # No detailed segment data. Create two (dummy) trackpoints at start and stop time of segment.
                 el_trackpoint = xml_et.SubElement(el_track, 'Trackpoint')
                 el_time = xml_et.SubElement(el_trackpoint, 'Time')
-                el_time.text = self.hi_activity.get_tz_aware_datetime(data['t']).isoformat('T')
+                el_time.text = _get_tz_aware_datetime(segment['start'], self.hi_activity.time_zone).isoformat('T')
+                el_distance_meters = xml_et.SubElement(el_trackpoint, 'DistanceMeters')
+                el_distance_meters.text = '0'
 
-                if 'lat' in data:
-                    el_position = xml_et.SubElement(el_trackpoint, 'Position')
-                    el_latitude_degrees = xml_et.SubElement(el_position, 'LatitudeDegrees')
-                    el_latitude_degrees.text = str(data['lat'])
-                    el_longitude_degrees = xml_et.SubElement(el_position, 'LongitudeDegrees')
-                    el_longitude_degrees.text = str(data['lon'])
+                el_trackpoint = xml_et.SubElement(el_track, 'Trackpoint')
+                el_time = xml_et.SubElement(el_trackpoint, 'Time')
+                el_time.text = _get_tz_aware_datetime(segment['stop'], self.hi_activity.time_zone).isoformat('T')
+                el_distance_meters = xml_et.SubElement(el_trackpoint, 'DistanceMeters')
+                el_distance_meters.text = str(segment['distance'])
 
-                if 'alti' in data:
-                    el_altitude_meters = xml_et.SubElement(el_trackpoint, 'AltitudeMeters')
-                    el_altitude_meters.text = str(data['alti'])
-
-                if 'distance' in data:
-                    el_distance_meters = xml_et.SubElement(el_trackpoint, 'DistanceMeters')
-                    el_distance_meters.text = str(data['distance'])
-
-                if 'hr' in data:
-                    el_heart_rate_bpm = xml_et.SubElement(el_trackpoint, 'HeartRateBpm')
-                    el_heart_rate_bpm.set('xsi:type', 'HeartRateInBeatsPerMinute_t')
-                    value = xml_et.SubElement(el_heart_rate_bpm, 'Value')
-                    value.text = str(data['hr'])
-
-                if 's-r' in data:  # Step frequency (for walking and running)
-                    if self.hi_activity.get_activity_type() in (HiActivity.TYPE_WALK, HiActivity.TYPE_RUN):
-                        el_extensions = xml_et.SubElement(el_trackpoint, 'Extensions')
-                        el_tpx = xml_et.SubElement(el_extensions, 'TPX')
-                        el_tpx.set('xmlns', 'http://www.garmin.com/xmlschemas/ActivityExtension/v2')
-                        el_run_cadence = xml_et.SubElement(el_tpx, 'RunCadence')
-                        # [Verified] Strava / TCX expects strides/minute (Strava displays steps/minute
-                        # in activity overview). The HiTrack information is in steps/minute. Divide by 2 to have
-                        # strides/minute in TCX.
-                        el_run_cadence.text = str(int(data['s-r'] / 2))
 
     def _generate_swim_xml_data(self, el_activity):
         """ Generates the TCX XML content for swimming activities """
@@ -1423,7 +1441,7 @@ class TcxActivity:
             # Add first TrackPoint for start of lap
             el_trackpoint = xml_et.SubElement(el_track, 'Trackpoint')
             el_time = xml_et.SubElement(el_trackpoint, 'Time')
-            el_time.text = self.hi_activity.get_tz_aware_datetime(lap['start']).isoformat('T')
+            el_time.text = _get_tz_aware_datetime(lap['start'], self.hi_activity.time_zone).isoformat('T')
             el_distance_meters = xml_et.SubElement(el_trackpoint, 'DistanceMeters')
             el_distance_meters.text = str(cumulative_distance)
 
@@ -1432,9 +1450,8 @@ class TcxActivity:
                 if 'lat' in lap_detail_data:
                     el_trackpoint = xml_et.SubElement(el_track, 'Trackpoint')
                     el_time = xml_et.SubElement(el_trackpoint, 'Time')
-                    el_time.text = self.hi_activity.get_tz_aware_datetime(lap_detail_data['t']).isoformat('T',
-                                                                                                          'seconds')
-
+                    el_time.text = _get_tz_aware_datetime(lap_detail_data['t'],
+                                                          self.hi_activity.time_zone).isoformat('T', 'seconds')
                     el_position = xml_et.SubElement(el_trackpoint, 'Position')
                     el_latitude_degrees = xml_et.SubElement(el_position, 'LatitudeDegrees')
                     el_latitude_degrees.text = str(lap_detail_data['lat'])
@@ -1446,7 +1463,7 @@ class TcxActivity:
 
             el_trackpoint = xml_et.SubElement(el_track, 'Trackpoint')
             el_time = xml_et.SubElement(el_trackpoint, 'Time')
-            el_time.text = self.hi_activity.get_tz_aware_datetime(lap['stop']).isoformat('T')
+            el_time.text = _get_tz_aware_datetime(lap['stop'], self.hi_activity.time_zone).isoformat('T')
             el_distance_meters = xml_et.SubElement(el_trackpoint, 'DistanceMeters')
             el_distance_meters.text = str(cumulative_distance)
         return
@@ -1454,7 +1471,7 @@ class TcxActivity:
     def _generate_lap_header_xml_data(self, el_activity, segment) -> xml_et.Element:
         """ Generates the TCX XML lap header content part """
         el_lap = xml_et.SubElement(el_activity, 'Lap')
-        el_lap.set('StartTime', self.hi_activity.get_tz_aware_datetime(segment['start']).isoformat('T'))
+        el_lap.set('StartTime', _get_tz_aware_datetime(segment['start'], self.hi_activity.time_zone).isoformat('T'))
         el_total_time_seconds = xml_et.SubElement(el_lap, 'TotalTimeSeconds')
         el_total_time_seconds.text = str(segment['duration'])
         # Distance per segment. Use calculated distances. Although they may be off from the total distance provided
@@ -1589,6 +1606,28 @@ def _convert_hitrack_timestamp(hitrack_timestamp: float) -> datetime:
 
     divisor = 10 ** (timestamp_digits - 9) if timestamp_digits > 9 else 0.1 ** (9 - timestamp_digits)
     return dts.utcfromtimestamp(int(hitrack_timestamp / divisor))
+
+
+def _get_tz_aware_datetime(naive_datetime: dts, time_zone: tz):
+    """"All datetimes in the HiActivity are represented as UTC datetimes and are parsed as time zone unaware
+    (naive) datetime objects. This method returns the equivalent time zone aware datetime representation using the
+    time zone information of the HiTrack activity (if any). If the Hitrack activity has no time zone information,
+    UTC (GMT) time zone is assumed.
+
+    :param naive_datetime:
+    :param time_zone:
+    :type naive_datetime: datetime.datetime
+    :type time_zone: datetime.timezone
+    :return
+    The (time zone) aware datetime corresponding to the naive datetime in the naive_datetime parameter
+    """
+    utc_datetime = dts.replace(naive_datetime, tzinfo=tz.utc)
+    if time_zone:
+        aware_datetime = utc_datetime.astimezone(time_zone)
+    else:
+        aware_datetime = utc_datetime
+
+    return aware_datetime
 
 
 def _init_logging(level: str = 'INFO'):
