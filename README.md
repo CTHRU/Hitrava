@@ -4,8 +4,14 @@
 ![GitHub release (latest by date)][shield release]
 ![GitHub Release Date][shield release date]
 ----------
+## Introduction
+Hitrava converts health activities registered using a Honor or Huawei activity tracker or smart watch in the 
+[`Huawei Health`](https://play.google.com/store/apps/details?id=com.huawei.health) app into a file format that can be 
+directly uploaded to [`Strava`](https://strava.com).
+
 ## Table of Contents
-- [Introduction](#introduction)  
+- [Introduction](#introduction)
+- [Features](#features)  
 - [Installation](#installation)  
 - [How To Covert](#how-to-convert-your-health-activities-and-import-them-in-strava)  
 - [Usage](#usage)  
@@ -14,11 +20,25 @@
 - [Release Notes](#release-notes)  
 - [Copyright and License](#copyright-and-license)
 
-## Introduction
-Hitrava converts health activities registered using a Honor or Huawei activity tracker or smart watch in the 
-[`Huawei Health`](https://play.google.com/store/apps/details?id=com.huawei.health) app into a file format that can be 
-directly uploaded to [`Strava`](https://strava.com).
-
+## Features
+- Recognizes and converts the following activity types from Huawei Health to Strava:
+    - Running: both outdoor and indoor running (threadmill run)
+    - Cycling
+    - Swimming: both pool swimming and open water swimming
+    - Walking
+    - Hiking
+- When available and depending on the activity type, conversion includes health data from your Huawei or Honor smart 
+ watch / fitness band:
+    - Heart rate
+    - Cadence 
+    - SWOLF
+- Conversion is done using the centralized data from Huawei Health. In principle, any recent Huawei or Honor smart watch
+or fitness band should be supported, if you see the data in Huawei Health, e.g. 
+    - Huawei smart watches: e.g. Huawei Watch GT2 
+    - Huawei fitness bands: e.g. Huawei Band 4
+    - Honor smart watches: e.g. Honor MagicWatch 2
+    - Honor fitness bands: e.g. Honor Band 4, Honor Band 5
+    
 ## Installation
 ### Requirements
 To use Hitrava, you need:
@@ -41,7 +61,7 @@ Only required if you don't have a (suitable) python installation on your system.
 - Extract all contents of the ZIP file with the sources to a location of your choice on your system.
 
 ## How to convert your health activities and import them in Strava
-All users can use conversion from a **[ZIP](#zip-file-conversion-example)** file or a **[JSON](#json-conversion-procedure)** file.  
+All users can use conversion from a **[ZIP](#ZIP-conversion-procedure)** file or a **[JSON](#JSON-file-conversion-example)** file.  
 For users with rooted phones, legacy **[file](#single-file-conversion-examples)** and 
 **[tar](#tar-file-conversion-examples)** options are still available.
 
@@ -230,14 +250,23 @@ The release notes of the latest release can be found below.
 For a full changelog of earlier versions, please look [`here`](./CHANGELOG.md).
 
 ## Release Notes
-### Version 3.2.7 (build 2004.2301)
+### Version 3.3.0 (build 2005.0201)
 #### New features and changes
-- ZIP conversion: added support for 'Indoor Run' activity types. Indoor run activities are uploaded to Strava as regular
-run activities (no specific activity type available for indoor run via file upload). Closes #7. 
+- ZIP conversion: Pool Swim activities are directly detected from the Huawei data.
+- ZIP conversion: Pool Swim activities are converted directly from the specific Huawei data for this activity type, 
+instead of the generic activity (HiTrack) data. This guarantees a 100% correct conversion of the pool swim data (the 
+previous conversion method sometimes needed to rely on calculations).
 
 #### Solved Issues
-- ZIP conversion: the filename of all generated files now contains the time zone aware local time from when the activity
-took place.
+- ZIP conversion: The new method to convert Pool Swim activities ensures the 'division by zero' won't occur anymore.
+ Closes #8.
+
+#### Known Limitations
+- Huawei might have made changes to / might not maintain the generic (HiTrack) data for Pool Swim activities. Users 
+using the legacy HiTrack File or Tar conversion methods for Pool Swim activities, might notice differences in laps / 
+times / distances or even get an error (see also #8). The legacy conversion method for swimming activities will no
+longer be maintained. You are encouraged to use the ZIP or JSON conversion method for Pool Swim activities.
+
 
 ## Copyright and License
 [![nposl3.0][shield nposl3.0]][tldrlegal nposl3.0]  
