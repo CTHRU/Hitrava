@@ -48,10 +48,10 @@ if sys.version_info < (3, 5, 1):
 # Global Constants
 PROGRAM_NAME = 'Hitrava'
 PROGRAM_MAJOR_VERSION = '3'
-PROGRAM_MINOR_VERSION = '2'
-PROGRAM_PATCH_VERSION = '7'
-PROGRAM_MAJOR_BUILD = '2004'
-PROGRAM_MINOR_BUILD = '2301'
+PROGRAM_MINOR_VERSION = '3'
+PROGRAM_PATCH_VERSION = '0'
+PROGRAM_MAJOR_BUILD = '2005'
+PROGRAM_MINOR_BUILD = '0201'
 
 OUTPUT_DIR = './output'
 GPS_TIMEOUT = dts_delta(seconds=10)
@@ -90,7 +90,6 @@ class HiActivity:
         # available in the raw HiTrack files. However, time zone information is available from the JSON data and can be
         # stored as an attribute of the HiActivity (see below). Please take care to properly format any display/output
         # dates and times using this time zone information.
-        # TODO Revise formatting of all displayed / outputted date and time information to take time zone into account
         self.start = None
         self.stop = None
         self.time_zone = None
@@ -107,8 +106,44 @@ class HiActivity:
         # Create an empty detail data dictionary. key = timestamp, value = dict{t, lat, lon, alt, hr)
         self.data_dict = {}
 
+        # Create an empty list for the (pool) swim data
+        self.swim_data = []
+
         # Private variable to temporarily hold the last parsed SWOLF data during parsing of swimming activities
         self.last_swolf_data = None
+
+    @classmethod
+    def from_json_pool_swim_data(cls, activity_id: str, start: datetime, json_pool_swim_dict):
+        """Create a HiActivity from the swim data in the JSON file.
+        Uses the data in the mSwimSegments section of the JSON file (lap distance, duration, swolf)
+        """
+        swim_activity = cls(activity_id, HiActivity.TYPE_POOL_SWIM)
+        swim_activity.start = start;
+
+        # Parse lap data
+        swim_activity.calculated_distance = 0
+        lap_start = start
+        for swim_segment in json_pool_swim_dict:
+            # Create lap
+            lap_distance = int(swim_segment['mDistance'])
+            lap_duration = int(swim_segment['mDuration'])
+            lap_stop = lap_start + dts_delta(seconds=lap_duration)
+            lap_data = {'lap': int(swim_segment['mSegmentIndex']),
+                        'start': lap_start,
+                        'stop': lap_stop,
+                        'duration': lap_duration,
+                        'distance': lap_distance,
+                        'swolf': int(swim_segment['mSwolf']),
+                        'strokes': int(swim_segment['mPullTimes'])}
+
+            swim_activity.swim_data.append(lap_data)
+            swim_activity._add_segment_start(lap_start)
+            swim_activity._add_segment_stop(lap_stop, lap_distance)
+            swim_activity.calculated_distance += lap_distance
+            swim_activity.stop = lap_stop
+            lap_start = lap_stop
+
+        return swim_activity
 
     def get_activity_type(self) -> str:
         if self._activity_type == self.TYPE_UNKNOWN:
@@ -702,13 +737,16 @@ class HiActivity:
 
     def get_swim_data(self) -> Optional[list]:
         if self.get_activity_type() == self.TYPE_POOL_SWIM:
-            return self._get_pool_swim_data()
+            if self.swim_data:
+                return self.swim_data
+            else:
+                return self._calc_pool_swim_data()
         elif self.get_activity_type() == self.TYPE_OPEN_WATER_SWIM:
             return self._get_open_water_swim_data()
         else:
             return None
 
-    def _get_pool_swim_data(self) -> list:
+    def _calc_pool_swim_data(self) -> list:
         """" Calculates the real swim (lap) data based on the raw parsed pool swim data
         The following calculation steps on the raw parsed data is applied.
         1. Starting point is the raw parsed data per lap (segment). The data consists of multiple data records
@@ -1029,7 +1067,7 @@ class HiJson:
     _JSON_SPORT_TYPES = [(5, HiActivity.TYPE_WALK),
                          (4, HiActivity.TYPE_RUN),
                          (3, HiActivity.TYPE_CYCLE),
-                         (-2, HiActivity.TYPE_POOL_SWIM),
+                         (102, HiActivity.TYPE_POOL_SWIM),
                          (-3, HiActivity.TYPE_OPEN_WATER_SWIM),
                          (282, HiActivity.TYPE_HIKE),
                          (101, HiActivity.TYPE_INDOOR_RUN)]
@@ -1156,10 +1194,6 @@ class HiJson:
                                 logging.getLogger(PROGRAM_NAME).error('Error closing HiTrack file <%s>\n%s',
                                                                       hitrack_filename, e)
 
-                        # Parse the HiTrack file
-                        hitrack_file = HiTrackFile(hitrack_filename)
-                        hi_activity = hitrack_file.parse()
-
                         # Use activity attributes available in JSON data
                         # Do NOT process unsupported sport types
                         sport_type = motion_path_dict['sportType']
@@ -1169,11 +1203,23 @@ class HiJson:
                                                                     n, activity_date, sport_type)
                             continue
 
-                        # Sport type
+                        # Sport type (internal HiActivity sport type)
+                        sport = HiActivity.TYPE_UNKNOWN
                         if any(motion_path_dict['sportType'] in i for i in self._JSON_SPORT_TYPES):
                             sport = \
                                 [item[1] for item in self._JSON_SPORT_TYPES if
                                  item[0] == sport_type][0]
+
+                        # Parse the Huawei activity data
+                        if sport == HiActivity.TYPE_POOL_SWIM:
+                            # Pool swimming activity, parse the JSON data
+                            hi_activity = HiActivity.from_json_pool_swim_data(os.path.basename(hitrack_filename),
+                                                                              activity_start,
+                                                                              activity_detail_dict['mSwimSegments'])
+                        else:
+                            # For all activities except pool swimming, parse the HiTrack file
+                            hitrack_file = HiTrackFile(hitrack_filename)
+                            hi_activity = hitrack_file.parse()
                             hi_activity.set_activity_type(sport)
 
                         # Start date and time (in UTC)
