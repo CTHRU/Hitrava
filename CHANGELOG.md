@@ -3,9 +3,26 @@
 All notable changes to this project are documented in this file. 
 
 ## Release Notes
+### Version 3.3.0 (build 2005.0201)
+#### New features and changes
+- ZIP conversion: Pool Swim activities are directly detected from the Huawei data.
+- ZIP conversion: Pool Swim activities are converted directly from the specific Huawei data for this activity type, 
+instead of the generic activity (HiTrack) data. This guarantees a 100% correct conversion of the pool swim data (the 
+previous conversion method sometimes needed to rely on calculations).
+
+#### Solved Issues
+- ZIP conversion: The new method to convert Pool Swim activities ensures the 'division by zero' won't occur anymore.
+ Closes #8.
+
+#### Known Limitations
+- Huawei might have made changes to / might not maintain the generic (HiTrack) data for Pool Swim activities. Users 
+using the legacy HiTrack File or Tar conversion methods for Pool Swim activities, might notice differences in laps / 
+times / distances or even get an error (see also #8). The legacy conversion method for swimming activities will no
+longer be maintained. You are encouraged to use the ZIP or JSON conversion method for Pool Swim activities.
+
 ### Version 3.2.7 (build 2004.2301)
 #### New features and changes
-- ZIP conversion: added support for 'Indoor Run' activity types. Indoor run activities are uploaded to Strava as regular
+- ZIP conversion: added support for 'Indoor Run' activity types. Indoor Run activities are uploaded to Strava as regular
 run activities (no specific activity type available for indoor run via file upload). Closes #7. 
 
 #### Solved Issues
