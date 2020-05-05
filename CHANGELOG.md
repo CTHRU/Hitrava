@@ -3,6 +3,14 @@
 All notable changes to this project are documented in this file. 
 
 ## Release Notes
+### Version 3.3.1 (build 2005.0501)
+#### New features and changes
+- ZIP conversion: Added 3 digit sequence number suffix to the filenames of the converted TCX files. This allows for
+easier manual selection per 25 (Strava upload limit) when uploading the file TCX files to Strava. Thank you for the
+suggestion in #9. 
+- ZIP conversion: Added a new command line argument _--suppress_output_file_sequence_ to suppress the sequence numbers 
+in the TCX filenames.  
+
 ### Version 3.3.0 (build 2005.0201)
 #### New features and changes
 - ZIP conversion: Pool Swim activities are directly detected from the Huawei data.
