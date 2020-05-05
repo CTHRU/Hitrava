@@ -3,6 +3,8 @@
 [![nposl3.0][shield nposl3.0]][tldrlegal nposl3.0]
 ![GitHub release (latest by date)][shield release]
 ![GitHub Release Date][shield release date]
+[![Buy me a coffee][shield buymeacoffee]][buymeacoffee]
+
 ----------
 ## Introduction
 Hitrava converts health activities registered using a Honor or Huawei activity tracker or smart watch in the 
@@ -27,6 +29,8 @@ directly uploaded to [`Strava`](https://strava.com).
     - Swimming: both pool swimming and open water swimming
     - Walking
     - Hiking
+- Conversion contains generic activity information such as GPS track, distance, duration, calorie consumption (as
+available during recording of the activity).
 - When available and depending on the activity type, conversion includes health data from your Huawei or Honor smart 
  watch / fitness band:
     - Heart rate
@@ -178,6 +182,10 @@ OUTPUT options:
                         prefix to the generated TCX XML file(s). E.g. use
                         %Y-%m-%d- to add human readable year-month-day
                         information in the name of the generated TCX file.
+  --suppress_output_file_sequence
+                        Suppresses the sequence number suffix in the filenames
+                        of converted TCX files when converting activities in
+                        ZIP or JSON mode.
   --validate_xml        Validate generated TCX XML file(s). NOTE: requires
                         xmlschema library and an internet connection to
                         retrieve the TCX XSD.
@@ -250,23 +258,13 @@ The release notes of the latest release can be found below.
 For a full changelog of earlier versions, please look [`here`](./CHANGELOG.md).
 
 ## Release Notes
-### Version 3.3.0 (build 2005.0201)
+### Version 3.3.1 (build 2005.0501)
 #### New features and changes
-- ZIP conversion: Pool Swim activities are directly detected from the Huawei data.
-- ZIP conversion: Pool Swim activities are converted directly from the specific Huawei data for this activity type, 
-instead of the generic activity (HiTrack) data. This guarantees a 100% correct conversion of the pool swim data (the 
-previous conversion method sometimes needed to rely on calculations).
-
-#### Solved Issues
-- ZIP conversion: The new method to convert Pool Swim activities ensures the 'division by zero' won't occur anymore.
- Closes #8.
-
-#### Known Limitations
-- Huawei might have made changes to / might not maintain the generic (HiTrack) data for Pool Swim activities. Users 
-using the legacy HiTrack File or Tar conversion methods for Pool Swim activities, might notice differences in laps / 
-times / distances or even get an error (see also #8). The legacy conversion method for swimming activities will no
-longer be maintained. You are encouraged to use the ZIP or JSON conversion method for Pool Swim activities.
-
+- ZIP conversion: Added 3 digit sequence number suffix to the filenames of the converted TCX files. This allows for
+easier manual selection per 25 (Strava upload limit) when uploading the file TCX files to Strava. Thank you for the
+suggestion in #9. 
+- ZIP conversion: Added a new command line argument _--suppress_output_file_sequence_ to suppress the sequence numbers 
+in the TCX filenames.
 
 ## Copyright and License
 [![nposl3.0][shield nposl3.0]][tldrlegal nposl3.0]  
@@ -285,3 +283,5 @@ If you're more into a TL;DR approach, start [`here`][tldrlegal nposl3.0].
 [shield release]: https://img.shields.io/github/v/release/CTHRU/Hitrava?color=orange
 [shield release date]: https://img.shields.io/github/release-date/CTHRU/Hitrava?color=orange
 [latest release]: https://github.com/CTHRU/Hitrava/releases/latest
+[shield buymeacoffee]: https://www.buymeacoffee.com/assets/img/guidelines/download-assets-sm-2.svg
+[buymeacoffee]: https://www.buymeacoffee.com/CTHRU
