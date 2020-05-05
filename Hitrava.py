@@ -49,9 +49,9 @@ if sys.version_info < (3, 5, 1):
 PROGRAM_NAME = 'Hitrava'
 PROGRAM_MAJOR_VERSION = '3'
 PROGRAM_MINOR_VERSION = '3'
-PROGRAM_PATCH_VERSION = '0'
+PROGRAM_PATCH_VERSION = '1'
 PROGRAM_MAJOR_BUILD = '2005'
-PROGRAM_MINOR_BUILD = '0201'
+PROGRAM_MINOR_BUILD = '0501'
 
 OUTPUT_DIR = './output'
 GPS_TIMEOUT = dts_delta(seconds=10)
@@ -1294,7 +1294,7 @@ class TcxActivity:
                            (HiActivity.TYPE_UNKNOWN, _SPORT_OTHER)]
 
     def __init__(self, hi_activity: HiActivity, tcx_xml_schema=None, save_dir: str = OUTPUT_DIR,
-                 filename_prefix: str = None):
+                 filename_prefix: str = None, filename_suffix: str = None):
         if not hi_activity:
             logging.getLogger(PROGRAM_NAME).error("No valid HiTrack activity specified to construct TCX activity.")
             raise Exception("No valid HiTrack activity specified to construct TCX activity.")
@@ -1307,6 +1307,7 @@ class TcxActivity:
         self.save_dir = save_dir
         self.filename_prefix = filename_prefix
         self.tcx_filename = None
+        self.filename_suffix = filename_suffix
 
     def _get_sport(self):
         sport = ''
@@ -1551,7 +1552,10 @@ class TcxActivity:
             if self.filename_prefix:
                 # TODO verify timezone (un)aware display date / time
                 self.tcx_filename += dts.strftime(self.hi_activity.start, self.filename_prefix)
-            self.tcx_filename += self.hi_activity.activity_id + '.tcx'
+            self.tcx_filename += self.hi_activity.activity_id
+            if self.filename_suffix:
+                self.tcx_filename += self.filename_suffix
+            self.tcx_filename += '.tcx'
         try:
             logging.getLogger(PROGRAM_NAME).info('Saving TCX file <%s> for HiTrack activity <%s>', self.tcx_filename,
                                                  self.hi_activity.activity_id)
@@ -1773,6 +1777,10 @@ def _init_argument_parser() -> argparse.ArgumentParser:
                               TCX XML file(s). E.g. use %%Y-%%m-%%d- to add human readable year-month-day information \
                               in the name of the generated TCX file.',
                               type=str)
+    output_group.add_argument('--suppress_output_file_sequence',
+                              help='Suppresses the sequence number suffix in the filenames of converted TCX files when \
+                              converting activities in ZIP or JSON mode.',
+                              action='store_true')
     output_group.add_argument('--validate_xml', help='Validate generated TCX XML file(s). NOTE: requires xmlschema library \
                                                 and an internet connection to retrieve the TCX XSD.',
                               action='store_true')
@@ -1834,10 +1842,13 @@ def main():
             json_filename = args.json
         hi_json = HiJson(json_filename, args.output_dir, args.json_export)
         hi_activity_list = hi_json.parse(args.from_date)
-        for hi_activity in hi_activity_list:
+        for n, hi_activity in enumerate(hi_activity_list, start=1):
             if args.pool_length:
                 hi_activity.set_pool_length(args.pool_length)
-            tcx_activity = TcxActivity(hi_activity, tcx_xml_schema, args.output_dir, args.output_file_prefix)
+            if not args.suppress_output_file_sequence:
+                output_file_suffix = '_%03d' % (n % 1000)
+            tcx_activity = TcxActivity(hi_activity, tcx_xml_schema, args.output_dir, args.output_file_prefix,
+                                       output_file_suffix)
             tcx_activity.save()
             logging.getLogger(PROGRAM_NAME).info('Converted %s', hi_activity)
 
