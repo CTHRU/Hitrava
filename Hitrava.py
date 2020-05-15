@@ -49,9 +49,9 @@ if sys.version_info < (3, 5, 1):
 PROGRAM_NAME = 'Hitrava'
 PROGRAM_MAJOR_VERSION = '3'
 PROGRAM_MINOR_VERSION = '3'
-PROGRAM_PATCH_VERSION = '1'
+PROGRAM_PATCH_VERSION = '2'
 PROGRAM_MAJOR_BUILD = '2005'
-PROGRAM_MINOR_BUILD = '0501'
+PROGRAM_MINOR_BUILD = '1501'
 
 OUTPUT_DIR = './output'
 GPS_TIMEOUT = dts_delta(seconds=10)
@@ -67,6 +67,10 @@ class HiActivity:
     TYPE_OPEN_WATER_SWIM = 'Swim_Open_Water'
     TYPE_HIKE = 'Hike'
     TYPE_INDOOR_RUN = 'Indoor_Run'
+    TYPE_INDOOR_CYCLE = 'Indoor_Cycle'
+    TYPE_CROSS_TRAINER = 'Cross_Trainer'
+    TYPE_OTHER = 'Other'
+    TYPE_CROSSFIT = 'CrossFit'
     TYPE_UNKNOWN = '?'
 
     _ACTIVITY_TYPE_LIST = (TYPE_WALK, TYPE_RUN, TYPE_CYCLE, TYPE_POOL_SWIM, TYPE_OPEN_WATER_SWIM, TYPE_HIKE,
@@ -1070,9 +1074,13 @@ class HiJson:
                          (102, HiActivity.TYPE_POOL_SWIM),
                          (-3, HiActivity.TYPE_OPEN_WATER_SWIM),
                          (282, HiActivity.TYPE_HIKE),
-                         (101, HiActivity.TYPE_INDOOR_RUN)]
+                         (101, HiActivity.TYPE_INDOOR_RUN),
+                         (103, HiActivity.TYPE_INDOOR_CYCLE),
+                         (111, HiActivity.TYPE_CROSS_TRAINER),
+                         (117, HiActivity.TYPE_OTHER),
+                         (145, HiActivity.TYPE_CROSSFIT)]
 
-    _UNSUPPORTED_JSON_SPORT_TYPES = []
+    _UNSUPPORTED_JSON_SPORT_TYPES = [103, 111, 117, 145]
 
     def __init__(self, json_filename: str, output_dir: str = OUTPUT_DIR, export_json_data: bool = False):
         # Validate the JSON file parameter
@@ -1220,7 +1228,15 @@ class HiJson:
                             # For all activities except pool swimming, parse the HiTrack file
                             hitrack_file = HiTrackFile(hitrack_filename)
                             hi_activity = hitrack_file.parse()
-                            hi_activity.set_activity_type(sport)
+                            if sport != HiActivity.TYPE_UNKNOWN:
+                                hi_activity.set_activity_type(sport)
+                            else:
+                                logging.getLogger(PROGRAM_NAME).warning('Activity %s from %s has an unknown activity '
+                                                                        'type %d. Conversion will be attempted but may '
+                                                                        'not work.',
+                                                                        os.path.basename(hitrack_filename),
+                                                                        activity_date,
+                                                                        sport_type)
 
                         # Start date and time (in UTC)
                         hi_activity.start = activity_start
@@ -1475,7 +1491,6 @@ class TcxActivity:
                 el_time.text = _get_tz_aware_datetime(segment['stop'], self.hi_activity.time_zone).isoformat('T')
                 el_distance_meters = xml_et.SubElement(el_trackpoint, 'DistanceMeters')
                 el_distance_meters.text = str(segment['distance'])
-
 
     def _generate_swim_xml_data(self, el_activity):
         """ Generates the TCX XML content for swimming activities """
