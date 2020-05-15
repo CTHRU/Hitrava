@@ -3,6 +3,20 @@
 All notable changes to this project are documented in this file. 
 
 ## Release Notes
+### Version 3.3.2 (build 2005.1501)
+#### Solved Issues
+- ZIP conversion: conversion no longer stops with an error when an activity with an unknown activity type is 
+encountered. This version will display a warning message when encountering such activities and will attempt conversion.
+You are encouraged to check the conversion result of these activities and report any conversion errors that might occur. 
+Closes #11. 
+
+#### Known Limitations
+- The following activity types are known to produce unreliable conversion data and will be skipped (for now):
+    - Indoor Cycle
+    - Cross Trainer
+    - Other
+    - CrossFit
+     
 ### Version 3.3.1 (build 2005.0501)
 #### New features and changes
 - ZIP conversion: Added 3 digit sequence number suffix to the filenames of the converted TCX files. This allows for
