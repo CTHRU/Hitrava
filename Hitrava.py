@@ -48,9 +48,9 @@ if sys.version_info < (3, 5, 1):
 # Global Constants
 PROGRAM_NAME = 'Hitrava'
 PROGRAM_MAJOR_VERSION = '3'
-PROGRAM_MINOR_VERSION = '3'
-PROGRAM_PATCH_VERSION = '2'
-PROGRAM_MAJOR_BUILD = '2005'
+PROGRAM_MINOR_VERSION = '4'
+PROGRAM_PATCH_VERSION = '0'
+PROGRAM_MAJOR_BUILD = '2006'
 PROGRAM_MINOR_BUILD = '1501'
 
 OUTPUT_DIR = './output'
@@ -74,7 +74,7 @@ class HiActivity:
     TYPE_UNKNOWN = '?'
 
     _ACTIVITY_TYPE_LIST = (TYPE_WALK, TYPE_RUN, TYPE_CYCLE, TYPE_POOL_SWIM, TYPE_OPEN_WATER_SWIM, TYPE_HIKE,
-                           TYPE_INDOOR_RUN)
+                           TYPE_INDOOR_RUN, TYPE_INDOOR_CYCLE, TYPE_CROSS_TRAINER, TYPE_OTHER, TYPE_CROSSFIT)
 
     def __init__(self, activity_id: str, activity_type: str = TYPE_UNKNOWN):
         logging.getLogger(PROGRAM_NAME).debug('New HiTrack activity to process <%s>', activity_id)
@@ -509,6 +509,10 @@ class HiActivity:
             # The first record with k=0 is the value registered after 5 seconds of activity.
             speed_data['t'] = self.start + dts_delta(seconds=int(speed_data.pop('k')) + 5)
             speed_data['rs'] = int(speed_data.pop('v'))
+
+            # Ignore invalid speed data records (negative speed value, e.g. for indoor (cycling) activities)
+            if speed_data['rs'] < 0:
+                return
         except Exception as e:
             logging.getLogger(PROGRAM_NAME).error(
                 'One or more required data fields (k, v) missing or invalid in speed data %s\n%s', data, e)
@@ -1080,7 +1084,7 @@ class HiJson:
                          (117, HiActivity.TYPE_OTHER),
                          (145, HiActivity.TYPE_CROSSFIT)]
 
-    _UNSUPPORTED_JSON_SPORT_TYPES = [103, 111, 117, 145]
+    _UNSUPPORTED_JSON_SPORT_TYPES = []
 
     def __init__(self, json_filename: str, output_dir: str = OUTPUT_DIR, export_json_data: bool = False):
         # Validate the JSON file parameter
@@ -1296,6 +1300,10 @@ class TcxActivity:
                         (HiActivity.TYPE_OPEN_WATER_SWIM, _SPORT_OTHER),
                         (HiActivity.TYPE_HIKE, _SPORT_OTHER),
                         (HiActivity.TYPE_INDOOR_RUN, 'Running'),
+                        (HiActivity.TYPE_INDOOR_CYCLE, 'Biking'),
+                        (HiActivity.TYPE_CROSS_TRAINER, _SPORT_OTHER),
+                        (HiActivity.TYPE_OTHER, _SPORT_OTHER),
+                        (HiActivity.TYPE_CROSSFIT, _SPORT_OTHER),
                         (HiActivity.TYPE_UNKNOWN, _SPORT_OTHER)]
 
     # TODO Customize XSD schema in the _validate_xml() function to validate Strava sport types.
@@ -1306,7 +1314,11 @@ class TcxActivity:
                            (HiActivity.TYPE_POOL_SWIM, 'swimming'),
                            (HiActivity.TYPE_OPEN_WATER_SWIM, 'swimming'),
                            (HiActivity.TYPE_HIKE, 'hiking'),
-                           (HiActivity.TYPE_INDOOR_RUN, 'running'),
+                           (HiActivity.TYPE_INDOOR_RUN, 'running'), # Not recognized by Strava TCX upload, change activity type after upload manually to Virtual Run.
+                           (HiActivity.TYPE_INDOOR_CYCLE, 'biking'), # Not recognized by Strava TCX upload, change activity type after upload manually to Virtual Ride.
+                           (HiActivity.TYPE_CROSS_TRAINER, 'elliptical'), # Not recognized by Strava TCX upload, change activity type after upload manually to Elliptical.
+                           (HiActivity.TYPE_OTHER, _SPORT_OTHER),
+                           (HiActivity.TYPE_CROSSFIT, 'crossfit'), # Not recognzied by Strava TCX upload, chnage activity type after upload manually to Crossfit.
                            (HiActivity.TYPE_UNKNOWN, _SPORT_OTHER)]
 
     def __init__(self, hi_activity: HiActivity, tcx_xml_schema=None, save_dir: str = OUTPUT_DIR,
@@ -1378,11 +1390,21 @@ class TcxActivity:
                                                         HiActivity.TYPE_CYCLE,
                                                         HiActivity.TYPE_HIKE,
                                                         HiActivity.TYPE_INDOOR_RUN,
+                                                        HiActivity.TYPE_INDOOR_CYCLE,
+                                                        HiActivity.TYPE_CROSS_TRAINER,
+                                                        HiActivity.TYPE_OTHER,
+                                                        HiActivity.TYPE_CROSSFIT,
                                                         HiActivity.TYPE_UNKNOWN]:
                 self._generate_walk_run_cycle_xml_data(el_activity)
             elif self.hi_activity.get_activity_type() in [HiActivity.TYPE_POOL_SWIM,
                                                           HiActivity.TYPE_OPEN_WATER_SWIM]:
                 self._generate_swim_xml_data(el_activity)
+            else:
+                logging.getLogger(PROGRAM_NAME).warning('Activity %s of type %s has no explicit XML generation method. '
+                                                        'Will attempt default XML generation method.',
+                                                        self.hi_activity.activity_id,
+                                                        self.hi_activity.get_activity_type())
+                self._generate_walk_run_cycle_xml_data(el_activity)
 
             # *** Creator
             # TODO: verify if information is available in JSON file
@@ -1541,12 +1563,15 @@ class TcxActivity:
         el_distance_meters = xml_et.SubElement(el_lap, 'DistanceMeters')
         el_distance_meters.text = str(segment['distance'])
         # Calories per segment. Assume even calorie consumption over all segments and distribute calories
-        # per segment based on the ratio segment distance / calculated total distance
-        if self.hi_activity.calories > 0 and segment['distance'] > 0 and self.hi_activity.calculated_distance > 0:
-            segment_calories = round(
-                self.hi_activity.calories * segment['distance'] / self.hi_activity.calculated_distance)
+        # per segment based on the ratio segment distance / calculated total distance. For (indoor) activities without
+        # distance information, use a duration based ratio.
+        if self.hi_activity.calculated_distance > 0:
+            if self.hi_activity.calories > 0 and segment['distance'] > 0:
+                segment_calories = round(
+                    self.hi_activity.calories * segment['distance'] / self.hi_activity.calculated_distance)
         else:
-            segment_calories = 0
+           total_duration = (self.hi_activity.stop - self.hi_activity.start).seconds
+           segment_calories = round(self.hi_activity.calories * segment['duration'] / total_duration)
         el_calories = xml_et.SubElement(el_lap, 'Calories')
         el_calories.text = str(segment_calories)
         el_intensity = xml_et.SubElement(el_lap, 'Intensity')  # TODO verify if required/correct
