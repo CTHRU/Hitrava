@@ -25,10 +25,12 @@ directly uploaded to [`Strava`](https://strava.com).
 ## Features
 - Recognizes and converts the following activity types from Huawei Health to Strava:
     - Running: both outdoor and indoor running (threadmill run)
-    - Cycling
+    - Cycling: both outdoor and indoor cycling
     - Swimming: both pool swimming and open water swimming
     - Walking
     - Hiking
+    - Cross Trainer (Elliptical)
+    - Crossfit
 - Conversion contains generic activity information such as GPS track, distance, duration, calorie consumption (as
 available during recording of the activity).
 - When available and depending on the activity type, conversion includes health data from your Huawei or Honor smart 
@@ -257,19 +259,22 @@ The release notes of the latest release can be found below.
 For a full changelog of earlier versions, please look [`here`](./CHANGELOG.md).
 
 ## Release Notes
-### Version 3.3.2 (build 2005.1501)
+### Version 3.4.0 (build 2006.1501)
+#### New features and changes
+- ZIP conversion: added support for sport types Indoor Cycle, Cross Trainer, Other and Cross Fit. Closes #12.
+
 #### Solved Issues
-- ZIP conversion: conversion no longer stops with an error when an activity with an unknown activity type is 
-encountered. This version will display a warning message when encountering such activities and will attempt conversion.
-You are encouraged to check the conversion result of these activities and report any conversion errors that might occur. 
-Closes #11. 
+- Calorie information for indoor run activities was missing in the converted TCX file (always zero).
 
 #### Known Limitations
-- The following activity types are known to produce unreliable conversion data and will be skipped (for now):
-    - Indoor Cycle
-    - Cross Trainer
-    - Other
-    - CrossFit
+- The Strava upload functionality does not have the functionality to recognize all sport types. It is recommended to 
+manually change the sport type after uploading for the following sport types (e.g. to allow Strava to display the 
+heart rate information):
+    - Indoor Run: is converted as regular Run. Manually change to Virtual Run.
+    - Indoor Cycle: is converted as regular Run. Manually change to Virtual Ride.
+    - Cross Trainer: Manually change to Elliptical.
+    - Other: ?
+    - Crossfit: Manually change to Crossfit.
 
 ## Copyright and License
 [![nposl3.0][shield nposl3.0]][tldrlegal nposl3.0]  
