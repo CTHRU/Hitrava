@@ -49,9 +49,9 @@ if sys.version_info < (3, 5, 1):
 PROGRAM_NAME = 'Hitrava'
 PROGRAM_MAJOR_VERSION = '3'
 PROGRAM_MINOR_VERSION = '4'
-PROGRAM_PATCH_VERSION = '0'
+PROGRAM_PATCH_VERSION = '1'
 PROGRAM_MAJOR_BUILD = '2006'
-PROGRAM_MINOR_BUILD = '1501'
+PROGRAM_MINOR_BUILD = '2101'
 
 OUTPUT_DIR = './output'
 GPS_TIMEOUT = dts_delta(seconds=10)
@@ -1563,15 +1563,17 @@ class TcxActivity:
         el_distance_meters = xml_et.SubElement(el_lap, 'DistanceMeters')
         el_distance_meters.text = str(segment['distance'])
         # Calories per segment. Assume even calorie consumption over all segments and distribute calories
-        # per segment based on the ratio segment distance / calculated total distance. For (indoor) activities without
-        # distance information, use a duration based ratio.
-        if self.hi_activity.calculated_distance > 0:
-            if self.hi_activity.calories > 0 and segment['distance'] > 0:
+        # per segment based on the ratio segment distance / calculated total distance. For (indoor) activities
+        # without distance information, use a duration based ratio.
+        if self.hi_activity.calories > 0:
+            if self.hi_activity.calculated_distance > 0 and segment['distance'] > 0:
                 segment_calories = round(
                     self.hi_activity.calories * segment['distance'] / self.hi_activity.calculated_distance)
+            else:
+                total_duration = (self.hi_activity.stop - self.hi_activity.start).seconds
+                segment_calories = round(self.hi_activity.calories * segment['duration'] / total_duration)
         else:
-           total_duration = (self.hi_activity.stop - self.hi_activity.start).seconds
-           segment_calories = round(self.hi_activity.calories * segment['duration'] / total_duration)
+            segment_calories = 0
         el_calories = xml_et.SubElement(el_lap, 'Calories')
         el_calories.text = str(segment_calories)
         el_intensity = xml_et.SubElement(el_lap, 'Intensity')  # TODO verify if required/correct
