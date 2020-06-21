@@ -259,22 +259,9 @@ The release notes of the latest release can be found below.
 For a full changelog of earlier versions, please look [`here`](./CHANGELOG.md).
 
 ## Release Notes
-### Version 3.4.0 (build 2006.1501)
-#### New features and changes
-- ZIP conversion: added support for sport types Indoor Cycle, Cross Trainer, Other and Cross Fit. Closes #12.
-
+### Version 3.4.1 (build 2006.2101)
 #### Solved Issues
-- Calorie information for indoor run activities was missing in the converted TCX file (always zero).
-
-#### Known Limitations
-- The Strava upload functionality does not have the functionality to recognize all sport types. It is recommended to 
-manually change the sport type after uploading for the following sport types (e.g. to allow Strava to display the 
-heart rate information):
-    - Indoor Run: is converted as regular Run. Manually change to Virtual Run.
-    - Indoor Cycle: is converted as regular Run. Manually change to Virtual Ride.
-    - Cross Trainer: Manually change to Elliptical.
-    - Other: ?
-    - Crossfit: Manually change to Crossfit.
+- Solved a bug where Hitrava would stop with an error when the activity has no calorie information. Closes #13.
 
 ## Copyright and License
 [![nposl3.0][shield nposl3.0]][tldrlegal nposl3.0]  
