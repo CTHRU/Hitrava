@@ -3,6 +3,10 @@
 All notable changes to this project are documented in this file. 
 
 ## Release Notes
+### Version 3.4.1 (build 2006.2101)
+#### Solved Issues
+- Solved a bug where Hitrava would stop with an error when the activity has no calorie information. Closes #13.
+
 ### Version 3.4.0 (build 2006.1501)
 #### New features and changes
 - ZIP conversion: added support for sport types Indoor Cycle, Cross Trainer, Other and Cross Fit. Closes #12.
