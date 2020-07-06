@@ -3,6 +3,11 @@
 All notable changes to this project are documented in this file. 
 
 ## Release Notes
+### Version 3.4.2 (build 2007.0601)
+#### Solved Issues
+- Corrected an error where parsing would error out for activities recorded on devices that provide speed values as 
+numbers with a decimal fraction (e.g Band Pro devices). Closes #15.
+
 ### Version 3.4.1 (build 2006.2101)
 #### Solved Issues
 - Solved a bug where Hitrava would stop with an error when the activity has no calorie information. Closes #13.
