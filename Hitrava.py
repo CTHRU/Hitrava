@@ -49,9 +49,9 @@ if sys.version_info < (3, 5, 1):
 PROGRAM_NAME = 'Hitrava'
 PROGRAM_MAJOR_VERSION = '3'
 PROGRAM_MINOR_VERSION = '4'
-PROGRAM_PATCH_VERSION = '1'
-PROGRAM_MAJOR_BUILD = '2006'
-PROGRAM_MINOR_BUILD = '2101'
+PROGRAM_PATCH_VERSION = '2'
+PROGRAM_MAJOR_BUILD = '2007'
+PROGRAM_MINOR_BUILD = '0601'
 
 OUTPUT_DIR = './output'
 GPS_TIMEOUT = dts_delta(seconds=10)
@@ -508,7 +508,7 @@ class HiActivity:
             # Time of speed data is relative to activity start.
             # The first record with k=0 is the value registered after 5 seconds of activity.
             speed_data['t'] = self.start + dts_delta(seconds=int(speed_data.pop('k')) + 5)
-            speed_data['rs'] = int(speed_data.pop('v'))
+            speed_data['rs'] = float(speed_data.pop('v'))
 
             # Ignore invalid speed data records (negative speed value, e.g. for indoor (cycling) activities)
             if speed_data['rs'] < 0:
@@ -840,8 +840,6 @@ class HiActivity:
 
         # Sort the data dictionary by timestamp
         self.data_dict = collections.OrderedDict(sorted(self.data_dict.items()))
-
-        total_distance = 0
 
         # The generated segment list based on the SWOLF data is unusable for open water swim activities.
         # Reset it and recalculate segments and distances based on the GPS location data.
