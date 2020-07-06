@@ -40,7 +40,7 @@ available during recording of the activity).
 - Conversion is done using the centralized data from Huawei Health. In principle, any recent Huawei or Honor smart watch
 or fitness band should be supported, if you see the data in Huawei Health, e.g. 
     - Huawei smart watches: e.g. Huawei Watch GT2 
-    - Huawei fitness bands: e.g. Huawei Band 4
+    - Huawei fitness bands: e.g. Huawei Band 4, Huawei Band 4 Pro
     - Honor smart watches: e.g. Honor MagicWatch 2
     - Honor fitness bands: e.g. Honor Band 4, Honor Band 5
     
@@ -259,9 +259,10 @@ The release notes of the latest release can be found below.
 For a full changelog of earlier versions, please look [`here`](./CHANGELOG.md).
 
 ## Release Notes
-### Version 3.4.1 (build 2006.2101)
+### Version 3.4.2 (build 2007.0601)
 #### Solved Issues
-- Solved a bug where Hitrava would stop with an error when the activity has no calorie information. Closes #13.
+- Corrected an error where parsing would error out for activities recorded on devices that provide speed values as 
+numbers with a decimal fraction (e.g Band Pro devices). Closes #15.
 
 ## Copyright and License
 [![nposl3.0][shield nposl3.0]][tldrlegal nposl3.0]  
