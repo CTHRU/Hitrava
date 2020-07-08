@@ -259,10 +259,9 @@ The release notes of the latest release can be found below.
 For a full changelog of earlier versions, please look [`here`](./CHANGELOG.md).
 
 ## Release Notes
-### Version 3.4.2 (build 2007.0601)
-#### Solved Issues
-- Corrected an error where parsing would error out for activities recorded on devices that provide speed values as 
-numbers with a decimal fraction (e.g Band Pro devices). Closes #15.
+### Version 3.5.0 (build 2007.0801)
+#### New features and changes
+- ZIP conversion: added support for the new Huawei data format as of July, 7th in the ZIP/JSON data. Closes #16.
 
 ## Copyright and License
 [![nposl3.0][shield nposl3.0]][tldrlegal nposl3.0]  
