@@ -48,10 +48,10 @@ if sys.version_info < (3, 5, 1):
 # Global Constants
 PROGRAM_NAME = 'Hitrava'
 PROGRAM_MAJOR_VERSION = '3'
-PROGRAM_MINOR_VERSION = '4'
-PROGRAM_PATCH_VERSION = '2'
+PROGRAM_MINOR_VERSION = '5'
+PROGRAM_PATCH_VERSION = '0'
 PROGRAM_MAJOR_BUILD = '2007'
-PROGRAM_MINOR_BUILD = '0601'
+PROGRAM_MINOR_BUILD = '0801'
 
 OUTPUT_DIR = './output'
 GPS_TIMEOUT = dts_delta(seconds=10)
@@ -1116,7 +1116,7 @@ class HiJson:
 
             data = json.loads(json_string)
 
-            # JSON data structure
+            # JSON data structure BEFORE 07/2020
             # data {list}
             #   00 {dict}
             #     motionPathData {list}
@@ -1127,145 +1127,37 @@ class HiJson:
             #         sportType {int}
             #         attribute {str} 'HW_EXT_TRACK_DETAIL@is<HiTrack File Data>&&HW_EXT_TRACK_SIMPLIFY@is<Other Data>
             #     recordDay {int} 'YYYYMMDD'
+            #
+            # JSON data structure AS OF 07/2020
+            # data {list}
+            #   0 {dict)
+            #     sportType {int}
+            #     attribute {str} 'HW_EXT_TRACK_DETAIL@is<HiTrack File Data>&&HW_EXT_TRACK_SIMPLIFY@is<Other Data>
+            #   1 {dict)
+            #     sportType {int}
+            #     attribute {str} 'HW_EXT_TRACK_DETAIL@is<HiTrack File Data>&&HW_EXT_TRACK_SIMPLIFY@is<Other Data>
             for n, activity_dict in enumerate(data):
-                activity_date = dts.strptime(str(activity_dict['recordDay']), "%Y%m%d").date()
+                if 'recordDay' in activity_dict:
+                    activity_date = dts.strptime(str(activity_dict['recordDay']), "%Y%m%d").date()
+                else:
+                    activity_date = dts.utcfromtimestamp(activity_dict['startTime'] / 1000).date()
+
                 if activity_date >= from_date:
-                    # TODO verify timezone (un)aware display date / time
                     logging.getLogger(PROGRAM_NAME).info(
                         'Found one or more activities in JSON at index %d to parse from %s (YYY-MM-DD)',
                         n, activity_date.isoformat())
-                    for motion_path_dict in activity_dict['motionPathData']:
-                        # Create a HiTrack file from the HiTrack data
-                        hitrack_data = motion_path_dict['attribute']
-                        # Strip prefix and suffix from raw HiTrack data
-                        hitrack_data = re.sub('HW_EXT_TRACK_DETAIL\@is', '', hitrack_data)
-                        hitrack_data = re.sub('\&\&HW_EXT_TRACK_SIMPLIFY\@is(.*)', '', hitrack_data, flags=re.DOTALL)
 
-                        # Get additional activity detail data
-                        activity_detail_data = motion_path_dict['attribute']
-                        activity_detail_data = re.sub('HW_EXT_TRACK_DETAIL\@is(.*)\&\&HW_EXT_TRACK_SIMPLIFY\@is',
-                                                      '', activity_detail_data, flags=re.DOTALL)
-                        activity_detail_dict = json.loads(activity_detail_data)
+                    if 'motionPathData' in activity_dict:
+                        for motion_path_dict in activity_dict['motionPathData']:
+                            hi_activity = self._parse_activity(motion_path_dict)
+                            if hi_activity:
+                                self.hi_activity_list.append(hi_activity)
+                    else:
+                        hi_activity = self._parse_activity(activity_dict)
+                        if hi_activity:
+                            self.hi_activity_list.append(hi_activity)
 
-                        # Get time zone
-                        time_zone_string = motion_path_dict['timeZone']
-                        time_zone_hours_offset = int(time_zone_string[:3])
-                        time_zone_minutes_offset = int(time_zone_string[3:])
-                        time_zone = tz(dts_delta(hours=time_zone_hours_offset,
-                                                 minutes=time_zone_minutes_offset))
-
-                        # Get start date and time in UTC
-                        activity_start = dts.utcfromtimestamp(motion_path_dict['startTime'] / 1000)
-
-                        # Save HiTrack data to HiTrack file
-                        hitrack_filename = "%s/HiTrack_%s" % \
-                                           (self.output_dir,
-                                            _get_tz_aware_datetime(activity_start, time_zone).strftime('%Y%m%d_%H%M%S')
-                                            )
-
-                        if self.export_json_data:
-                            # Save a copy of the JSON data of a single activity. Allows re-processing for debugging.
-                            json_filename = hitrack_filename + '.json'
-                            logging.getLogger(PROGRAM_NAME).info(
-                                'Exporting JSON data of activity at index %d from %s to file %s',
-                                n, activity_date, json_filename)
-                            try:
-                                with open(json_filename, 'w+') as json_file:
-                                    json_file.write('[')  # Encapsulate the exported JSON data in a list
-                                    json.dump(activity_dict, json_file)
-                                    json_file.write(']')
-                            except Exception as e:
-                                logging.getLogger(PROGRAM_NAME).error(
-                                    'Error exporting JSON data of activity at index %d from %s.\n%s',
-                                    n, activity_date, e)
-                            finally:
-                                try:
-                                    if json_file:
-                                        json_file.close()
-                                except Exception as e:
-                                    logging.getLogger(PROGRAM_NAME).error('Error closing JSON export file <%s>\n%s',
-                                                                          json_filename, e)
-
-                        logging.getLogger(PROGRAM_NAME).info(
-                            'Saving activity at index %d from %s to HiTrack file %s for parsing',
-                            n, activity_date, hitrack_filename)
-                        try:
-                            hitrack_file = open(hitrack_filename, 'w+')
-                            hitrack_file.write(hitrack_data)
-                        except Exception as e:
-                            logging.getLogger(PROGRAM_NAME).error(
-                                'Error saving activity at index %d from %s to HiTrack file for parsing.\n%s',
-                                n, activity_date, e)
-                        finally:
-                            try:
-                                if hitrack_file:
-                                    hitrack_file.close()
-                            except Exception as e:
-                                logging.getLogger(PROGRAM_NAME).error('Error closing HiTrack file <%s>\n%s',
-                                                                      hitrack_filename, e)
-
-                        # Use activity attributes available in JSON data
-                        # Do NOT process unsupported sport types
-                        sport_type = motion_path_dict['sportType']
-                        if sport_type in self._UNSUPPORTED_JSON_SPORT_TYPES:
-                            logging.getLogger(PROGRAM_NAME).warning('Activity at index %d from %s has an unsupported '
-                                                                    'activity type %d and will NOT be converted.',
-                                                                    n, activity_date, sport_type)
-                            continue
-
-                        # Sport type (internal HiActivity sport type)
-                        sport = HiActivity.TYPE_UNKNOWN
-                        if any(motion_path_dict['sportType'] in i for i in self._JSON_SPORT_TYPES):
-                            sport = \
-                                [item[1] for item in self._JSON_SPORT_TYPES if
-                                 item[0] == sport_type][0]
-
-                        # Parse the Huawei activity data
-                        if sport == HiActivity.TYPE_POOL_SWIM:
-                            # Pool swimming activity, parse the JSON data
-                            hi_activity = HiActivity.from_json_pool_swim_data(os.path.basename(hitrack_filename),
-                                                                              activity_start,
-                                                                              activity_detail_dict['mSwimSegments'])
-                        else:
-                            # For all activities except pool swimming, parse the HiTrack file
-                            hitrack_file = HiTrackFile(hitrack_filename)
-                            hi_activity = hitrack_file.parse()
-                            if sport != HiActivity.TYPE_UNKNOWN:
-                                hi_activity.set_activity_type(sport)
-                            else:
-                                logging.getLogger(PROGRAM_NAME).warning('Activity %s from %s has an unknown activity '
-                                                                        'type %d. Conversion will be attempted but may '
-                                                                        'not work.',
-                                                                        os.path.basename(hitrack_filename),
-                                                                        activity_date,
-                                                                        sport_type)
-
-                        # Start date and time (in UTC)
-                        hi_activity.start = activity_start
-
-                        # Time zone - Use time zone from JSON activity data
-                        hi_activity.time_zone = time_zone
-
-                        # Stop date and time (in UTC) from duration
-                        hi_activity.stop = activity_start + dts_delta(milliseconds=motion_path_dict['totalTime'])
-
-                        # Total distance
-                        if 'totalDistance' in activity_detail_dict:
-                            hi_activity.distance = activity_detail_dict['totalDistance']
-
-                        # Total calories
-                        if 'totalCalories' in activity_detail_dict:
-                            hi_activity.calories = activity_detail_dict['totalCalories'] / 1000
-
-                        # Swimming pool length
-                        if 'wearSportData' in activity_detail_dict:
-                            if 'swim_pool_length' in activity_detail_dict['wearSportData']:
-                                hi_activity.set_pool_length(
-                                    activity_detail_dict['wearSportData']['swim_pool_length'] / 100)
-
-                        self.hi_activity_list.append(hi_activity)
                 else:
-                    # TODO verify timezone (un)aware display date / time
                     logging.getLogger(PROGRAM_NAME).info(
                         'Skipped parsing activity at index %d being an activity from %s before %s (YYYY-MM-DD).',
                         n, activity_date.isoformat(), from_date.isoformat())
@@ -1274,6 +1166,134 @@ class HiJson:
         except Exception as e:
             logging.getLogger(PROGRAM_NAME).error('Error parsing JSON file <%s>\n%s', self.json_file.name, e)
             raise Exception('Error parsing JSON file <%s>', self.json_file.name)
+
+
+    def _parse_activity(self, activity_dict : dict) -> HiActivity:
+        # Create a HiTrack file from the HiTrack data
+        hitrack_data = activity_dict['attribute']
+        # Strip prefix and suffix from raw HiTrack data
+        hitrack_data = re.sub('HW_EXT_TRACK_DETAIL\@is', '', hitrack_data)
+        hitrack_data = re.sub('\&\&HW_EXT_TRACK_SIMPLIFY\@is(.*)', '', hitrack_data, flags=re.DOTALL)
+
+        # Get additional activity detail data
+        activity_detail_data = activity_dict['attribute']
+        activity_detail_data = re.sub('HW_EXT_TRACK_DETAIL\@is(.*)\&\&HW_EXT_TRACK_SIMPLIFY\@is',
+                                      '', activity_detail_data, flags=re.DOTALL)
+        activity_detail_dict = json.loads(activity_detail_data)
+
+        # Get time zone
+        time_zone_string = activity_dict['timeZone']
+        time_zone_hours_offset = int(time_zone_string[:3])
+        time_zone_minutes_offset = int(time_zone_string[3:])
+        time_zone = tz(dts_delta(hours=time_zone_hours_offset,
+                                 minutes=time_zone_minutes_offset))
+
+        # Get start date and time in UTC
+        activity_start = dts.utcfromtimestamp(activity_dict['startTime'] / 1000)
+
+        # Save HiTrack data to HiTrack file
+        hitrack_filename = "%s/HiTrack_%s" % \
+                           (self.output_dir,
+                            _get_tz_aware_datetime(activity_start, time_zone).strftime('%Y%m%d_%H%M%S')
+                            )
+
+        if self.export_json_data:
+            # Save a copy of the JSON data of a single activity. Allows re-processing for debugging.
+            json_filename = hitrack_filename + '.json'
+            logging.getLogger(PROGRAM_NAME).info(
+                'Exporting JSON data of activity from %s to file %s', activity_start, json_filename)
+            try:
+                with open(json_filename, 'w+') as json_file:
+                    json_file.write('[')  # Encapsulate the exported JSON data in a list
+                    json.dump(activity_dict, json_file)
+                    json_file.write(']')
+            except Exception as e:
+                logging.getLogger(PROGRAM_NAME).error(
+                    'Error exporting JSON data of activity from %s.\n%s', activity_start, e)
+            finally:
+                try:
+                    if json_file:
+                        json_file.close()
+                except Exception as e:
+                    logging.getLogger(PROGRAM_NAME).error('Error closing JSON export file <%s>\n%s',
+                                                          json_filename, e)
+
+        logging.getLogger(PROGRAM_NAME).info(
+            'Saving activity from %s to HiTrack file %s for parsing', activity_start, hitrack_filename)
+        try:
+            hitrack_file = open(hitrack_filename, 'w+')
+            hitrack_file.write(hitrack_data)
+        except Exception as e:
+            logging.getLogger(PROGRAM_NAME).error(
+                'Error saving activity from %s to HiTrack file for parsing.\n%s', activity_start, e)
+        finally:
+            try:
+                if hitrack_file:
+                    hitrack_file.close()
+            except Exception as e:
+                logging.getLogger(PROGRAM_NAME).error('Error closing HiTrack file <%s>\n%s',
+                                                      hitrack_filename, e)
+
+        # Use activity attributes available in JSON data
+        # Do NOT process unsupported sport types
+        sport_type = activity_dict['sportType']
+        if sport_type in self._UNSUPPORTED_JSON_SPORT_TYPES:
+            logging.getLogger(PROGRAM_NAME).warning('Activity from %s has an unsupported '
+                                                    'activity type %d and will NOT be converted.',
+                                                    activity_start, sport_type)
+            return
+
+        # Sport type (internal HiActivity sport type)
+        sport = HiActivity.TYPE_UNKNOWN
+        if any(activity_dict['sportType'] in i for i in self._JSON_SPORT_TYPES):
+            sport = \
+                [item[1] for item in self._JSON_SPORT_TYPES if
+                 item[0] == sport_type][0]
+
+        # Parse the Huawei activity data
+        if sport == HiActivity.TYPE_POOL_SWIM:
+            # Pool swimming activity, parse the JSON data
+            hi_activity = HiActivity.from_json_pool_swim_data(os.path.basename(hitrack_filename),
+                                                              activity_start,
+                                                              activity_detail_dict['mSwimSegments'])
+        else:
+            # For all activities except pool swimming, parse the HiTrack file
+            hitrack_file = HiTrackFile(hitrack_filename)
+            hi_activity = hitrack_file.parse()
+            if sport != HiActivity.TYPE_UNKNOWN:
+                hi_activity.set_activity_type(sport)
+            else:
+                logging.getLogger(PROGRAM_NAME).warning('Activity %s from %s has an unknown activity '
+                                                        'type %d. Conversion will be attempted but may '
+                                                        'not work.',
+                                                        os.path.basename(hitrack_filename),
+                                                        activity_start,
+                                                        sport_type)
+
+        # Start date and time (in UTC)
+        hi_activity.start = activity_start
+
+        # Time zone - Use time zone from JSON activity data
+        hi_activity.time_zone = time_zone
+
+        # Stop date and time (in UTC) from duration
+        hi_activity.stop = activity_start + dts_delta(milliseconds=activity_dict['totalTime'])
+
+        # Total distance
+        if 'totalDistance' in activity_detail_dict:
+            hi_activity.distance = activity_detail_dict['totalDistance']
+
+        # Total calories
+        if 'totalCalories' in activity_detail_dict:
+            hi_activity.calories = activity_detail_dict['totalCalories'] / 1000
+
+        # Swimming pool length
+        if 'wearSportData' in activity_detail_dict:
+            if 'swim_pool_length' in activity_detail_dict['wearSportData']:
+                hi_activity.set_pool_length(
+                    activity_detail_dict['wearSportData']['swim_pool_length'] / 100)
+
+        return hi_activity
 
     def _close_json(self):
         try:
