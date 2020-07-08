@@ -3,6 +3,10 @@
 All notable changes to this project are documented in this file. 
 
 ## Release Notes
+### Version 3.5.0 (build 2007.0801)
+#### New features and changes
+- ZIP conversion: added support for the new Huawei data format as of July, 7th in the ZIP/JSON data. Closes #16.
+
 ### Version 3.4.2 (build 2007.0601)
 #### Solved Issues
 - Corrected an error where parsing would error out for activities recorded on devices that provide speed values as 
