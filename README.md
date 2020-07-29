@@ -15,7 +15,7 @@ directly uploaded to [`Strava`](https://strava.com).
 - [Introduction](#introduction)
 - [Features](#features)  
 - [Installation](#installation)  
-- [How To Covert](#how-to-convert-your-health-activities-and-import-them-in-strava)  
+- [How To Convert](#how-to-convert-your-health-activities-and-import-them-in-strava)  
 - [Usage](#usage)  
     - [Command Line Arguments](#command-line-arguments-overview)  
     - [Examples](#usage-examples)
@@ -178,6 +178,10 @@ OUTPUT options:
   --output_dir OUTPUT_DIR
                         The path to the directory to store the output files.
                         The default directory is ./output.
+  --use_original_filename
+                        In single FILE or TAR mode, when using this option the
+                        converted TCX files will have the same filename as the
+                        original input file (except from the file extension).
   --output_file_prefix OUTPUT_FILE_PREFIX
                         Adds the strftime representation of this argument as a
                         prefix to the generated TCX XML file(s). E.g. use
@@ -259,9 +263,12 @@ The release notes of the latest release can be found below.
 For a full changelog of earlier versions, please look [`here`](./CHANGELOG.md).
 
 ## Release Notes
-### Version 3.5.0 (build 2007.0801)
+### Version 3.5.1 (build 2007.2901)
 #### New features and changes
-- ZIP conversion: added support for the new Huawei data format as of July, 7th in the ZIP/JSON data. Closes #16.
+- FILE and TAR conversion: the filenames of the converted TCX files are now more readable (i.e. the same as for the
+ones generated in ZIP or JSON mode: format _Hitrack_ISO timestamp_sequence.tcx_). If you want to retain the original 
+filename, you can use the new command line argument _--use_original_filename_. Closes #18.
+- Added 'Mountain Hike' ('Climb') to the list of supported sport types. It will be converted in Strava as 'Hike'. See also #2.
 
 ## Copyright and License
 [![nposl3.0][shield nposl3.0]][tldrlegal nposl3.0]  
