@@ -49,9 +49,9 @@ if sys.version_info < (3, 5, 1):
 PROGRAM_NAME = 'Hitrava'
 PROGRAM_MAJOR_VERSION = '3'
 PROGRAM_MINOR_VERSION = '5'
-PROGRAM_PATCH_VERSION = '0'
+PROGRAM_PATCH_VERSION = '1'
 PROGRAM_MAJOR_BUILD = '2007'
-PROGRAM_MINOR_BUILD = '0801'
+PROGRAM_MINOR_BUILD = '2901'
 
 OUTPUT_DIR = './output'
 GPS_TIMEOUT = dts_delta(seconds=10)
@@ -66,6 +66,7 @@ class HiActivity:
     TYPE_POOL_SWIM = 'Swim_Pool'
     TYPE_OPEN_WATER_SWIM = 'Swim_Open_Water'
     TYPE_HIKE = 'Hike'
+    TYPE_MOUNTAIN_HIKE = 'Mountain_Hike'
     TYPE_INDOOR_RUN = 'Indoor_Run'
     TYPE_INDOOR_CYCLE = 'Indoor_Cycle'
     TYPE_CROSS_TRAINER = 'Cross_Trainer'
@@ -74,7 +75,8 @@ class HiActivity:
     TYPE_UNKNOWN = '?'
 
     _ACTIVITY_TYPE_LIST = (TYPE_WALK, TYPE_RUN, TYPE_CYCLE, TYPE_POOL_SWIM, TYPE_OPEN_WATER_SWIM, TYPE_HIKE,
-                           TYPE_INDOOR_RUN, TYPE_INDOOR_CYCLE, TYPE_CROSS_TRAINER, TYPE_OTHER, TYPE_CROSSFIT)
+                           TYPE_MOUNTAIN_HIKE, TYPE_INDOOR_RUN, TYPE_INDOOR_CYCLE, TYPE_CROSS_TRAINER, TYPE_OTHER,
+                           TYPE_CROSSFIT)
 
     def __init__(self, activity_id: str, activity_type: str = TYPE_UNKNOWN):
         logging.getLogger(PROGRAM_NAME).debug('New HiTrack activity to process <%s>', activity_id)
@@ -1076,6 +1078,7 @@ class HiJson:
                          (102, HiActivity.TYPE_POOL_SWIM),
                          (-3, HiActivity.TYPE_OPEN_WATER_SWIM),
                          (282, HiActivity.TYPE_HIKE),
+                         (2, HiActivity.TYPE_MOUNTAIN_HIKE),
                          (101, HiActivity.TYPE_INDOOR_RUN),
                          (103, HiActivity.TYPE_INDOOR_CYCLE),
                          (111, HiActivity.TYPE_CROSS_TRAINER),
@@ -1317,6 +1320,7 @@ class TcxActivity:
                         (HiActivity.TYPE_POOL_SWIM, _SPORT_OTHER),
                         (HiActivity.TYPE_OPEN_WATER_SWIM, _SPORT_OTHER),
                         (HiActivity.TYPE_HIKE, _SPORT_OTHER),
+                        (HiActivity.TYPE_MOUNTAIN_HIKE, _SPORT_OTHER),
                         (HiActivity.TYPE_INDOOR_RUN, 'Running'),
                         (HiActivity.TYPE_INDOOR_CYCLE, 'Biking'),
                         (HiActivity.TYPE_CROSS_TRAINER, _SPORT_OTHER),
@@ -1332,6 +1336,7 @@ class TcxActivity:
                            (HiActivity.TYPE_POOL_SWIM, 'swimming'),
                            (HiActivity.TYPE_OPEN_WATER_SWIM, 'swimming'),
                            (HiActivity.TYPE_HIKE, 'hiking'),
+                           (HiActivity.TYPE_MOUNTAIN_HIKE, 'hiking'),
                            (HiActivity.TYPE_INDOOR_RUN, 'running'), # Not recognized by Strava TCX upload, change activity type after upload manually to Virtual Run.
                            (HiActivity.TYPE_INDOOR_CYCLE, 'biking'), # Not recognized by Strava TCX upload, change activity type after upload manually to Virtual Ride.
                            (HiActivity.TYPE_CROSS_TRAINER, 'elliptical'), # Not recognized by Strava TCX upload, change activity type after upload manually to Elliptical.
@@ -1407,6 +1412,7 @@ class TcxActivity:
                                                         HiActivity.TYPE_RUN,
                                                         HiActivity.TYPE_CYCLE,
                                                         HiActivity.TYPE_HIKE,
+                                                        HiActivity.TYPE_MOUNTAIN_HIKE,
                                                         HiActivity.TYPE_INDOOR_RUN,
                                                         HiActivity.TYPE_INDOOR_CYCLE,
                                                         HiActivity.TYPE_CROSS_TRAINER,
@@ -1607,7 +1613,7 @@ class TcxActivity:
             self.generate_xml()
 
         # Format and save the TCX XML file
-        if not self.tcx_filename:
+        if not tcx_filename:
             self.tcx_filename = self.save_dir + '/'
             if self.filename_prefix:
                 # TODO verify timezone (un)aware display date / time
@@ -1616,6 +1622,8 @@ class TcxActivity:
             if self.filename_suffix:
                 self.tcx_filename += self.filename_suffix
             self.tcx_filename += '.tcx'
+        else:
+            self.tcx_filename = tcx_filename
         try:
             logging.getLogger(PROGRAM_NAME).info('Saving TCX file <%s> for HiTrack activity <%s>', self.tcx_filename,
                                                  self.hi_activity.activity_id)
@@ -1831,7 +1839,10 @@ def _init_argument_parser() -> argparse.ArgumentParser:
     output_group.add_argument('--output_dir', help='The path to the directory to store the output files. The default \
                                              directory is ' + OUTPUT_DIR + '.',
                               default=OUTPUT_DIR)
-
+    output_group.add_argument('--use_original_filename',
+                              help='In single FILE or TAR mode, when using this option the converted TCX files will \
+                              have the same filename as the original input file (except from the file extension).',
+                              action='store_true')
     output_group.add_argument('--output_file_prefix',
                               help='Adds the strftime representation of this argument as a prefix to the generated \
                               TCX XML file(s). E.g. use %%Y-%%m-%%d- to add human readable year-month-day information \
@@ -1882,16 +1893,33 @@ def main():
         if args.pool_length:
             hi_activity.set_pool_length(args.pool_length)
         tcx_activity = TcxActivity(hi_activity, tcx_xml_schema, args.output_dir, args.output_file_prefix)
-        tcx_activity.save()
+        if args.use_original_filename:
+            tcx_activity.save()
+        else:
+            tcx_filename = "%s/HiTrack_%s.tcx" % \
+                           (args.output_dir,
+                            _get_tz_aware_datetime(hi_activity.start, hi_activity.time_zone).strftime('%Y%m%d_%H%M%S'),
+                            )
+            tcx_activity.save(tcx_filename)
         logging.getLogger(PROGRAM_NAME).info('Converted %s', hi_activity)
     elif args.tar:
         hi_tarball = HiTarBall(args.tar)
         hi_activity_list = hi_tarball.parse(args.from_date)
-        for hi_activity in hi_activity_list:
+        for n, hi_activity in enumerate(hi_activity_list, start=1):
             if args.pool_length:
                 hi_activity.set_pool_length(args.pool_length)
             tcx_activity = TcxActivity(hi_activity, tcx_xml_schema, args.output_dir, args.output_file_prefix)
-            tcx_activity.save()
+            if args.use_original_filename:
+                tcx_activity.save()
+            else:
+                if not args.suppress_output_file_sequence:
+                    output_file_suffix = '_%03d' % (n % 1000)
+                tcx_filename = "%s/HiTrack_%s%s.tcx" % \
+                                   (args.output_dir,
+                                    _get_tz_aware_datetime(hi_activity.start, hi_activity.time_zone).strftime('%Y%m%d_%H%M%S'),
+                                    output_file_suffix
+                                    )
+                tcx_activity.save(tcx_filename)
             logging.getLogger(PROGRAM_NAME).info('Converted %s', hi_activity)
     elif args.json or args.zip:
         if args.zip:
