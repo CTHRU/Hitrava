@@ -3,6 +3,13 @@
 All notable changes to this project are documented in this file. 
 
 ## Release Notes
+### Version 3.5.1 (build 2007.2901)
+#### New features and changes
+- FILE and TAR conversion: the filenames of the converted TCX files are now more readable (i.e. the same as for the
+ones generated in ZIP or JSON mode: format _Hitrack_ISO timestamp_sequence.tcx_). If you want to retain the original 
+filename, you can use the new command line argument _--use_original_filename_. Closes #18.
+- Added 'Mountain Hike' ('Climb') to the list of supported sport types. It will be converted in Strava as 'Hike'. See also #2.
+
 ### Version 3.5.0 (build 2007.0801)
 #### New features and changes
 - ZIP conversion: added support for the new Huawei data format as of July, 7th in the ZIP/JSON data. Closes #16.
