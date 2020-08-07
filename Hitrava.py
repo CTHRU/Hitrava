@@ -49,9 +49,9 @@ if sys.version_info < (3, 5, 1):
 PROGRAM_NAME = 'Hitrava'
 PROGRAM_MAJOR_VERSION = '3'
 PROGRAM_MINOR_VERSION = '5'
-PROGRAM_PATCH_VERSION = '1'
-PROGRAM_MAJOR_BUILD = '2007'
-PROGRAM_MINOR_BUILD = '2901'
+PROGRAM_PATCH_VERSION = '2'
+PROGRAM_MAJOR_BUILD = '2008'
+PROGRAM_MINOR_BUILD = '0701'
 
 OUTPUT_DIR = './output'
 GPS_TIMEOUT = dts_delta(seconds=10)
@@ -1884,6 +1884,11 @@ def main():
 
     tcx_xml_schema = None if not args.validate_xml else _init_tcx_xml_schema()
 
+    if not args.suppress_output_file_sequence:
+        output_file_suffix_format = '_%03d'
+    else:
+        output_file_suffix_format = '%.0s'
+
     if args.file:
         if args.sport:
             hi_file = HiTrackFile(args.file, args.sport)
@@ -1912,8 +1917,7 @@ def main():
             if args.use_original_filename:
                 tcx_activity.save()
             else:
-                if not args.suppress_output_file_sequence:
-                    output_file_suffix = '_%03d' % (n % 1000)
+                output_file_suffix = output_file_suffix_format % (n % 1000)
                 tcx_filename = "%s/HiTrack_%s%s.tcx" % \
                                    (args.output_dir,
                                     _get_tz_aware_datetime(hi_activity.start, hi_activity.time_zone).strftime('%Y%m%d_%H%M%S'),
@@ -1933,8 +1937,7 @@ def main():
         for n, hi_activity in enumerate(hi_activity_list, start=1):
             if args.pool_length:
                 hi_activity.set_pool_length(args.pool_length)
-            if not args.suppress_output_file_sequence:
-                output_file_suffix = '_%03d' % (n % 1000)
+            output_file_suffix = output_file_suffix_format % (n % 1000)
             tcx_activity = TcxActivity(hi_activity, tcx_xml_schema, args.output_dir, args.output_file_prefix,
                                        output_file_suffix)
             tcx_activity.save()
