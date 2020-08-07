@@ -3,6 +3,10 @@
 All notable changes to this project are documented in this file. 
 
 ## Release Notes
+### Version 3.5.2 (build 2008.0701)
+#### Solved Issues
+- Hitrava would crash when using the command line argument _--suppress_output_file_sequence_. Closes #19.
+
 ### Version 3.5.1 (build 2007.2901)
 #### New features and changes
 - FILE and TAR conversion: the filenames of the converted TCX files are now more readable (i.e. the same as for the
