@@ -262,13 +262,9 @@ python Hitrava.py --tar com.huawei.health.tar --from_date 20190820
 The release notes of the latest release can be found below.  
 For a full changelog of earlier versions, please look [`here`](./CHANGELOG.md).
 
-## Release Notes
-### Version 3.5.1 (build 2007.2901)
-#### New features and changes
-- FILE and TAR conversion: the filenames of the converted TCX files are now more readable (i.e. the same as for the
-ones generated in ZIP or JSON mode: format _Hitrack_ISO timestamp_sequence.tcx_). If you want to retain the original 
-filename, you can use the new command line argument _--use_original_filename_. Closes #18.
-- Added 'Mountain Hike' ('Climb') to the list of supported sport types. It will be converted in Strava as 'Hike'. See also #2.
+### Version 3.5.2 (build 2008.0701)
+#### Solved Issues
+- Hitrava would crash when using the command line argument _--suppress_output_file_sequence_. Closes #19.
 
 ## Copyright and License
 [![nposl3.0][shield nposl3.0]][tldrlegal nposl3.0]  
