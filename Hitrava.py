@@ -1884,6 +1884,8 @@ def main():
 
     tcx_xml_schema = None if not args.validate_xml else _init_tcx_xml_schema()
 
+    output_file_suffix = ""
+    
     if args.file:
         if args.sport:
             hi_file = HiTrackFile(args.file, args.sport)
