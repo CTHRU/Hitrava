@@ -11,6 +11,14 @@ Hitrava converts health activities registered using a Honor or Huawei activity t
 [`Huawei Health`](https://play.google.com/store/apps/details?id=com.huawei.health) app into a file format that can be 
 directly uploaded to [`Strava`](https://strava.com).
 
+----------
+
+NEW - An alpha release of Hitrava Web is now available. If you prefer on-line conversion in a web app with GUI over a script, 
+learn more on [https://cthru.hopto.org](https://cthru.hopto.org).
+(Note: my website is not up all the time, plan your visit between 08:30 and 22:30 CET)
+
+----------
+
 ## Table of Contents
 - [Introduction](#introduction)
 - [Features](#features)  
