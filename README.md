@@ -14,7 +14,7 @@ directly uploaded to [`Strava`](https://strava.com).
 ----------
 
 NEW - An alpha release of Hitrava Web is now available. If you prefer on-line conversion in a web app with GUI over a script, 
-learn more on [https://cthru.hopto.org](https://cthru.hopto.org).
+learn more on [https://cthru.hopto.org](https://cthru.hopto.org/hitrava-web).
 (Note: my website is not up all the time, plan your visit between 08:30 and 22:30 CET)
 
 ----------
@@ -267,12 +267,7 @@ python Hitrava.py --tar com.huawei.health.tar --from_date 20190820
 ```
   
 ## Release Notes
-The release notes of the latest release can be found below.  
-For a full changelog of earlier versions, please look [`here`](./CHANGELOG.md).
-
-### Version 3.5.2 (build 2008.0701)
-#### Solved Issues
-- Hitrava would crash when using the command line argument _--suppress_output_file_sequence_. Closes #19.
+For a full changelog of all versions, please look in [`CHANGELOG.md`](./CHANGELOG.md).
 
 ## Copyright and License
 [![nposl3.0][shield nposl3.0]][tldrlegal nposl3.0]  
