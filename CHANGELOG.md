@@ -3,6 +3,24 @@
 All notable changes to this project are documented in this file. 
 
 ## Release Notes
+### Version 3.5.3 (build 2008.1801)
+#### New features and changes
+- Changed logging messages with startup parameters from debug to info and added python version info on which Hitrava
+is running.
+- Added an error message if the file in the --zip argument is an invalid ZIP file.
+- Added an info message if the JSON data in the ZIP file contains no activities.
+ 
+#### Solved Issues
+- Conversion failed with an error when the Hitrack data starts with records with relative timestamps before the first
+ record with an absolute timestamp could be processed. The issue is patched by ignoring these records. 
+ The logging will show a warning that a relative time record has been ignored. Closes #22.
+
+#### Known Limitations
+- Related to issue #22: A potential issue remains when the order of the records in the Hitrack data deviates more and 
+more from the chronological order. The conversion result could be off because data with relative timestamps would 
+currently either be ignored or placed at a wrong absolute time. If you would see too many messages of ignored relative 
+timestamp records, don't hesitate to file an issue.
+
 ### Version 3.5.2 (build 2008.0701)
 #### Solved Issues
 - Hitrava would crash when using the command line argument _--suppress_output_file_sequence_. Closes #19.
