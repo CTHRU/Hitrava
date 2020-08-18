@@ -49,9 +49,9 @@ if sys.version_info < (3, 5, 1):
 PROGRAM_NAME = 'Hitrava'
 PROGRAM_MAJOR_VERSION = '3'
 PROGRAM_MINOR_VERSION = '5'
-PROGRAM_PATCH_VERSION = '2'
+PROGRAM_PATCH_VERSION = '3'
 PROGRAM_MAJOR_BUILD = '2008'
-PROGRAM_MINOR_BUILD = '0701'
+PROGRAM_MINOR_BUILD = '1801'
 
 OUTPUT_DIR = './output'
 GPS_TIMEOUT = dts_delta(seconds=10)
@@ -124,7 +124,7 @@ class HiActivity:
         Uses the data in the mSwimSegments section of the JSON file (lap distance, duration, swolf)
         """
         swim_activity = cls(activity_id, HiActivity.TYPE_POOL_SWIM)
-        swim_activity.start = start;
+        swim_activity.start = start
 
         # Parse lap data
         swim_activity.calculated_distance = 0
@@ -441,6 +441,13 @@ class HiActivity:
         try:
             # Create a dictionary from the key value pairs
             swolf_data = dict(data)
+
+            # Ignore records (with relative timestamp) before at least 1 record with an absolute timestamp is processed.
+            if not self.start:
+                logging.getLogger(PROGRAM_NAME).warning('Ignored SWOLF record at relative time <%s> before first ' +
+                                                        'record with absolute time.', swolf_data.pop('k'))
+                return
+
             # Use unique keys. Update keys k -> t and v -> swf
             # Time of SWOLF swimming data is relative to activity start.
             # The first record with k=0 is the value registered after 5 seconds of activity.
@@ -484,6 +491,14 @@ class HiActivity:
         try:
             # Create a dictionary from the key value pairs
             stroke_freq_data = dict(data)
+
+            # Ignore records (with relative timestamp) before at least 1 record with an absolute timestamp is processed.
+            if not self.start:
+                logging.getLogger(PROGRAM_NAME).warning('Ignored stroke frequency record at relative time <%s> ' +
+                                                        'before first record with absolute time.',
+                                                        stroke_freq_data.pop('k'))
+                return
+
             # Use unique keys. Update keys k -> t and v -> p-f
             # Time of stroke frequency swimming data is relative to activity start.
             # The first record with k=0 is the value registered after 5 seconds of activity.
@@ -506,6 +521,13 @@ class HiActivity:
         try:
             # Create a dictionary from the key value pairs
             speed_data = dict(data)
+
+            # Ignore records (with relative timestamp) before at least 1 record with an absolute timestamp is processed.
+            if not self.start:
+                logging.getLogger(PROGRAM_NAME).warning('Ignored speed record at relative time <%s> before ' +
+                                                        'first record with absolute time.', speed_data.pop('k'))
+                return
+
             # Use unique keys. Update keys k -> t and v -> p-f
             # Time of speed data is relative to activity start.
             # The first record with k=0 is the value registered after 5 seconds of activity.
@@ -1068,6 +1090,9 @@ class HiZip:
                                                           zip_json_filename, zip_filename, e)
                     raise Exception('Error extracting JSON file <%s> from ZIP file <%s>',
                                     zip_json_filename, zip_filename)
+        else:
+            logging.getLogger(PROGRAM_NAME).error('Invalid ZIP file <%s>', zip_filename)
+            raise Exception('Invalid ZIP file <%s>', zip_filename)
 
 
 class HiJson:
@@ -1139,6 +1164,7 @@ class HiJson:
             #   1 {dict)
             #     sportType {int}
             #     attribute {str} 'HW_EXT_TRACK_DETAIL@is<HiTrack File Data>&&HW_EXT_TRACK_SIMPLIFY@is<Other Data>
+            n = 0
             for n, activity_dict in enumerate(data):
                 if 'recordDay' in activity_dict:
                     activity_date = dts.strptime(str(activity_dict['recordDay']), "%Y%m%d").date()
@@ -1165,6 +1191,9 @@ class HiJson:
                         'Skipped parsing activity at index %d being an activity from %s before %s (YYYY-MM-DD).',
                         n, activity_date.isoformat(), from_date.isoformat())
 
+            if n == 0:
+                logging.getLogger(PROGRAM_NAME).info('No activities found to convert in JSON file <%s>',
+                                                     self.json_file.name)
             return self.hi_activity_list
         except Exception as e:
             logging.getLogger(PROGRAM_NAME).error('Error parsing JSON file <%s>\n%s', self.json_file.name, e)
@@ -1873,7 +1902,7 @@ def main():
     else:
         _init_logging()
 
-    logging.getLogger(PROGRAM_NAME).debug("%s version %s.%s.%s (build %s.%s) started with arguments %s",
+    logging.getLogger(PROGRAM_NAME).info("%s version %s.%s.%s (build %s.%s) started with arguments %s",
                                           PROGRAM_NAME,
                                           PROGRAM_MAJOR_VERSION,
                                           PROGRAM_MINOR_VERSION,
@@ -1881,6 +1910,10 @@ def main():
                                           PROGRAM_MAJOR_BUILD,
                                           PROGRAM_MINOR_BUILD,
                                           str(sys.argv[1:]))
+    logging.getLogger(PROGRAM_NAME).info("Running on Python version %s.%s.%s",
+                                          sys.version_info[0],
+                                          sys.version_info[1],
+                                          sys.version_info[2])
 
     tcx_xml_schema = None if not args.validate_xml else _init_tcx_xml_schema()
 
