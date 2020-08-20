@@ -1,8 +1,8 @@
-![Hitrava](images/Hitrava_Logo_With_Name.png)  
+[![Hitrava](images/Hitrava_Logo_With_Name.png)](https://cthru.hopto.org/hitrava-web)  
 
 [![nposl3.0][shield nposl3.0]][tldrlegal nposl3.0]
-![GitHub release (latest by date)][shield release]
-![GitHub Release Date][shield release date]
+[![GitHub release (latest by date)][shield release]][latest release]
+[![GitHub Release Date][shield release date]][latest release]
 [![Buy me a coffee][shield buymeacoffee]][buymeacoffee]
 
 ----------
@@ -12,15 +12,18 @@ Hitrava converts health activities registered using a Honor or Huawei activity t
 directly uploaded to [`Strava`](https://strava.com).
 
 ----------
-
-NEW - An alpha release of Hitrava Web is now available. If you prefer on-line conversion in a web app with GUI over a script, 
+### Hitrava Web
+[![Hitrava](images/Hitrava_Web_Screenshot_Small.png)](https://cthru.hopto.org/hitrava-web)  
+  
+NEW - An alpha release of [Hitrava Web](https://cthru.hopto.org/hitrava-web) is now available. If you prefer on-line conversion in a web app with GUI over a script, 
 learn more on [https://cthru.hopto.org](https://cthru.hopto.org/hitrava-web).
-(Note: my website is not up all the time, plan your visit between 08:30 and 22:30 CET)
+(Note: my website is not up all the time, plan your visit between 08:15 and 22:45 CET)
 
 ----------
 
 ## Table of Contents
-- [Introduction](#introduction)
+- [Introduction](#introduction)  
+    - [Hitrava Web](#Hitrava-Web)
 - [Features](#features)  
 - [Installation](#installation)  
 - [How To Convert](#how-to-convert-your-health-activities-and-import-them-in-strava)  
