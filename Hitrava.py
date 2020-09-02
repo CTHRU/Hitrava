@@ -49,9 +49,9 @@ if sys.version_info < (3, 5, 1):
 PROGRAM_NAME = 'Hitrava'
 PROGRAM_MAJOR_VERSION = '3'
 PROGRAM_MINOR_VERSION = '5'
-PROGRAM_PATCH_VERSION = '3'
-PROGRAM_MAJOR_BUILD = '2008'
-PROGRAM_MINOR_BUILD = '1801'
+PROGRAM_PATCH_VERSION = '4'
+PROGRAM_MAJOR_BUILD = '2009'
+PROGRAM_MINOR_BUILD = '0201'
 
 OUTPUT_DIR = './output'
 GPS_TIMEOUT = dts_delta(seconds=10)
@@ -204,6 +204,8 @@ class HiActivity:
         self._current_segment['duration'] = int((segment_stop - self._current_segment['start']).total_seconds())
         if not segment_distance == -1:
             self._current_segment['distance'] = segment_distance
+        else:
+            self._current_segment['distance'] = 0;
 
         self._current_segment = None
 
@@ -749,6 +751,8 @@ class HiActivity:
             self.calculated_distance = self.distance
 
         if self.distance < 0:
+            if self.calculated_distance < 0:
+                self.calculated_distance = 0
             self.distance = self.calculated_distance
 
     def get_segment_data(self, segment: dict) -> list:
