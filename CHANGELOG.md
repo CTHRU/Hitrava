@@ -3,6 +3,16 @@
 All notable changes to this project are documented in this file. 
 
 ## Release Notes
+### Version 3.6.0 (build 2009.1501)
+#### New features and changes
+- Added a new command line argument option _--tcx_insert_altitude_data_ that forcibly inserts the last known altitude 
+information in every track point of the generated TCX file. You don't need it for Strava, and technically it is optional
+data in the TCX specification, but it seems that some 3rd party TCX visualization tools seem to expect this to properly 
+display altitude information. Closes #27.
+
+#### Solved Issues
+- Corrected a faulty log message stating no activities were found to convert when converting a single activity.
+
 ### Version 3.5.4 (build 2009.0201)
 #### Solved Issues
 - Legacy FILE and TAR options only: hitrava would stop with an error when generating the TCX files for indoor 
