@@ -15,7 +15,7 @@ directly uploaded to [`Strava`](https://strava.com).
 ### Hitrava Web
 [![Hitrava](images/Hitrava_Web_Screenshot_Small.png)](https://cthru.hopto.org/hitrava-web)  
   
-NEW - An alpha release of [Hitrava Web](https://cthru.hopto.org/hitrava-web) is now available. If you prefer on-line conversion in a web app with GUI over a script, 
+An alpha release of [Hitrava Web](https://cthru.hopto.org/hitrava-web) is now available. If you prefer on-line conversion in a web app with GUI over a script, 
 learn more on [https://cthru.hopto.org](https://cthru.hopto.org/hitrava-web).
 (Note: my website is not up all the time, plan your visit between 08:15 and 22:45 CET)
 
@@ -184,6 +184,12 @@ SWIM options:
                         pool length derived from the available speed data in
                         the HiTrack file will be used. Note that the available
                         speed data has a minimum resolution of 1 dm/s.
+
+TCX options:
+  --tcx_insert_altitude_data
+                        When an activity has altitude information, inserts the
+                        last known altitude in every track point of the
+                        generated TCX file.
 
 OUTPUT options:
   --output_dir OUTPUT_DIR
