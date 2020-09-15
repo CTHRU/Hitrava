@@ -48,10 +48,10 @@ if sys.version_info < (3, 5, 1):
 # Global Constants
 PROGRAM_NAME = 'Hitrava'
 PROGRAM_MAJOR_VERSION = '3'
-PROGRAM_MINOR_VERSION = '5'
-PROGRAM_PATCH_VERSION = '4'
+PROGRAM_MINOR_VERSION = '6'
+PROGRAM_PATCH_VERSION = '0'
 PROGRAM_MAJOR_BUILD = '2009'
-PROGRAM_MINOR_BUILD = '0201'
+PROGRAM_MINOR_BUILD = '1501'
 
 OUTPUT_DIR = './output'
 GPS_TIMEOUT = dts_delta(seconds=10)
@@ -205,7 +205,7 @@ class HiActivity:
         if not segment_distance == -1:
             self._current_segment['distance'] = segment_distance
         else:
-            self._current_segment['distance'] = 0;
+            self._current_segment['distance'] = 0
 
         self._current_segment = None
 
@@ -378,6 +378,7 @@ class HiActivity:
             if alti_data['alti'] < -1000 or alti_data['alti'] > 10000:
                 logging.getLogger(PROGRAM_NAME).warning('Invalid altitude data detected and ignored in data %s', data)
                 return
+
         except Exception as e:
             logging.getLogger(PROGRAM_NAME).error(
                 'One or more required data fields (k, v) missing or invalid in altitude data %s\n%s', data, e)
@@ -729,6 +730,12 @@ class HiActivity:
                     data['distance'] = 0
                     segment_start_distance = 0
                     last_location = data
+            elif 'alti' in data:
+                # Retain first altitude as start altitude parameter.
+                # Only used in conjunction with --tcx_insert_altitude_data to insert altitude information in every record.
+                if 'altitude start' not in self.activity_params:
+                    self.activity_params['altitude start'] = data['alti']
+
 
         # Close last segment if it is still open
         if self._current_segment:
@@ -1168,7 +1175,7 @@ class HiJson:
             #   1 {dict)
             #     sportType {int}
             #     attribute {str} 'HW_EXT_TRACK_DETAIL@is<HiTrack File Data>&&HW_EXT_TRACK_SIMPLIFY@is<Other Data>
-            n = 0
+            n = -1
             for n, activity_dict in enumerate(data):
                 if 'recordDay' in activity_dict:
                     activity_date = dts.strptime(str(activity_dict['recordDay']), "%Y%m%d").date()
@@ -1195,7 +1202,7 @@ class HiJson:
                         'Skipped parsing activity at index %d being an activity from %s before %s (YYYY-MM-DD).',
                         n, activity_date.isoformat(), from_date.isoformat())
 
-            if n == 0:
+            if n == -1:
                 logging.getLogger(PROGRAM_NAME).info('No activities found to convert in JSON file <%s>',
                                                      self.json_file.name)
             return self.hi_activity_list
@@ -1378,7 +1385,7 @@ class TcxActivity:
                            (HiActivity.TYPE_UNKNOWN, _SPORT_OTHER)]
 
     def __init__(self, hi_activity: HiActivity, tcx_xml_schema=None, save_dir: str = OUTPUT_DIR,
-                 filename_prefix: str = None, filename_suffix: str = None):
+                 filename_prefix: str = None, filename_suffix: str = None, insert_altitude: bool = False):
         if not hi_activity:
             logging.getLogger(PROGRAM_NAME).error("No valid HiTrack activity specified to construct TCX activity.")
             raise Exception("No valid HiTrack activity specified to construct TCX activity.")
@@ -1392,6 +1399,7 @@ class TcxActivity:
         self.filename_prefix = filename_prefix
         self.tcx_filename = None
         self.filename_suffix = filename_suffix
+        self.insert_altitude = insert_altitude
 
     def _get_sport(self):
         sport = ''
@@ -1521,6 +1529,10 @@ class TcxActivity:
 
             segment_data = self.hi_activity.get_segment_data(segment)
             if segment_data:
+                last_altitude = -1000
+                if 'altitude start' in self.hi_activity.activity_params:
+                    last_altitude = self.hi_activity.activity_params['altitude start']
+
                 for data in segment_data:
                     el_trackpoint = xml_et.SubElement(el_track, 'Trackpoint')
                     el_time = xml_et.SubElement(el_trackpoint, 'Time')
@@ -1536,6 +1548,10 @@ class TcxActivity:
                     if 'alti' in data:
                         el_altitude_meters = xml_et.SubElement(el_trackpoint, 'AltitudeMeters')
                         el_altitude_meters.text = str(data['alti'])
+                        last_altitude = data['alti']
+                    elif (self.insert_altitude and last_altitude != -1000):
+                        el_altitude_meters = xml_et.SubElement(el_trackpoint, 'AltitudeMeters')
+                        el_altitude_meters.text = str(last_altitude)
 
                     if 'distance' in data:
                         el_distance_meters = xml_et.SubElement(el_trackpoint, 'DistanceMeters')
@@ -1868,6 +1884,12 @@ def _init_argument_parser() -> argparse.ArgumentParser:
                                                   that the available speed data has a minimum resolution of 1 dm/s.',
                             type=pool_length_type)
 
+    tcx_group = parser.add_argument_group('TCX options')
+    tcx_group.add_argument('--tcx_insert_altitude_data',
+                           help='When an activity has altitude information, inserts the last known altitude in \
+                              every track point of the generated TCX file.',
+                           action='store_true')
+
     output_group = parser.add_argument_group('OUTPUT options')
     output_group.add_argument('--output_dir', help='The path to the directory to store the output files. The default \
                                              directory is ' + OUTPUT_DIR + '.',
@@ -1934,7 +1956,8 @@ def main():
         hi_activity = hi_file.parse()
         if args.pool_length:
             hi_activity.set_pool_length(args.pool_length)
-        tcx_activity = TcxActivity(hi_activity, tcx_xml_schema, args.output_dir, args.output_file_prefix)
+        tcx_activity = TcxActivity(hi_activity, tcx_xml_schema, args.output_dir, args.output_file_prefix,
+                                   args.tcx_insert_altitude_data)
         if args.use_original_filename:
             tcx_activity.save()
         else:
@@ -1950,7 +1973,8 @@ def main():
         for n, hi_activity in enumerate(hi_activity_list, start=1):
             if args.pool_length:
                 hi_activity.set_pool_length(args.pool_length)
-            tcx_activity = TcxActivity(hi_activity, tcx_xml_schema, args.output_dir, args.output_file_prefix)
+            tcx_activity = TcxActivity(hi_activity, tcx_xml_schema, args.output_dir, args.output_file_prefix,
+                                       args.tcx_insert_altitude_data)
             if args.use_original_filename:
                 tcx_activity.save()
             else:
@@ -1976,7 +2000,7 @@ def main():
                 hi_activity.set_pool_length(args.pool_length)
             output_file_suffix = output_file_suffix_format % (n % 1000)
             tcx_activity = TcxActivity(hi_activity, tcx_xml_schema, args.output_dir, args.output_file_prefix,
-                                       output_file_suffix)
+                                       output_file_suffix, args.tcx_insert_altitude_data)
             tcx_activity.save()
             logging.getLogger(PROGRAM_NAME).info('Converted %s', hi_activity)
 
