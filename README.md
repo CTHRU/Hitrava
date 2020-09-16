@@ -130,11 +130,13 @@ extension, up to 25 at once) to upload.
 ### Command Line Arguments Overview
 ```
 usage: Hitrava.py [-h] [-z ZIP] [-j JSON] [--json_export] [-f FILE]
-                     [-s {Walk,Run,Cycle,Swim_Pool,Swim_Open_Water}] [-t TAR]
-                     [--from_date FROM_DATE] [--pool_length POOL_LENGTH]
-                     [--output_dir OUTPUT_DIR]
-                     [--output_file_prefix OUTPUT_FILE_PREFIX]
-                     [--validate_xml] [--log_level {INFO,DEBUG}]
+                  [-s {Walk,Run,Cycle,Swim_Pool,Swim_Open_Water}] [-t TAR]
+                  [--from_date FROM_DATE] [--pool_length POOL_LENGTH]
+                  [--tcx_insert_altitude_data] [--output_dir OUTPUT_DIR]
+                  [--use_original_filename]
+                  [--output_file_prefix OUTPUT_FILE_PREFIX]
+                  [--suppress_output_file_sequence] [--validate_xml]
+                  [--log_level {INFO,DEBUG}]
 
 optional arguments:
   -h, --help            show this help message and exit
