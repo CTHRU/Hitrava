@@ -3,6 +3,11 @@
 All notable changes to this project are documented in this file. 
 
 ## Release Notes
+### Version 3.6.1 (build 2009.1901)
+#### Solved Issues
+- Conversion stopped with an error when an empty swim activity is encountered (0 distance and no swim segments).
+A warning message is now logged for these activities and they are not converted. Closes #28.
+
 ### Version 3.6.0 (build 2009.1501)
 #### New features and changes
 - Added a new command line argument option _--tcx_insert_altitude_data_ that forcibly inserts the last known altitude 
