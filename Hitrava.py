@@ -49,9 +49,9 @@ if sys.version_info < (3, 5, 1):
 PROGRAM_NAME = 'Hitrava'
 PROGRAM_MAJOR_VERSION = '3'
 PROGRAM_MINOR_VERSION = '6'
-PROGRAM_PATCH_VERSION = '0'
+PROGRAM_PATCH_VERSION = '1'
 PROGRAM_MAJOR_BUILD = '2009'
-PROGRAM_MINOR_BUILD = '1501'
+PROGRAM_MINOR_BUILD = '1901'
 
 OUTPUT_DIR = './output'
 GPS_TIMEOUT = dts_delta(seconds=10)
@@ -123,6 +123,11 @@ class HiActivity:
         """Create a HiActivity from the swim data in the JSON file.
         Uses the data in the mSwimSegments section of the JSON file (lap distance, duration, swolf)
         """
+        if json_pool_swim_dict is None or len(json_pool_swim_dict) == 0:
+            logging.getLogger(PROGRAM_NAME).warning('Swimming activity %s is empty (no segment data) and can not be ' +
+                                                    'instantiated.', activity_id)
+            return
+
         swim_activity = cls(activity_id, HiActivity.TYPE_POOL_SWIM)
         swim_activity.start = start
 
@@ -1064,7 +1069,7 @@ class HiTarBall:
 
     def _close_tarball(self):
         try:
-            if self.tarball and not self.tarball.closed:
+            if self.tarball:
                 self.tarball.close()
                 logging.getLogger(PROGRAM_NAME).debug('Tarball <%s> closed', self.tarball.name)
         except Exception as e:
@@ -1296,9 +1301,14 @@ class HiJson:
         # Parse the Huawei activity data
         if sport == HiActivity.TYPE_POOL_SWIM:
             # Pool swimming activity, parse the JSON data
-            hi_activity = HiActivity.from_json_pool_swim_data(os.path.basename(hitrack_filename),
+            activity_id = os.path.basename(hitrack_filename)
+            hi_activity = HiActivity.from_json_pool_swim_data(activity_id,
                                                               activity_start,
                                                               activity_detail_dict['mSwimSegments'])
+            if hi_activity is None:
+                logging.getLogger(PROGRAM_NAME).warning('Swimming activity %s has no swim segment data and can not ' +
+                                                        'be converted.', activity_id)
+                return
         else:
             # For all activities except pool swimming, parse the HiTrack file
             hitrack_file = HiTrackFile(hitrack_filename)
