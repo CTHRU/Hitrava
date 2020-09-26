@@ -274,7 +274,7 @@ python Hitrava.py --tar com.huawei.health.tar
 In the example below, only activities in the com.huawei.health.tar tarball that were started on August 20th, 2019 or 
 later will be extracted and converted to the _./output_ directory.
 ```
-python Hitrava.py --tar com.huawei.health.tar --from_date 20190820
+python Hitrava.py --tar com.huawei.health.tar --from_date 2019-08-20
 ```
   
 ## Release Notes
