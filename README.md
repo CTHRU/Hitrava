@@ -155,7 +155,7 @@ extension, up to 25 at once) to upload.
 ## Usage
 ### Command Line Arguments Overview
 ```
-usage: Hitrava.py [-h] [-z ZIP] [-j JSON] [--json_export] [-f FILE]
+usage: Hitrava.py [-h] [-z ZIP] [-p PASSWORD] [-j JSON] [--json_export] [-f FILE]
                   [-s {Walk,Run,Cycle,Swim_Pool,Swim_Open_Water}] [-t TAR]
                   [--from_date FROM_DATE] [--pool_length POOL_LENGTH]
                   [--tcx_insert_altitude_data] [--output_dir OUTPUT_DIR]
