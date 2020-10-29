@@ -16,6 +16,7 @@ import math
 import operator
 import os
 import re
+import subprocess
 import sys
 import tarfile
 import tempfile
@@ -48,10 +49,10 @@ if sys.version_info < (3, 5, 1):
 # Global Constants
 PROGRAM_NAME = 'Hitrava'
 PROGRAM_MAJOR_VERSION = '3'
-PROGRAM_MINOR_VERSION = '6'
-PROGRAM_PATCH_VERSION = '1'
-PROGRAM_MAJOR_BUILD = '2009'
-PROGRAM_MINOR_BUILD = '1901'
+PROGRAM_MINOR_VERSION = '7'
+PROGRAM_PATCH_VERSION = '0'
+PROGRAM_MAJOR_BUILD = '2010'
+PROGRAM_MINOR_BUILD = '2901'
 
 OUTPUT_DIR = './output'
 GPS_TIMEOUT = dts_delta(seconds=10)
@@ -1081,31 +1082,38 @@ class HiTarBall:
 
 class HiZip:
     @staticmethod
-    def extract_json(zip_filename: str, output_dir: str = OUTPUT_DIR):
+    def extract_json(zip_filename: str, output_dir: str = OUTPUT_DIR, password: str = None):
         _MOTION_PATH_JSON_FILENAME = 'data/Motion path detail data & description/motion path detail data.json'
         _MOTION_PATH_JSON_FILENAME_ALT = 'Motion path detail data & description/motion path detail data.json'
-        if zipfile.is_zipfile(zip_filename):
-            with ZipFile(zip_filename, 'r') as hi_zip:
-                if _MOTION_PATH_JSON_FILENAME in hi_zip.namelist():
-                    zip_json_filename = _MOTION_PATH_JSON_FILENAME
-                elif _MOTION_PATH_JSON_FILENAME_ALT in hi_zip.namelist():
-                    zip_json_filename = _MOTION_PATH_JSON_FILENAME_ALT
-                else:
-                    logging.getLogger(PROGRAM_NAME).warning('Could not find JSON file <%s> in ZIP file <%s>. \
-                                                            Nothing to convert.',
-                                                            _MOTION_PATH_JSON_FILENAME, zip_filename)
-                    raise Exception('Could not find file <data/motion path detail data.json> in ZIP file <%s>. \
-                                    Nothing to convert.', zip_filename)
+        _UNZIP_CMD = '7za x -aoa "-o%s" -bb0 -bse0 -bsp2 "-p%s" -sccUTF-8 "%s" -- "%s"'
 
-                try:
-                    hi_zip.extract(zip_json_filename, output_dir)
-                    json_filename = output_dir + '/' + zip_json_filename
-                    return json_filename
-                except Exception as e:
-                    logging.getLogger(PROGRAM_NAME).error('Error extracting JSON file <%s> from ZIP file <%s>\n%s',
-                                                          zip_json_filename, zip_filename, e)
-                    raise Exception('Error extracting JSON file <%s> from ZIP file <%s>',
-                                    zip_json_filename, zip_filename)
+        if zipfile.is_zipfile(zip_filename):
+            if password is not None:
+                zip_json_filename = _MOTION_PATH_JSON_FILENAME_ALT
+                unzip_cmd = _UNZIP_CMD % (output_dir, password, zip_filename, zip_json_filename)
+                subprocess.call(unzip_cmd)
+            else:
+                with ZipFile(zip_filename, 'r', True) as hi_zip:
+                    if _MOTION_PATH_JSON_FILENAME in hi_zip.namelist():
+                        zip_json_filename = _MOTION_PATH_JSON_FILENAME
+                    elif _MOTION_PATH_JSON_FILENAME_ALT in hi_zip.namelist():
+                        zip_json_filename = _MOTION_PATH_JSON_FILENAME_ALT
+                    else:
+                        logging.getLogger(PROGRAM_NAME).warning('Could not find JSON file <%s> in ZIP file <%s>. \
+                                                                Nothing to convert.',
+                                                                _MOTION_PATH_JSON_FILENAME, zip_filename)
+                        raise Exception('Could not find file <data/motion path detail data.json> in ZIP file <%s>. \
+                                        Nothing to convert.', zip_filename)
+
+                    try:
+                        hi_zip.extract(zip_json_filename, output_dir)
+                    except Exception as e:
+                        logging.getLogger(PROGRAM_NAME).error('Error extracting JSON file <%s> from ZIP file <%s>\n%s',
+                                                              zip_json_filename, zip_filename, e)
+                        raise Exception('Error extracting JSON file <%s> from ZIP file <%s>',
+                                        zip_json_filename, zip_filename)
+            json_filename = output_dir + '/' + zip_json_filename
+            return json_filename
         else:
             logging.getLogger(PROGRAM_NAME).error('Invalid ZIP file <%s>', zip_filename)
             raise Exception('Invalid ZIP file <%s>', zip_filename)
@@ -1837,6 +1845,9 @@ def _init_argument_parser() -> argparse.ArgumentParser:
                                                  The JSON file will be extracted to the directory in the --output_dir \
                                                  argument and conversion will be performed.')
 
+    json_group.add_argument('-p', '--password', help='The password of the encrypted Huawei Cloud ZIP file. \
+                                                     Required for encrypted ZIP files only.')
+
     json_group.add_argument('-j', '--json', help='The filename of a Huawei Cloud JSON file containing the motion path \
                                                   detail data to convert or the filename of the Huawei Cloud ZIP file \
                                                   containing the JSON file with the motion path detail data (this will \
@@ -1938,6 +1949,8 @@ def main():
     else:
         _init_logging()
 
+    args_string = str(sys.argv[1:])
+    args_string = re.sub("('--password', '\w*')|('-p', '\w*')", "'--password', '********'", args_string)
     logging.getLogger(PROGRAM_NAME).info("%s version %s.%s.%s (build %s.%s) started with arguments %s",
                                           PROGRAM_NAME,
                                           PROGRAM_MAJOR_VERSION,
@@ -1945,7 +1958,7 @@ def main():
                                           PROGRAM_PATCH_VERSION,
                                           PROGRAM_MAJOR_BUILD,
                                           PROGRAM_MINOR_BUILD,
-                                          str(sys.argv[1:]))
+                                          args_string)
     logging.getLogger(PROGRAM_NAME).info("Running on Python version %s.%s.%s",
                                           sys.version_info[0],
                                           sys.version_info[1],
@@ -1998,9 +2011,9 @@ def main():
             logging.getLogger(PROGRAM_NAME).info('Converted %s', hi_activity)
     elif args.json or args.zip:
         if args.zip:
-            json_filename = HiZip.extract_json(args.zip, args.output_dir)
+            json_filename = HiZip.extract_json(args.zip, args.output_dir, args.password)
         elif args.json and zipfile.is_zipfile(args.json):
-            json_filename = HiZip.extract_json(args.json, args.output_dir)
+            json_filename = HiZip.extract_json(args.json, args.output_dir, args.password)
         else:
             json_filename = args.json
         hi_json = HiJson(json_filename, args.output_dir, args.json_export)
