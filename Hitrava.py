@@ -52,7 +52,7 @@ PROGRAM_MAJOR_VERSION = '3'
 PROGRAM_MINOR_VERSION = '7'
 PROGRAM_PATCH_VERSION = '0'
 PROGRAM_MAJOR_BUILD = '2010'
-PROGRAM_MINOR_BUILD = '2901'
+PROGRAM_MINOR_BUILD = '2902'
 
 OUTPUT_DIR = './output'
 GPS_TIMEOUT = dts_delta(seconds=10)
@@ -1091,7 +1091,16 @@ class HiZip:
             if password is not None:
                 zip_json_filename = _MOTION_PATH_JSON_FILENAME_ALT
                 unzip_cmd = _UNZIP_CMD % (output_dir, password, zip_filename, zip_json_filename)
-                subprocess.call(unzip_cmd)
+                completed_process = subprocess.run(unzip_cmd,
+                                                   universal_newlines=True,
+                                                   stderr=subprocess.STDOUT,
+                                                   stdout=subprocess.PIPE)
+                logging.getLogger(PROGRAM_NAME).info(completed_process.stdout)
+                if completed_process.returncode != 0:
+                    logging.getLogger(PROGRAM_NAME).error('Error extracting JSON file <%s> from encrypted ZIP file <%s>. Return code was %s',
+                                                          zip_json_filename, zip_filename, completed_process.returncode)
+                    raise Exception('Error extracting JSON file <%s> from encrypted ZIP file <%s>. Return code was %s',
+                                    zip_json_filename, zip_filename, completed_process.returncode)
             else:
                 with ZipFile(zip_filename, 'r', True) as hi_zip:
                     if _MOTION_PATH_JSON_FILENAME in hi_zip.namelist():
@@ -1115,8 +1124,8 @@ class HiZip:
             json_filename = output_dir + '/' + zip_json_filename
             return json_filename
         else:
-            logging.getLogger(PROGRAM_NAME).error('Invalid ZIP file <%s>', zip_filename)
-            raise Exception('Invalid ZIP file <%s>', zip_filename)
+            logging.getLogger(PROGRAM_NAME).error('Invalid ZIP file or ZIP file not found <%s>', zip_filename)
+            raise Exception('Invalid ZIP file or ZIP file not found <%s>', zip_filename)
 
 
 class HiJson:
