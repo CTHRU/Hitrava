@@ -35,7 +35,7 @@ learn more on [https://cthru.hopto.org](https://cthru.hopto.org/hitrava-web).
 
 ## Features
 - Recognizes and converts the following activity types from Huawei Health to Strava:
-    - Running: both outdoor and indoor running (threadmill run)
+    - Running: both outdoor and indoor running (treadmill run)
     - Cycling: both outdoor and indoor cycling
     - Swimming: both pool swimming and open water swimming
     - Walking
@@ -62,8 +62,8 @@ To use Hitrava, you need:
     - Python 3.7.6 is the lowest recommended version (developed and tested on this version).
     - Python 3.5.1 is the lowest minimum required version (compatibility tested on this version). 
 - A Huawei account to request your health data.
-- 7-Zip stand-alone version to convert directly from an encrypted Huawei Health ZIP file. Currently this method is only 
-supported Windows operating systems.
+- 7-Zip stand-alone version to convert directly from an encrypted Huawei Health ZIP file. Currently, this method is only 
+supported on Windows operating systems.
 
 ### Installation Procedure
 #### Step 1 - Install Python
@@ -84,12 +84,10 @@ NOTE: This step is required to convert **encrypted** Huawei Health ZIP files.
 - Download the latest 7-zip **stand-alone** console version from the [`7-Zip website`](https://www.7-zip.org/download.html).
 The stand-alone version can be identified by the description below:
 > 7-Zip Extra: standalone console version, 7z DLL, Plugin for Far Manager
-- Extract the contents of the downloaded archive to your Hitrava installation foloder from step 2 above.
-Your Hitrava installation folder should now contain at least the following files.
+- Extract the file _7za.exe_ from the downloaded archive and place it in your Hitrava installation folder from step 2 
+above. Your Hitrava installation folder should now contain at least the following files.
 > Hitrava.py  
 > 7za.exe  
-> 7za.dll  
-> 7zxa.dll  
 > Run_Hitrava_Decrypt.cmd
 
 ## How to convert your health activities and import them in Strava
@@ -99,8 +97,8 @@ For users with rooted phones, legacy **[file](#single-file-conversion-examples)*
 
 ### Encrypted ZIP conversion procedure
 NOTE: As of late October 2020, the latest version of the Huawei Health app obliges you to provide a password with which 
-your data will be encrypted. If you need to convert from an older non-encrypted ZIP file, please refer to the 
-**[corresponding example](ZIP-file-conversion-example)**.
+your data in the ZIP file will be encrypted. If you need to convert from an older non-encrypted ZIP file, please refer 
+to the **[corresponding example](ZIP-file-conversion-example)**.
  
 Activities can be mass converted using the data in a ZIP file that you can request in the Huawei Health app.
 
