@@ -35,7 +35,7 @@ learn more on [https://cthru.hopto.org](https://cthru.hopto.org/hitrava-web).
 
 ## Features
 - Recognizes and converts the following activity types from Huawei Health to Strava:
-    - Running: both outdoor and indoor running (threadmill run)
+    - Running: both outdoor and indoor running (treadmill run)
     - Cycling: both outdoor and indoor cycling
     - Swimming: both pool swimming and open water swimming
     - Walking
@@ -62,6 +62,8 @@ To use Hitrava, you need:
     - Python 3.7.6 is the lowest recommended version (developed and tested on this version).
     - Python 3.5.1 is the lowest minimum required version (compatibility tested on this version). 
 - A Huawei account to request your health data.
+- 7-Zip stand-alone version to convert directly from an encrypted Huawei Health ZIP file. Currently, this method is only 
+supported on Windows operating systems.
 
 ### Installation Procedure
 #### Step 1 - Install Python
@@ -76,12 +78,28 @@ Only required if you don't have a (suitable) python installation on your system.
 - Save the ZIP file with the sources on your system.
 - Extract all contents of the ZIP file with the sources to a location of your choice on your system.
 
+#### Step 3 - Download and Extract Stand-alone 7-Zip
+NOTE: This step is required to convert **encrypted** Huawei Health ZIP files.
+
+- Download the latest 7-zip **stand-alone** console version from the [`7-Zip website`](https://www.7-zip.org/download.html).
+The stand-alone version can be identified by the description below:
+> 7-Zip Extra: standalone console version, 7z DLL, Plugin for Far Manager
+- Extract the file _7za.exe_ from the downloaded archive and place it in your Hitrava installation folder from step 2 
+above. Your Hitrava installation folder should now contain at least the following files.
+> Hitrava.py  
+> 7za.exe  
+> Run_Hitrava_Decrypt.cmd
+
 ## How to convert your health activities and import them in Strava
-All users can use conversion from a **[ZIP](#ZIP-conversion-procedure)** file or a **[JSON](#JSON-file-conversion-example)** file.  
+All users can use conversion from a **[ZIP](#Encrypted-ZIP-conversion-procedure)** file or a **[JSON](#JSON-file-conversion-example)** file.  
 For users with rooted phones, legacy **[file](#single-file-conversion-examples)** and 
 **[tar](#tar-file-conversion-examples)** options are still available.
 
-### ZIP conversion procedure
+### Encrypted ZIP conversion procedure
+NOTE: As of late October 2020, the latest version of the Huawei Health app obliges you to provide a password with which 
+your data in the ZIP file will be encrypted. If you need to convert from an older non-encrypted ZIP file, please refer 
+to the **[corresponding example](ZIP-file-conversion-example)**.
+ 
 Activities can be mass converted using the data in a ZIP file that you can request in the Huawei Health app.
 
 The procedure below assumes that you [installed Hitrava](#installation) and are logged in with your Huawei account in
@@ -93,7 +111,10 @@ the Huawei Health app. If you don't have a Huawei account, you can create one in
 - Now tap on your account name on top of the screen.
 - Tap on **'Privacy Center'**. 
 - Tap **'Request Your Data'**. 
-- Select **'Health'** from the list. Confirm your selection and follow the in-app instructions.
+- Select **'Health'** from the list and confirm your selection.
+- You will be obligated to enter a password to encrypt the requested data with. You will need this password later in
+step 3 below.   
+- Follow any further in-app instructions.
 - Wait for the mail from Huawei to arrive with a link to download the data (ZIP file). 
 
 #### Step 2 - Download your requested data
@@ -103,15 +124,20 @@ the Huawei Health app. If you don't have a Huawei account, you can create one in
 #### Step 3 - Convert the data with Hitrava
 
 >**Tip**: If you're on Windows and you're not familiar with the Command Prompt or just want to do a quick
-> conversion with default arguments, double-click the _Run_Hitrava.cmd_ file in the installation folder of Hitrava.  
+> conversion with default arguments, you can use the _Run_Hitrava_Decrypt.cmd_ batch file.
+>- Open the _Run_Hitrava_Decrypt.cmd_ file with a text editor and change the password 123456 to the password you 
+>provided in step 2 above. 
+>- double-click the _Run_Hitrava_Decrypt.cmd_ file in the installation folder of Hitrava.  
 > This will convert all available activities in the ZIP file from the previous step.                                                                                                                   
 
 - Open a Command Prompt (Windows) or Terminal (Linux / Mac OS) and change the directory to the installation folder of 
 Hitrava.
-- In the Command Prompt, run Hitrava.py with the --zip command line argument. You can use the default example 
-command below or [add / change command line arguments](#command-line-arguments-overview) as you need.
+- In the Command Prompt, run Hitrava.py with the --zip command line argument. You can start from the default example 
+command below or [add / change command line arguments](#command-line-arguments-overview) as you need.  
+
+**IMPORTANT**: You must replace the password 123456 with the password you provided in step 2 above.
   ```
-  Hitrava.py --zip HiZip.zip --json_export
+  Hitrava.py --zip HiZip.zip --password 123456 --json_export
   ```
   The above command will generate both the original HiTrack files and the converted TCX files for ALL activities to the
   _output_ subfolder of the Hitrava installation folder. In this folder:
@@ -129,7 +155,7 @@ extension, up to 25 at once) to upload.
 ## Usage
 ### Command Line Arguments Overview
 ```
-usage: Hitrava.py [-h] [-z ZIP] [-j JSON] [--json_export] [-f FILE]
+usage: Hitrava.py [-h] [-z ZIP] [-p PASSWORD] [-j JSON] [--json_export] [-f FILE]
                   [-s {Walk,Run,Cycle,Swim_Pool,Swim_Open_Water}] [-t TAR]
                   [--from_date FROM_DATE] [--pool_length POOL_LENGTH]
                   [--tcx_insert_altitude_data] [--output_dir OUTPUT_DIR]
@@ -149,6 +175,9 @@ JSON options:
                         convert. The JSON file will be extracted to the
                         directory in the --output_dir argument and conversion
                         will be performed.
+  -p PASSWORD, --password PASSWORD
+                        The password of the encrypted Huawei Cloud ZIP file.
+                        Required for encrypted ZIP files only.
   -j JSON, --json JSON  The filename of a Huawei Cloud JSON file containing
                         the motion path detail data to convert or the filename
                         of the Huawei Cloud ZIP file containing the JSON file
@@ -216,6 +245,19 @@ OUTPUT options:
 ```
                         
 ### Usage Examples
+#### Encrypted ZIP file conversion example
+Use the command below to convert all activities available in the **encrypted** ZIP file with the Huawei 
+Privacy data (here with filename _HiZip.zip_) that were started on October, 3rd, 2019 or later.  
+The ZIP file was encrypted with password 123456 provided in the Huawei Health app.  
+The following files will be generated in folder _./my_output_dir_:  
+- JSON files with the raw JSON data of a single activity (_.json_ file extension).
+- HiTrack files with the unconverted source data of a single activity (no extension, filenames start with _HiTrack__).
+- Converted TCX files for upload to Strava (_.tcx_ file extension).
+ 
+```
+ python Hitrava.py --zip HiZip.zip --password 123456 --json_export --from_date 2019-10-03 --output_dir my_output_dir
+```
+
 #### ZIP file conversion example
 Use the command below to convert all activities available in the ZIP file with the Huawei 
 Privacy data (here with filename _HiZip.zip_) that were started on October, 3rd, 2019 or later. The following files will
