@@ -26,7 +26,9 @@ learn more on [https://cthru.hopto.org](https://cthru.hopto.org/hitrava-web).
     - [Hitrava Web](#Hitrava-Web)
 - [Features](#features)  
 - [Installation](#installation)  
-- [How To Convert](#how-to-convert-your-health-activities-and-import-them-in-strava)  
+- [How To Convert](#how-to-convert-your-health-activities-and-import-them-in-strava)   
+  -[Windows Users](#windows-users---encrypted-zip-conversion-procedure)  
+  -[macOS / Linux / UNIX Users](#other-operating-systems-users-macos-linux-unix)  
 - [Usage](#usage)  
     - [Command Line Arguments](#command-line-arguments-overview)  
     - [Examples](#usage-examples)
@@ -95,7 +97,7 @@ All users can use conversion from a **[ZIP](#Encrypted-ZIP-conversion-procedure)
 For users with rooted phones, legacy **[file](#single-file-conversion-examples)** and 
 **[tar](#tar-file-conversion-examples)** options are still available.
 
-### Windows User - Encrypted ZIP conversion procedure
+### Windows Users - Encrypted ZIP conversion procedure
 NOTE: As of late October 2020, the latest version of the Huawei Health app obliges you to provide a password with which 
 your data in the ZIP file will be encrypted. If you need to convert from an older non-encrypted ZIP file, please refer 
 to the **[corresponding example](#zip-file-conversion-example)**.
