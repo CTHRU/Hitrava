@@ -95,10 +95,10 @@ All users can use conversion from a **[ZIP](#Encrypted-ZIP-conversion-procedure)
 For users with rooted phones, legacy **[file](#single-file-conversion-examples)** and 
 **[tar](#tar-file-conversion-examples)** options are still available.
 
-### Encrypted ZIP conversion procedure
+### Windows User - Encrypted ZIP conversion procedure
 NOTE: As of late October 2020, the latest version of the Huawei Health app obliges you to provide a password with which 
 your data in the ZIP file will be encrypted. If you need to convert from an older non-encrypted ZIP file, please refer 
-to the **[corresponding example](ZIP-file-conversion-example)**.
+to the **[corresponding example](#zip-file-conversion-example)**.
  
 Activities can be mass converted using the data in a ZIP file that you can request in the Huawei Health app.
 
@@ -130,8 +130,7 @@ step 3 below.
 >- double-click the _Run_Hitrava_Decrypt.cmd_ file in the installation folder of Hitrava.  
 > This will convert all available activities in the ZIP file from the previous step.                                                                                                                   
 
-- Open a Command Prompt (Windows) or Terminal (Linux / Mac OS) and change the directory to the installation folder of 
-Hitrava.
+- Open a Command Prompt and change the directory to the installation folder of Hitrava.
 - In the Command Prompt, run Hitrava.py with the --zip command line argument. You can start from the default example 
 command below or [add / change command line arguments](#command-line-arguments-overview) as you need.  
 
@@ -151,6 +150,33 @@ You can now go to the Strava website to import your data.
 - Log in with your Strava account. 
 - Once logged in, use the **'Browse...'** button on the page and select the converted TCX files (with the _.tcx_ 
 extension, up to 25 at once) to upload. 
+
+### Other Operating Systems Users (macOS, Linux, UNIX)
+#### Step 1 - Request your data
+Follow the same procedure as for Windows users explained [above](#step-1---request-your-data-in-the-huawei-health-app).
+
+#### Step 2 - Download and extract your data
+- In the mail from Huawei, click on the link to download your data and follow the instructions.
+- Extract the following file from the downloaded ZIP file using an unzip tool for your operating system that supports
+ AES encrypted ZIP files.
+  > Motion path detail data & description/motion path detail data.json
+- Put (a copy of) the extracted file in the Hitrava installation folder and rename it to HiJson.json.
+
+#### Step 3 - Convert the JSON file with Hitrava
+- Open a Terminal window and change the directory to the installation folder of Hitrava.
+- In the terminal Prompt, run Hitrava.py with the --json command line argument. You can start from the default example
+  command below or [add / change command line arguments](#command-line-arguments-overview) as you need.
+  ```
+  python3 Hitrava.py --json HiJson.json --json_export
+  ```
+  The above command will generate both the original HiTrack files and the converted TCX files for ALL activities to the
+  _output_ subfolder of the Hitrava installation folder. In this folder:
+  - Files without an extension are the Huawei HiTrack files which contain the raw unconverted data of an activity.
+  - Files with the _.json_ extension represent an exported copy of the JSON data of a single activity.
+  - Files with the **_.tcx_** extension are the **converted files** suitable for upload to Strava.
+
+#### Step 4 - Upload your data
+Follow the same procedure as for Windows users explained [above](#step-4---upload-your-data-to-strava).
 
 ## Usage
 ### Command Line Arguments Overview
