@@ -15,6 +15,7 @@ import logging
 import math
 import operator
 import os
+import platform
 import re
 import subprocess
 import sys
@@ -49,10 +50,10 @@ if sys.version_info < (3, 5, 1):
 # Global Constants
 PROGRAM_NAME = 'Hitrava'
 PROGRAM_MAJOR_VERSION = '4'
-PROGRAM_MINOR_VERSION = '0'
+PROGRAM_MINOR_VERSION = '2'
 PROGRAM_PATCH_VERSION = '0'
-PROGRAM_MAJOR_BUILD = '2010'
-PROGRAM_MINOR_BUILD = '2902'
+PROGRAM_MAJOR_BUILD = '2101'
+PROGRAM_MINOR_BUILD = '1801'
 
 OUTPUT_DIR = './output'
 GPS_TIMEOUT = dts_delta(seconds=10)
@@ -72,12 +73,13 @@ class HiActivity:
     TYPE_INDOOR_CYCLE = 'Indoor_Cycle'
     TYPE_CROSS_TRAINER = 'Cross_Trainer'
     TYPE_OTHER = 'Other'
-    TYPE_CROSSFIT = 'CrossFit'
+    TYPE_CROSSFIT = 'CrossFit',
+    TYPE_CROSS_COUNTRY_RUN = 'Cross_Country_Run'
     TYPE_UNKNOWN = '?'
 
     _ACTIVITY_TYPE_LIST = (TYPE_WALK, TYPE_RUN, TYPE_CYCLE, TYPE_POOL_SWIM, TYPE_OPEN_WATER_SWIM, TYPE_HIKE,
                            TYPE_MOUNTAIN_HIKE, TYPE_INDOOR_RUN, TYPE_INDOOR_CYCLE, TYPE_CROSS_TRAINER, TYPE_OTHER,
-                           TYPE_CROSSFIT)
+                           TYPE_CROSSFIT, TYPE_CROSS_COUNTRY_RUN)
 
     def __init__(self, activity_id: str, activity_type: str = TYPE_UNKNOWN):
         logging.getLogger(PROGRAM_NAME).debug('New HiTrack activity to process <%s>', activity_id)
@@ -1085,12 +1087,20 @@ class HiZip:
     def extract_json(zip_filename: str, output_dir: str = OUTPUT_DIR, password: str = None):
         _MOTION_PATH_JSON_FILENAME = 'data/Motion path detail data & description/motion path detail data.json'
         _MOTION_PATH_JSON_FILENAME_ALT = 'Motion path detail data & description/motion path detail data.json'
-        _UNZIP_CMD = '7za x -aoa "-o%s" -bb0 -bse0 -bsp2 "-p%s" -sccUTF-8 "%s" -- "%s"'
+        _WINDOWS_UNZIP_CMD = '7za x -aoa "-o%s" -bb0 -bse0 -bsp2 "-p%s" -sccUTF-8 "%s" -- "%s"'
+        _MACOS_UNZIP_CMD = 'unzip %s -P %s -d %s %s'
 
         if zipfile.is_zipfile(zip_filename):
             if password is not None:
                 zip_json_filename = _MOTION_PATH_JSON_FILENAME_ALT
-                unzip_cmd = _UNZIP_CMD % (output_dir, password, zip_filename, zip_json_filename)
+                if platform.system() == 'Windows':
+                    unzip_cmd = _WINDOWS_UNZIP_CMD % (output_dir, password, zip_filename, zip_json_filename)
+                elif platform.system() == 'Darwin':
+                    unzip_cmd = _MACOS_UNZIP_CMD % (zip_filename, password, output_dir, zip_json_filename)
+                else:
+                    logging.getLogger(PROGRAM_NAME).error('Encrypted ZIP files not supported on platform %s',
+                                                          platform.system());
+                    raise NotImplementedError('Encrypted ZIP files not supported on platform %s', platform.system())
                 completed_process = subprocess.run(unzip_cmd,
                                                    universal_newlines=True,
                                                    stderr=subprocess.STDOUT,
@@ -1134,14 +1144,15 @@ class HiJson:
                          (4, HiActivity.TYPE_RUN),
                          (3, HiActivity.TYPE_CYCLE),
                          (102, HiActivity.TYPE_POOL_SWIM),
-                         (-3, HiActivity.TYPE_OPEN_WATER_SWIM),
+                         (104, HiActivity.TYPE_OPEN_WATER_SWIM),
                          (282, HiActivity.TYPE_HIKE),
                          (2, HiActivity.TYPE_MOUNTAIN_HIKE),
                          (101, HiActivity.TYPE_INDOOR_RUN),
                          (103, HiActivity.TYPE_INDOOR_CYCLE),
                          (111, HiActivity.TYPE_CROSS_TRAINER),
                          (117, HiActivity.TYPE_OTHER),
-                         (145, HiActivity.TYPE_CROSSFIT)]
+                         (145, HiActivity.TYPE_CROSSFIT),
+                         (118, HiActivity.TYPE_CROSS_COUNTRY_RUN)]
 
     _UNSUPPORTED_JSON_SPORT_TYPES = []
 
@@ -1393,7 +1404,8 @@ class TcxActivity:
                         (HiActivity.TYPE_CROSS_TRAINER, _SPORT_OTHER),
                         (HiActivity.TYPE_OTHER, _SPORT_OTHER),
                         (HiActivity.TYPE_CROSSFIT, _SPORT_OTHER),
-                        (HiActivity.TYPE_UNKNOWN, _SPORT_OTHER)]
+                        (HiActivity.TYPE_UNKNOWN, _SPORT_OTHER),
+                        (HiActivity.TYPE_CROSS_COUNTRY_RUN, 'Running')]
 
     # TODO Customize XSD schema in the _validate_xml() function to validate Strava sport types.
     # TODO Upload activities directly into Strava using Strava API
@@ -1409,7 +1421,8 @@ class TcxActivity:
                            (HiActivity.TYPE_CROSS_TRAINER, 'elliptical'), # Not recognized by Strava TCX upload, change activity type after upload manually to Elliptical.
                            (HiActivity.TYPE_OTHER, _SPORT_OTHER),
                            (HiActivity.TYPE_CROSSFIT, 'crossfit'), # Not recognzied by Strava TCX upload, chnage activity type after upload manually to Crossfit.
-                           (HiActivity.TYPE_UNKNOWN, _SPORT_OTHER)]
+                           (HiActivity.TYPE_UNKNOWN, _SPORT_OTHER),
+                           (HiActivity.TYPE_CROSS_COUNTRY_RUN, 'running')]
 
     def __init__(self, hi_activity: HiActivity, tcx_xml_schema=None, save_dir: str = OUTPUT_DIR,
                  filename_prefix: str = None, filename_suffix: str = None, insert_altitude: bool = False):
@@ -1486,6 +1499,7 @@ class TcxActivity:
                                                         HiActivity.TYPE_CROSS_TRAINER,
                                                         HiActivity.TYPE_OTHER,
                                                         HiActivity.TYPE_CROSSFIT,
+                                                        HiActivity.TYPE_CROSS_COUNTRY_RUN,
                                                         HiActivity.TYPE_UNKNOWN]:
                 self._generate_walk_run_cycle_xml_data(el_activity)
             elif self.hi_activity.get_activity_type() in [HiActivity.TYPE_POOL_SWIM,
@@ -1591,7 +1605,9 @@ class TcxActivity:
                         value.text = str(data['hr'])
 
                     if 's-r' in data:  # Step frequency (for walking and running)
-                        if self.hi_activity.get_activity_type() in (HiActivity.TYPE_WALK, HiActivity.TYPE_RUN):
+                        if self.hi_activity.get_activity_type() in (HiActivity.TYPE_WALK, HiActivity.TYPE_RUN,
+                                                                    HiActivity.TYPE_HIKE, HiActivity.TYPE_MOUNTAIN_HIKE,
+                                                                    HiActivity.TYPE_CROSS_COUNTRY_RUN):
                             el_extensions = xml_et.SubElement(el_trackpoint, 'Extensions')
                             el_tpx = xml_et.SubElement(el_extensions, 'TPX')
                             el_tpx.set('xmlns', 'http://www.garmin.com/xmlschemas/ActivityExtension/v2')
@@ -1629,18 +1645,33 @@ class TcxActivity:
             el_distance_meters = xml_et.SubElement(el_trackpoint, 'DistanceMeters')
             el_distance_meters.text = str(cumulative_distance)
 
-            # Add location records during lap (if any, only for open water swimming)
+            # Add track points for heart rate, position and distance
             for i, lap_detail_data in enumerate(self.hi_activity.get_segment_data(self.hi_activity.get_segments()[n])):
-                if 'lat' in lap_detail_data:
+                if 'hr' in lap_detail_data or 'lat' in lap_detail_data or 'distance' in lap_detail_data:
                     el_trackpoint = xml_et.SubElement(el_track, 'Trackpoint')
                     el_time = xml_et.SubElement(el_trackpoint, 'Time')
                     el_time.text = _get_tz_aware_datetime(lap_detail_data['t'],
                                                           self.hi_activity.time_zone).isoformat('T', 'seconds')
+
+                # Add location records during lap (if any, only for open water swimming)
+                if 'lat' in lap_detail_data:
                     el_position = xml_et.SubElement(el_trackpoint, 'Position')
                     el_latitude_degrees = xml_et.SubElement(el_position, 'LatitudeDegrees')
                     el_latitude_degrees.text = str(lap_detail_data['lat'])
                     el_longitude_degrees = xml_et.SubElement(el_position, 'LongitudeDegrees')
                     el_longitude_degrees.text = str(lap_detail_data['lon'])
+
+                # Add heart rate records during lap
+                if 'hr' in lap_detail_data:
+                    el_heart_rate_bpm = xml_et.SubElement(el_trackpoint, 'HeartRateBpm')
+                    el_heart_rate_bpm.set('xsi:type', 'HeartRateInBeatsPerMinute_t')
+                    value = xml_et.SubElement(el_heart_rate_bpm, 'Value')
+                    value.text = str(lap_detail_data['hr'])
+
+                # Add distance records during lap (if any, only for open water swimming)
+                if 'distance' in lap_detail_data:
+                    el_distance_meters = xml_et.SubElement(el_trackpoint, 'DistanceMeters')
+                    el_distance_meters.text = str(lap_detail_data['distance'])
 
             # Add second TrackPoint for stop of lap
             cumulative_distance += lap['distance']
