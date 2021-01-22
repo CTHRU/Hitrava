@@ -13,7 +13,8 @@ All notable changes to this project are documented in this file.
 #### Solved Issues
 - Solved missing step frequency data in the converted TCX files for outdoor walking and running activity types other 
   than the default types (Hike, Mountain Hike, Cross-country run).
-- Open water swimming: solved an issue in the converted TCX data that could lead to incorrect total duration in Strava.  
+- Open water swimming: solved an issue in the converted TCX data that could lead to incorrect total duration in Strava. 
+  Closes #45.  
 
 #### Known limitations
 - The --validate_xml command line argument does not work for open water swimming activities.
