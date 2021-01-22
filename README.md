@@ -42,6 +42,7 @@ learn more on [https://cthru.hopto.org](https://cthru.hopto.org/hitrava-web).
     - Swimming: both pool swimming and open water swimming
     - Walking
     - Hiking
+    - Cross-country run
     - Cross Trainer (Elliptical)
     - Crossfit
 - Conversion contains generic activity information such as GPS track, distance, duration, calorie consumption (as
