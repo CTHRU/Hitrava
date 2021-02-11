@@ -54,6 +54,7 @@ PROGRAM_MINOR_VERSION = '2'
 PROGRAM_PATCH_VERSION = '0'
 PROGRAM_MAJOR_BUILD = '2101'
 PROGRAM_MINOR_BUILD = '1801'
+PROGRAM_DAN67_BUILD = '20210211_work'
 
 OUTPUT_DIR = './output'
 GPS_TIMEOUT = dts_delta(seconds=10)
@@ -217,7 +218,7 @@ class HiActivity:
 
         self._current_segment = None
 
-    # TODO Verify if something useful can be done with the (optional) altitude data in the tp=lbs records
+    #  Verify if something useful can be done with the (optional) altitude data in the tp=lbs records
     def add_location_data(self, data: []):
         """"Add location data from a tp=lbs record in the HiTrack file.
         Information:
@@ -1140,23 +1141,25 @@ class HiZip:
 
 class HiJson:
     # TODO find the correct values for the unknown/undocumented JSON sport types
-    _JSON_SPORT_TYPES = [(5, HiActivity.TYPE_WALK),
-                         (4, HiActivity.TYPE_RUN),
+    # dan67 - sort by number
+    _JSON_SPORT_TYPES = [(2, HiActivity.TYPE_MOUNTAIN_HIKE),
                          (3, HiActivity.TYPE_CYCLE),
-                         (102, HiActivity.TYPE_POOL_SWIM),
-                         (104, HiActivity.TYPE_OPEN_WATER_SWIM),
-                         (282, HiActivity.TYPE_HIKE),
-                         (2, HiActivity.TYPE_MOUNTAIN_HIKE),
+                         (4, HiActivity.TYPE_RUN),
+                         (5, HiActivity.TYPE_WALK),
                          (101, HiActivity.TYPE_INDOOR_RUN),
+                         (102, HiActivity.TYPE_POOL_SWIM),
                          (103, HiActivity.TYPE_INDOOR_CYCLE),
+                         (104, HiActivity.TYPE_OPEN_WATER_SWIM),
                          (111, HiActivity.TYPE_CROSS_TRAINER),
                          (117, HiActivity.TYPE_OTHER),
+                         (118, HiActivity.TYPE_CROSS_COUNTRY_RUN),
                          (145, HiActivity.TYPE_CROSSFIT),
-                         (118, HiActivity.TYPE_CROSS_COUNTRY_RUN)]
+                         (282, HiActivity.TYPE_HIKE)
+                         ]
 
     _UNSUPPORTED_JSON_SPORT_TYPES = []
 
-    def __init__(self, json_filename: str, output_dir: str = OUTPUT_DIR, export_json_data: bool = False):
+    def __init__(self, json_filename: str, output_dir: str = OUTPUT_DIR, export_json_data: bool = False, export_json_summary: bool = False):
         # Validate the JSON file parameter
         if not json_filename:
             logging.getLogger(PROGRAM_NAME).error('Parameter for JSON filename is missing')
@@ -1173,6 +1176,8 @@ class HiJson:
             os.makedirs(self.output_dir)
 
         self.export_json_data = export_json_data
+
+        self.export_json_summary = export_json_summary
 
         self.hi_activity_list = []
 
@@ -1294,6 +1299,23 @@ class HiJson:
                     logging.getLogger(PROGRAM_NAME).error('Error closing JSON export file <%s>\n%s',
                                                           json_filename, e)
 
+        if self.export_json_summary:
+            # Save aditional JSON data as summary of single activity.
+            json_summary_filename = hitrack_filename + '_summary.txt'
+            try:
+                json_summary = open(json_summary_filename, 'w+')
+                json_summary_data = self._generate_json_summary(activity_start,time_zone,activity_dict,activity_detail_dict)
+                for item in json_summary_data:
+                    json_summary.write("%s\n" % item)
+            finally:
+                try:
+                    if json_summary:
+                        json_summary.close()
+                except Exception as e:
+                    logging.getLogger(PROGRAM_NAME).error(
+                        'Error saving json summary', activity_start, e)
+
+
         logging.getLogger(PROGRAM_NAME).info(
             'Saving activity from %s to HiTrack file %s for parsing', activity_start, hitrack_filename)
         try:
@@ -1386,6 +1408,40 @@ class HiJson:
 
     def __del__(self):
         self._close_json()
+
+    def _generate_json_summary(self, activity_start : str, time_zone : str, activity_dict : dict, activity_detail_dict : dict) -> list:
+        # generate summary info from original JSON data
+
+        self.json_summary_list = []
+
+        self.json_summary_list.append("Date      : " + _get_tz_aware_datetime(activity_start, time_zone).strftime('%Y%m%d_%H%M%S'))
+        self.json_summary_list.append("Activity  : " + str(activity_dict["sportType"]))
+        # TODO add line with text sport type (I can not do it :-( )
+
+        self.json_summary_list.append("Duration  : " + str(datetime.timedelta(seconds=activity_dict["totalTime"]/1000)))
+        self.json_summary_list.append("Distance  : " + str(activity_dict["totalDistance"]))
+        self.json_summary_list.append("Calories  : " + str(activity_dict["totalCalories"]))
+        self.json_summary_list.append("HR avg    : " + str(activity_detail_dict["avgHeartRate"]))
+        self.json_summary_list.append("HR max    : " + str(activity_detail_dict["maxHeartRate"]))
+        self.json_summary_list.append("Pace avg  : " + str(datetime.timedelta(seconds=activity_detail_dict["avgPace"])))
+        self.json_summary_list.append("Pace max  : " + str(datetime.timedelta(seconds=activity_detail_dict["bestPace"])))
+        if activity_detail_dict["avgPace"] != 0:
+            self.json_summary_list.append("Speed avg : " + str(round(3600 / activity_detail_dict["avgPace"], 2)))
+        else:
+            self.json_summary_list.append("Speed avg : ")
+        if activity_detail_dict["bestPace"] != 0:
+            self.json_summary_list.append("Speed max : " + str(round(3600 / activity_detail_dict["bestPace"], 2)))
+        else:
+            self.json_summary_list.append("Speed max : ")
+        self.json_summary_list.append("Steps avg : " + str(activity_detail_dict["avgStepRate"]))
+        self.json_summary_list.append("Steps max : " + str(activity_detail_dict["bestStepRate"]))
+        self.json_summary_list.append("Steps tot : " + str(activity_dict["totalSteps"]))
+        self.json_summary_list.append("Alt max   : " + str(activity_detail_dict["mMaxAlti"]))
+        self.json_summary_list.append("Alt min   : " + str(activity_detail_dict["mMinAlti"]))
+        self.json_summary_list.append("Ascend    : " + str(activity_detail_dict["mTotalDescent"] / 10))
+        self.json_summary_list.append("Descend   : " + str(activity_detail_dict["creepingWave"] / 10))
+
+        return self.json_summary_list
 
 
 class TcxActivity:
@@ -1900,6 +1956,9 @@ def _init_argument_parser() -> argparse.ArgumentParser:
                                                    --json argument to e.g. run the conversion again for the JSON \
                                                    activity or for debugging purposes.',
                             action='store_true')
+    json_group.add_argument('--json_summary', help='Use data from JSON file, without recalculation',
+                            action='store_true')
+
     file_group = parser.add_argument_group('FILE options')
     file_group.add_argument('-f', '--file', help='The filename of a single HiTrack file to convert.')
     file_group.add_argument('-s', '--sport', help='Force sport for the conversion. Sport will be auto-detected when \
@@ -2056,7 +2115,7 @@ def main():
             json_filename = HiZip.extract_json(args.json, args.output_dir, args.password)
         else:
             json_filename = args.json
-        hi_json = HiJson(json_filename, args.output_dir, args.json_export)
+        hi_json = HiJson(json_filename, args.output_dir, args.json_export, args.json_summary)
         hi_activity_list = hi_json.parse(args.from_date)
         for n, hi_activity in enumerate(hi_activity_list, start=1):
             if args.pool_length:
