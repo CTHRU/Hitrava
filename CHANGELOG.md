@@ -3,9 +3,25 @@
 All notable changes to this project are documented in this file. 
 
 ## Release Notes
+### Version 4.2.0 (build 2101.1801)
+#### New features and changes
+- Updated activity type for open water swim.
+- Added activity type for cross-country run.
+- Added support to unzip encrypted ZIP files on macOS.
+- Added heart rate information for open water swimming activities.
+
+#### Solved Issues
+- Solved missing step frequency data in the converted TCX files for outdoor walking and running activity types other 
+  than the default types (Hike, Mountain Hike, Cross-country run).
+- Open water swimming: solved an issue in the converted TCX data that could lead to incorrect total duration in Strava. 
+  Closes #45.  
+
+#### Known limitations
+- The --validate_xml command line argument does not work for open water swimming activities.
+
 ### Version 4.0.0 (build 2010.2902)
 #### New features and changes
-- Added support to convert from an encrypted Huawei Health ZIP file. As of late october 2020, the Huawei Health app
+- Added support to convert from an encrypted Huawei Health ZIP file. As of late October 2020, the Huawei Health app
 obligates to provide a password to encrypt the requested data with. You must provide this password in the new command
 line argument --password. The used encryption method also requires the installation of a 7-Zip stand-alone version to be 
 able to decrypt the data. For more information, see the updated installation and conversion procedures in the README
