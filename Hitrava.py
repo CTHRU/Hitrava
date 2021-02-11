@@ -1420,7 +1420,7 @@ class HiJson:
 
         self.json_summary_list.append("Duration  : " + str(datetime.timedelta(seconds=activity_dict["totalTime"]/1000)))
         self.json_summary_list.append("Distance  : " + str(activity_dict["totalDistance"]))
-        self.json_summary_list.append("Calories  : " + str(activity_dict["totalCalories"]))
+        self.json_summary_list.append("Calories  : " + str(activity_dict["totalCalories"]/1000))
         self.json_summary_list.append("HR avg    : " + str(activity_detail_dict["avgHeartRate"]))
         self.json_summary_list.append("HR max    : " + str(activity_detail_dict["maxHeartRate"]))
         self.json_summary_list.append("Pace avg  : " + str(datetime.timedelta(seconds=activity_detail_dict["avgPace"])))
