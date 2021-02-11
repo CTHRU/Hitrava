@@ -122,6 +122,13 @@ class HiActivity:
         # Private variable to temporarily hold the last parsed SWOLF data during parsing of swimming activities
         self.last_swolf_data = None
 
+        # Private variable for JSON data
+        # for xml summary
+        self.JSON_total_time = 0
+        self.JSON_total_distance = 0
+
+
+
     @classmethod
     def from_json_pool_swim_data(cls, activity_id: str, start: datetime, json_pool_swim_dict):
         """Create a HiActivity from the swim data in the JSON file.
@@ -1363,6 +1370,11 @@ class HiJson:
             # For all activities except pool swimming, parse the HiTrack file
             hitrack_file = HiTrackFile(hitrack_filename)
             hi_activity = hitrack_file.parse()
+
+            # write global info about training, for xml
+            hi_activity.JSON_total_distance = activity_dict["totalDistance"]
+            hi_activity.JSON_total_time = activity_dict["totalTime"]/1000
+
             if sport != HiActivity.TYPE_UNKNOWN:
                 hi_activity.set_activity_type(sport)
             else:
@@ -1544,6 +1556,7 @@ class TcxActivity:
             # TODO verify if this is the case for Strava too or if something more meaningful can be passed.
             el_id = xml_et.SubElement(el_activity, 'Id')
             el_id.text = _get_tz_aware_datetime(self.hi_activity.start, self.hi_activity.time_zone).isoformat('T')
+
             # Generate the activity xml content based on the type of activity
             if self.hi_activity.get_activity_type() in [HiActivity.TYPE_WALK,
                                                         HiActivity.TYPE_RUN,
@@ -1567,6 +1580,19 @@ class TcxActivity:
                                                         self.hi_activity.activity_id,
                                                         self.hi_activity.get_activity_type())
                 self._generate_walk_run_cycle_xml_data(el_activity)
+
+
+            # *** Training
+            # *** genetare summary about training
+
+            el_training = xml_et.SubElement(el_activity, 'Training')
+            el_training.set('VirtualPartner', 'false')
+
+            el_QuickWorkoutResults = xml_et.SubElement(el_training, 'QuickWorkoutResults')
+            el_time = xml_et.SubElement(el_QuickWorkoutResults, 'TotalTimeSeconds')
+            el_time.text = str(self.hi_activity.JSON_total_time)
+            el_distance = xml_et.SubElement(el_QuickWorkoutResults, 'DistanceMeters')
+            el_distance.text = str(self.hi_activity.JSON_total_distance)
 
             # *** Creator
             # TODO: verify if information is available in JSON file
