@@ -51,9 +51,9 @@ if sys.version_info < (3, 5, 1):
 PROGRAM_NAME = 'Hitrava'
 PROGRAM_MAJOR_VERSION = '4'
 PROGRAM_MINOR_VERSION = '2'
-PROGRAM_PATCH_VERSION = '0'
-PROGRAM_MAJOR_BUILD = '2101'
-PROGRAM_MINOR_BUILD = '1801'
+PROGRAM_PATCH_VERSION = '1'
+PROGRAM_MAJOR_BUILD = '2103'
+PROGRAM_MINOR_BUILD = '1601'
 
 OUTPUT_DIR = './output'
 GPS_TIMEOUT = dts_delta(seconds=10)
@@ -156,6 +156,23 @@ class HiActivity:
             swim_activity.calculated_distance += lap_distance
             swim_activity.stop = lap_stop
             lap_start = lap_stop
+
+        return swim_activity
+
+    @classmethod
+    def from_manual_json_pool_swim_data(cls, activity_id: str, start: datetime, duration_millis: int, distance: int):
+        swim_activity = cls(activity_id, HiActivity.TYPE_POOL_SWIM)
+        swim_activity.start = start
+        swim_activity.stop = start + dts_delta(milliseconds=duration_millis)
+        swim_activity.calculated_distance = distance
+        lap_data = {'lap': 1,
+                    'start': swim_activity.start,
+                    'stop': swim_activity.stop,
+                    'duration': duration_millis / 1000,
+                    'distance': distance,
+                    'swolf': 0,
+                    'strokes': 0}
+        swim_activity.swim_data.append(lap_data)
 
         return swim_activity
 
@@ -718,7 +735,8 @@ class HiActivity:
                     data['distance'] = 0
                     segment_start_distance = 0
                     last_location = data
-            elif 'rs' in data:
+            # Do not process speed records for open water swim activities
+            elif 'rs' in data and self._activity_type != HiActivity.TYPE_OPEN_WATER_SWIM:
                 if last_location:
                     time_delta = data['t'] - last_location['t']
                     if not paused and ('lat' not in last_location or time_delta > GPS_TIMEOUT):
@@ -1156,6 +1174,8 @@ class HiJson:
 
     _UNSUPPORTED_JSON_SPORT_TYPES = []
 
+    _SPORT_DATA_SOURCE_MANUAL = 2
+
     def __init__(self, json_filename: str, output_dir: str = OUTPUT_DIR, export_json_data: bool = False):
         # Validate the JSON file parameter
         if not json_filename:
@@ -1330,12 +1350,29 @@ class HiJson:
         if sport == HiActivity.TYPE_POOL_SWIM:
             # Pool swimming activity, parse the JSON data
             activity_id = os.path.basename(hitrack_filename)
-            hi_activity = HiActivity.from_json_pool_swim_data(activity_id,
-                                                              activity_start,
-                                                              activity_detail_dict['mSwimSegments'])
+            hi_activity = None
+            if 'mSwimSegments' in activity_detail_dict:
+                hi_activity = HiActivity.from_json_pool_swim_data(activity_id,
+                                                                  activity_start,
+                                                                  activity_detail_dict['mSwimSegments'])
+            else:
+                sport_data_source = activity_dict['sportDataSource']
+                if sport_data_source == self._SPORT_DATA_SOURCE_MANUAL:
+                    logging.getLogger(PROGRAM_NAME).info('Swimming activity %s has been manually added, conversion '
+                                                         'will only contain basic activity data.', activity_id)
+                    hi_activity = HiActivity.from_manual_json_pool_swim_data(activity_id,
+                                                                             activity_start,
+                                                                             activity_dict['totalTime'],
+                                                                             activity_dict['totalDistance'])
+                else:
+                    logging.getLogger(PROGRAM_NAME).warning('Swimming activity %s with sport data source %d has no '
+                                                            'swim segment data and can not be converted.', activity_id,
+                                                            sport_data_source)
+                    return
+
             if hi_activity is None:
-                logging.getLogger(PROGRAM_NAME).warning('Swimming activity %s has no swim segment data and can not ' +
-                                                        'be converted.', activity_id)
+                logging.getLogger(PROGRAM_NAME).warning('Swimming activity %s has empty swim segment data and can ' +
+                                                        'not be converted.', activity_id)
                 return
         else:
             # For all activities except pool swimming, parse the HiTrack file
