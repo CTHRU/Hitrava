@@ -3,6 +3,10 @@
 All notable changes to this project are documented in this file. 
 
 ## Release Notes
+### Version 4.2.1 (build 2103.1601)
+#### Solved Issues
+- Conversion failed for pool swimming activities that were manually added in Huawei Health. Closes #62.
+
 ### Version 4.2.0 (build 2101.1801)
 #### New features and changes
 - Updated activity type for open water swim.
