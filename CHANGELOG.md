@@ -3,6 +3,14 @@
 All notable changes to this project are documented in this file. 
 
 ## Release Notes
+### Version 5.0.0 (build 2104.2801)
+#### Solved Issues
+- Added support for the new Huawei data format as of late April 2021. Closes #64.  
+The new data format uses relative timestamps instead of absolute ones for some data.  
+Update to this version if you experience problems with dates and times being wrong causing import in Strava to fail.  
+This version is fully backward compatible with the previous data format. You will still be able to convert older 
+data exports.
+  
 ### Version 4.2.1 (build 2103.1601)
 #### Solved Issues
 - Conversion failed for pool swimming activities that were manually added in Huawei Health. Closes #62.
