@@ -49,11 +49,11 @@ if sys.version_info < (3, 5, 1):
 
 # Global Constants
 PROGRAM_NAME = 'Hitrava'
-PROGRAM_MAJOR_VERSION = '4'
-PROGRAM_MINOR_VERSION = '2'
-PROGRAM_PATCH_VERSION = '1'
-PROGRAM_MAJOR_BUILD = '2103'
-PROGRAM_MINOR_BUILD = '1601'
+PROGRAM_MAJOR_VERSION = '5'
+PROGRAM_MINOR_VERSION = '0'
+PROGRAM_PATCH_VERSION = '0'
+PROGRAM_MAJOR_BUILD = '2104'
+PROGRAM_MINOR_BUILD = '2801'
 
 OUTPUT_DIR = './output'
 GPS_TIMEOUT = dts_delta(seconds=10)
@@ -81,7 +81,7 @@ class HiActivity:
                            TYPE_MOUNTAIN_HIKE, TYPE_INDOOR_RUN, TYPE_INDOOR_CYCLE, TYPE_CROSS_TRAINER, TYPE_OTHER,
                            TYPE_CROSSFIT, TYPE_CROSS_COUNTRY_RUN)
 
-    def __init__(self, activity_id: str, activity_type: str = TYPE_UNKNOWN):
+    def __init__(self, activity_id: str, activity_type: str = TYPE_UNKNOWN, timestamp_ref: datetime = None):
         logging.getLogger(PROGRAM_NAME).debug('New HiTrack activity to process <%s>', activity_id)
         self.activity_id = activity_id
 
@@ -120,6 +120,8 @@ class HiActivity:
 
         # Private variable to temporarily hold the last parsed SWOLF data during parsing of swimming activities
         self.last_swolf_data = None
+
+        self.timestamp_ref = timestamp_ref
 
     @classmethod
     def from_json_pool_swim_data(cls, activity_id: str, start: datetime, json_pool_swim_dict):
@@ -270,9 +272,9 @@ class HiActivity:
             # Pause/stop record without a valid epoch timestamp. Set it to the last timestamp recorded
             location_data['t'] = self.stop
         else:
-            # Regular location record or pause/stop record with valid epoch timestamp.
+            # Regular location record or pause/stop record with valid epoch timestamp or seconds since start of day.
             # Convert the timestamp to a datetime
-            location_data['t'] = _convert_hitrack_timestamp(location_data['t'])
+            location_data['t'] = _convert_hitrack_timestamp(location_data['t'], timestamp_ref=self.timestamp_ref)
 
             self.activity_params['gps'] = True
 
@@ -762,7 +764,6 @@ class HiActivity:
                 if 'altitude start' not in self.activity_params:
                     self.activity_params['altitude start'] = data['alti']
 
-
         # Close last segment if it is still open
         if self._current_segment:
             # If the segment is open (no stop record for end of activity):
@@ -921,15 +922,16 @@ class HiActivity:
                     '\nType     : ' + self._activity_type + \
                     '\nDate     : ' + self.start.date().isoformat() + ' (YYYY-MM-DD)' + \
                     '\nDuration : ' + str(self.stop - self.start) + ' (H:MM:SS)' \
-                                                                    '\nDistance : ' + str(
-            self.calculated_distance) + 'm (Huawei: ' + str(self.distance) + ' m)'
+                                                                    '\nDistance : ' + \
+                    str(self.calculated_distance) + 'm (Huawei: ' + str(self.distance) + ' m)'
         return to_string
 
 
 class HiTrackFile:
     """The HiTrackFile class represents a single HiTrack file. It contains all file handling and parsing methods."""
 
-    def __init__(self, hitrack_filename: str, activity_type: str = HiActivity.TYPE_UNKNOWN):
+    def __init__(self, hitrack_filename: str, activity_type: str = HiActivity.TYPE_UNKNOWN,
+                 timestamp_ref: datetime = None):
         # Validate the file parameter and (try to) open the file for reading
         if not hitrack_filename:
             logging.getLogger(PROGRAM_NAME).error('Parameter HiTrack filename is missing')
@@ -943,7 +945,7 @@ class HiTrackFile:
         self.activity = None
         self.activity_type = activity_type
 
-        # Try to parse activity start and stop datetime from the filename.
+        # Legacy mode - Try to parse activity start and stop datetime from the filename.
         # Original HiTrack filename is: HiTrack_<12 digit start datetime><12 digit stop datetime><5 digit unknown>
         try:
             # Get start timestamp from file in seconds (10 digits)
@@ -957,6 +959,9 @@ class HiTrackFile:
         except:
             self.stop = None
 
+        # Timestamp reference for calculating offset timestamp values in the HiTrack data
+        self.timestamp_ref = timestamp_ref
+
     def parse(self) -> HiActivity:
         """
         Parses the HiTrack file and returns the parsed data in a HiActivity object
@@ -968,7 +973,7 @@ class HiTrackFile:
         logging.getLogger(PROGRAM_NAME).info('Parsing file <%s>', self.hitrack_file.name)
 
         # Create a new activity object for the file
-        self.activity = HiActivity(os.path.basename(self.hitrack_file.name), self.activity_type)
+        self.activity = HiActivity(os.path.basename(self.hitrack_file.name), self.activity_type, self.timestamp_ref)
 
         data_list = []
         line_number = 0
@@ -1117,7 +1122,7 @@ class HiZip:
                     unzip_cmd = _MACOS_UNZIP_CMD % (zip_filename, password, output_dir, zip_json_filename)
                 else:
                     logging.getLogger(PROGRAM_NAME).error('Encrypted ZIP files not supported on platform %s',
-                                                          platform.system());
+                                                          platform.system())
                     raise NotImplementedError('Encrypted ZIP files not supported on platform %s', platform.system())
                 completed_process = subprocess.run(unzip_cmd,
                                                    universal_newlines=True,
@@ -1263,8 +1268,7 @@ class HiJson:
             logging.getLogger(PROGRAM_NAME).error('Error parsing JSON file <%s>\n%s', self.json_file.name, e)
             raise Exception('Error parsing JSON file <%s>', self.json_file.name)
 
-
-    def _parse_activity(self, activity_dict : dict) -> HiActivity:
+    def _parse_activity(self, activity_dict: dict) -> HiActivity:
         # Create a HiTrack file from the HiTrack data
         hitrack_data = activity_dict['attribute']
         # Strip prefix and suffix from raw HiTrack data
@@ -1376,7 +1380,14 @@ class HiJson:
                 return
         else:
             # For all activities except pool swimming, parse the HiTrack file
-            hitrack_file = HiTrackFile(hitrack_filename)
+
+            # Calculate the timestamp reference for relative timestamp in the HiTrack data.
+            # Use time zone unaware reference to be in match with other timestamp
+            timestamp_ref = datetime.datetime(year=activity_start.year,
+                                              month=activity_start.month,
+                                              day=activity_start.day)
+
+            hitrack_file = HiTrackFile(hitrack_filename, timestamp_ref=timestamp_ref)
             hi_activity = hitrack_file.parse()
             if sport != HiActivity.TYPE_UNKNOWN:
                 hi_activity.set_activity_type(sport)
@@ -1453,11 +1464,11 @@ class TcxActivity:
                            (HiActivity.TYPE_OPEN_WATER_SWIM, 'swimming'),
                            (HiActivity.TYPE_HIKE, 'hiking'),
                            (HiActivity.TYPE_MOUNTAIN_HIKE, 'hiking'),
-                           (HiActivity.TYPE_INDOOR_RUN, 'running'), # Not recognized by Strava TCX upload, change activity type after upload manually to Virtual Run.
-                           (HiActivity.TYPE_INDOOR_CYCLE, 'biking'), # Not recognized by Strava TCX upload, change activity type after upload manually to Virtual Ride.
-                           (HiActivity.TYPE_CROSS_TRAINER, 'elliptical'), # Not recognized by Strava TCX upload, change activity type after upload manually to Elliptical.
+                           (HiActivity.TYPE_INDOOR_RUN, 'running'),  # Not recognized by Strava TCX upload, change activity type after upload manually to Virtual Run.
+                           (HiActivity.TYPE_INDOOR_CYCLE, 'biking'),  # Not recognized by Strava TCX upload, change activity type after upload manually to Virtual Ride.
+                           (HiActivity.TYPE_CROSS_TRAINER, 'elliptical'),  # Not recognized by Strava TCX upload, change activity type after upload manually to Elliptical.
                            (HiActivity.TYPE_OTHER, _SPORT_OTHER),
-                           (HiActivity.TYPE_CROSSFIT, 'crossfit'), # Not recognzied by Strava TCX upload, chnage activity type after upload manually to Crossfit.
+                           (HiActivity.TYPE_CROSSFIT, 'crossfit'),  # Not recognzied by Strava TCX upload, chnage activity type after upload manually to Crossfit.
                            (HiActivity.TYPE_UNKNOWN, _SPORT_OTHER),
                            (HiActivity.TYPE_CROSS_COUNTRY_RUN, 'running')]
 
@@ -1627,7 +1638,7 @@ class TcxActivity:
                         el_altitude_meters = xml_et.SubElement(el_trackpoint, 'AltitudeMeters')
                         el_altitude_meters.text = str(data['alti'])
                         last_altitude = data['alti']
-                    elif (self.insert_altitude and last_altitude != -1000):
+                    elif self.insert_altitude and last_altitude != -1000:
                         el_altitude_meters = xml_et.SubElement(el_trackpoint, 'AltitudeMeters')
                         el_altitude_meters.text = str(last_altitude)
 
@@ -1857,13 +1868,20 @@ def _init_tcx_xml_schema():
                                                     'The following exception occured: %s', e)
 
 
-def _convert_hitrack_timestamp(hitrack_timestamp: float) -> datetime:
+def _convert_hitrack_timestamp(hitrack_timestamp: float, timestamp_ref: datetime = None) -> datetime:
     """ Converts the different timestamp formats appearing in HiTrack files to a Python datetime.
 
-    Known formats are seconds (e.g. 1516273200 or 1.5162732E9) or milliseconds (e.g. 1516273200000 or 1.5162732E12)
+    Known formats are
+    - seconds (e.g. 1516273200 or 1.5162732E9)
+    - milliseconds (e.g. 1516273200000 or 1.5162732E12)
+    - seconds since start of day (e.g. 43200) relative to day of activity start
     """
     timestamp_digits = int(math.log10(hitrack_timestamp))
-    if timestamp_digits == 9:
+    if timestamp_ref is not None and hitrack_timestamp < 604800:   # Assume activity not longer than a week.
+        # Relative seconds from timestamp reference
+        return dts.utcfromtimestamp((timestamp_ref + dts_delta(seconds=hitrack_timestamp)).timestamp())
+    elif timestamp_digits == 9:
+        # Absolute epoch timestamp
         return dts.utcfromtimestamp(int(hitrack_timestamp))
 
     divisor = 10 ** (timestamp_digits - 9) if timestamp_digits > 9 else 0.1 ** (9 - timestamp_digits)
@@ -2029,17 +2047,17 @@ def main():
     args_string = str(sys.argv[1:])
     args_string = re.sub("('--password', '\w*')|('-p', '\w*')", "'--password', '********'", args_string)
     logging.getLogger(PROGRAM_NAME).info("%s version %s.%s.%s (build %s.%s) started with arguments %s",
-                                          PROGRAM_NAME,
-                                          PROGRAM_MAJOR_VERSION,
-                                          PROGRAM_MINOR_VERSION,
-                                          PROGRAM_PATCH_VERSION,
-                                          PROGRAM_MAJOR_BUILD,
-                                          PROGRAM_MINOR_BUILD,
-                                          args_string)
+                                         PROGRAM_NAME,
+                                         PROGRAM_MAJOR_VERSION,
+                                         PROGRAM_MINOR_VERSION,
+                                         PROGRAM_PATCH_VERSION,
+                                         PROGRAM_MAJOR_BUILD,
+                                         PROGRAM_MINOR_BUILD,
+                                         args_string)
     logging.getLogger(PROGRAM_NAME).info("Running on Python version %s.%s.%s",
-                                          sys.version_info[0],
-                                          sys.version_info[1],
-                                          sys.version_info[2])
+                                         sys.version_info[0],
+                                         sys.version_info[1],
+                                         sys.version_info[2])
 
     tcx_xml_schema = None if not args.validate_xml else _init_tcx_xml_schema()
 
@@ -2080,10 +2098,10 @@ def main():
             else:
                 output_file_suffix = output_file_suffix_format % (n % 1000)
                 tcx_filename = "%s/HiTrack_%s%s.tcx" % \
-                                   (args.output_dir,
-                                    _get_tz_aware_datetime(hi_activity.start, hi_activity.time_zone).strftime('%Y%m%d_%H%M%S'),
-                                    output_file_suffix
-                                    )
+                               (args.output_dir,
+                                _get_tz_aware_datetime(hi_activity.start, hi_activity.time_zone).strftime('%Y%m%d_%H%M%S'),
+                                output_file_suffix
+                                )
                 tcx_activity.save(tcx_filename)
             logging.getLogger(PROGRAM_NAME).info('Converted %s', hi_activity)
     elif args.json or args.zip:
