@@ -50,10 +50,10 @@ if sys.version_info < (3, 5, 1):
 # Global Constants
 PROGRAM_NAME = 'Hitrava'
 PROGRAM_MAJOR_VERSION = '5'
-PROGRAM_MINOR_VERSION = '0'
+PROGRAM_MINOR_VERSION = '1'
 PROGRAM_PATCH_VERSION = '0'
-PROGRAM_MAJOR_BUILD = '2104'
-PROGRAM_MINOR_BUILD = '2801'
+PROGRAM_MAJOR_BUILD = '2108'
+PROGRAM_MINOR_BUILD = '2601'
 
 OUTPUT_DIR = './output'
 GPS_TIMEOUT = dts_delta(seconds=10)
@@ -804,6 +804,24 @@ class HiActivity:
         # Sort data by timestamp (sort on key in data dictionary)
         segment_data = [value for (key, value) in sorted(segment_data_dict.items())]
         return segment_data
+
+    def normalize_distances(self):
+        # Make sure segment and distance data is calculated.
+        segments = self.get_segments()
+
+        if self.calculated_distance == self.distance:
+            return
+
+        logging.getLogger(PROGRAM_NAME).debug('Normalizing distance data for activity %s', self.activity_id)
+
+        normalize_ratio = self.calculated_distance / self.distance
+        for n, segment in enumerate(segments):
+            segment['distance'] = segment['distance'] / normalize_ratio
+            segment_data = self.get_segment_data(segment)
+            if segment_data:
+                for data in segment_data:
+                    if 'distance' in data:
+                        data['distance'] = data['distance'] / normalize_ratio
 
     def get_swim_data(self) -> Optional[list]:
         if self.get_activity_type() == self.TYPE_POOL_SWIM:
@@ -2005,6 +2023,11 @@ def _init_argument_parser() -> argparse.ArgumentParser:
                            help='When an activity has altitude information, inserts the last known altitude in \
                               every track point of the generated TCX file.',
                            action='store_true')
+    tcx_group.add_argument('--tcx_use_raw_distance_data',
+                           help='In JSON or ZIP mode, when using this option the converted TCX files will use the raw \
+                           distance data as calculated from the raw HiTrack data. When not specified (default), all \
+                           distances in the TCX files will be normalized to match the original Huawei distance.' ,
+                           action='store_true')
 
     output_group = parser.add_argument_group('OUTPUT options')
     output_group.add_argument('--output_dir', help='The path to the directory to store the output files. The default \
@@ -2116,6 +2139,8 @@ def main():
         for n, hi_activity in enumerate(hi_activity_list, start=1):
             if args.pool_length:
                 hi_activity.set_pool_length(args.pool_length)
+            if not args.tcx_use_raw_distance_data:
+                hi_activity.normalize_distances()
             output_file_suffix = output_file_suffix_format % (n % 1000)
             tcx_activity = TcxActivity(hi_activity, tcx_xml_schema, args.output_dir, args.output_file_prefix,
                                        output_file_suffix, args.tcx_insert_altitude_data)
