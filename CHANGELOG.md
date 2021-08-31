@@ -3,6 +3,14 @@
 All notable changes to this project are documented in this file. 
 
 ## Release Notes
+### Version 5.1.0 (build 2108.2601)
+#### New features and changes
+- JSON and ZIP conversion: Added normalization to all distances calculated from the raw Hitrack data. This 
+ eliminates the distance differences between Huawei Health and Strava. Note that all distances are slightly shifted to
+ get this result. TCX output with normalized distances has become the default mode from this version. If you prefer
+ using the raw calculated distances from previous versions, use the new --tcx_use_raw_distance_data command line 
+ argument.
+
 ### Version 5.0.0 (build 2104.2801)
 #### Solved Issues
 - Added support for the new Huawei data format as of late April 2021. Closes #64.  

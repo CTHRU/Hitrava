@@ -250,6 +250,13 @@ TCX options:
                         When an activity has altitude information, inserts the
                         last known altitude in every track point of the
                         generated TCX file.
+  --tcx_use_raw_distance_data
+                        In JSON or ZIP mode, when using this option the
+                        converted TCX files will use the raw distance data as
+                        calculated from the raw HiTrack data. When not
+                        specified (default), all distances in the TCX files
+                        will be normalized to match the original Huawei
+                        distance.
 
 OUTPUT options:
   --output_dir OUTPUT_DIR
