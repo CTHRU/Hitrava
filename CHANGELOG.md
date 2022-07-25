@@ -3,6 +3,13 @@
 All notable changes to this project are documented in this file. 
 
 ## Release Notes
+### Version 5.1.1 (build 2207.2501)
+#### New features and changes
+- Added support for conversion of activities with dummy location (start) records.
+
+#### Solved Issues
+- Conversion could fail in case of activities without any distance information (i.e. the calculated distance was zero).
+
 ### Version 5.1.0 (build 2108.2601)
 #### New features and changes
 - JSON and ZIP conversion: Added normalization to all distances calculated from the raw Hitrack data. This 
