@@ -3,7 +3,9 @@
 [![nposl3.0][shield nposl3.0]][tldrlegal nposl3.0]
 [![GitHub release (latest by date)][shield release]][latest release]
 [![GitHub Release Date][shield release date]][latest release]
+[![PayPal][shield paypal]][paypal]
 [![Buy me a coffee][shield buymeacoffee]][buymeacoffee]
+
 
 ----------
 ## Introduction
@@ -361,7 +363,7 @@ For a full changelog of all versions, please look in [`CHANGELOG.md`](./CHANGELO
 ## Copyright and License
 [![nposl3.0][shield nposl3.0]][tldrlegal nposl3.0]  
 
-Copyright (c) 2019-2020 Christoph Vanthuyne
+Copyright (c) 2019-2022 Christoph Vanthuyne
 
 Licensed under the Non-Profit Open Software License version 3.0 from Hitrava version 3.1.1 onward.  
 
@@ -377,3 +379,5 @@ If you're more into a TL;DR approach, start [`here`][tldrlegal nposl3.0].
 [latest release]: https://github.com/CTHRU/Hitrava/releases/latest
 [shield buymeacoffee]: https://www.buymeacoffee.com/assets/img/guidelines/download-assets-sm-2.svg
 [buymeacoffee]: https://www.buymeacoffee.com/CTHRU
+[shield paypal]: https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif
+[paypal]: https://www.paypal.com/donate/?hosted_button_id=SSSHR299GZEKQ

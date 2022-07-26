@@ -51,9 +51,9 @@ if sys.version_info < (3, 5, 1):
 PROGRAM_NAME = 'Hitrava'
 PROGRAM_MAJOR_VERSION = '5'
 PROGRAM_MINOR_VERSION = '1'
-PROGRAM_PATCH_VERSION = '0'
-PROGRAM_MAJOR_BUILD = '2108'
-PROGRAM_MINOR_BUILD = '2601'
+PROGRAM_PATCH_VERSION = '1'
+PROGRAM_MAJOR_BUILD = '2207'
+PROGRAM_MINOR_BUILD = '2501'
 
 OUTPUT_DIR = './output'
 GPS_TIMEOUT = dts_delta(seconds=10)
@@ -81,7 +81,7 @@ class HiActivity:
                            TYPE_MOUNTAIN_HIKE, TYPE_INDOOR_RUN, TYPE_INDOOR_CYCLE, TYPE_CROSS_TRAINER, TYPE_OTHER,
                            TYPE_CROSSFIT, TYPE_CROSS_COUNTRY_RUN)
 
-    def __init__(self, activity_id: str, activity_type: str = TYPE_UNKNOWN, timestamp_ref: datetime = None):
+    def __init__(self, activity_id: str, activity_type: str = TYPE_UNKNOWN, timestamp_ref: datetime = None, start_timestamp_ref: datetime = None):
         logging.getLogger(PROGRAM_NAME).debug('New HiTrack activity to process <%s>', activity_id)
         self.activity_id = activity_id
 
@@ -122,6 +122,7 @@ class HiActivity:
         self.last_swolf_data = None
 
         self.timestamp_ref = timestamp_ref
+        self.start_timestamp_ref = start_timestamp_ref
 
     @classmethod
     def from_json_pool_swim_data(cls, activity_id: str, start: datetime, json_pool_swim_dict):
@@ -271,6 +272,11 @@ class HiActivity:
         if location_data['t'] == 0 and location_data['lat'] == 90 and location_data['lon'] == -80:
             # Pause/stop record without a valid epoch timestamp. Set it to the last timestamp recorded
             location_data['t'] = self.stop
+        elif location_data['t'] == 0 and location_data['lat'] == 0 and location_data['lon'] == 0:
+            # Exception (Guess) - this type of record seems to be generated once at the start of the activtiy when no GPS data is available.
+            # Set the start timestamp (only possible in case of json or zip conversion).
+            logging.getLogger(PROGRAM_NAME).debug('Found zero location record. Setting activity start to reference %s', self.start_timestamp_ref)
+            self.start = self.start_timestamp_ref
         else:
             # Regular location record or pause/stop record with valid epoch timestamp or seconds since start of day.
             # Convert the timestamp to a datetime
@@ -809,7 +815,7 @@ class HiActivity:
         # Make sure segment and distance data is calculated.
         segments = self.get_segments()
 
-        if self.calculated_distance == self.distance:
+        if self.calculated_distance == 0 or self.distance == 0 or self.calculated_distance == self.distance:
             return
 
         logging.getLogger(PROGRAM_NAME).debug('Normalizing distance data for activity %s', self.activity_id)
@@ -949,7 +955,7 @@ class HiTrackFile:
     """The HiTrackFile class represents a single HiTrack file. It contains all file handling and parsing methods."""
 
     def __init__(self, hitrack_filename: str, activity_type: str = HiActivity.TYPE_UNKNOWN,
-                 timestamp_ref: datetime = None):
+                 timestamp_ref: datetime = None, start_timestamp_ref: datetime = None):
         # Validate the file parameter and (try to) open the file for reading
         if not hitrack_filename:
             logging.getLogger(PROGRAM_NAME).error('Parameter HiTrack filename is missing')
@@ -980,6 +986,9 @@ class HiTrackFile:
         # Timestamp reference for calculating offset timestamp values in the HiTrack data
         self.timestamp_ref = timestamp_ref
 
+        # Start timestamp reference for calculating real start timestamp in case of exception tp=lbs record with all zeros.
+        self.start_timestamp_ref = start_timestamp_ref
+
     def parse(self) -> HiActivity:
         """
         Parses the HiTrack file and returns the parsed data in a HiActivity object
@@ -991,7 +1000,11 @@ class HiTrackFile:
         logging.getLogger(PROGRAM_NAME).info('Parsing file <%s>', self.hitrack_file.name)
 
         # Create a new activity object for the file
-        self.activity = HiActivity(os.path.basename(self.hitrack_file.name), self.activity_type, self.timestamp_ref)
+        self.activity = HiActivity(
+            os.path.basename(self.hitrack_file.name), 
+            self.activity_type, 
+            self.timestamp_ref, 
+            self.start_timestamp_ref)
 
         data_list = []
         line_number = 0
@@ -1405,7 +1418,7 @@ class HiJson:
                                               month=activity_start.month,
                                               day=activity_start.day)
 
-            hitrack_file = HiTrackFile(hitrack_filename, timestamp_ref=timestamp_ref)
+            hitrack_file = HiTrackFile(hitrack_filename, timestamp_ref=timestamp_ref, start_timestamp_ref=activity_start)
             hi_activity = hitrack_file.parse()
             if sport != HiActivity.TYPE_UNKNOWN:
                 hi_activity.set_activity_type(sport)
