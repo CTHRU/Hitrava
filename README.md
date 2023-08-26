@@ -9,7 +9,7 @@
 
 ----------
 ## Introduction
-Hitrava converts health activities registered using a Honor or Huawei activity tracker or smart watch in the 
+Hitrava converts health activities registered using a Honor or Huawei activity tracker or smartwatch in the 
 [`Huawei Health`](https://play.google.com/store/apps/details?id=com.huawei.health) app into a file format that can be 
 directly uploaded to [`Strava`](https://strava.com).
 
@@ -49,15 +49,14 @@ learn more on [https://cthru.hopto.org](https://cthru.hopto.org/hitrava-web).
     - Crossfit
 - Conversion contains generic activity information such as GPS track, distance, duration, calorie consumption (as
 available during recording of the activity).
-- When available and depending on the activity type, conversion includes health data from your Huawei or Honor smart 
- watch / fitness band:
+- When available and depending on the activity type, conversion includes health data from your Huawei or Honor smartwatch / fitness band:
     - Heart rate
     - Cadence
-- Conversion is done using the centralized data from Huawei Health. In principle, any recent Huawei or Honor smart watch
+- Conversion is done using the centralized data from Huawei Health. In principle, any recent Huawei or Honor smartwatch
 or fitness band should be supported, if you see the data in Huawei Health, e.g. 
-    - Huawei smart watches: e.g. Huawei Watch GT2 
+    - Huawei smartwatches: e.g. Huawei Watch GT2 
     - Huawei fitness bands: e.g. Huawei Band 4, Huawei Band 4 Pro
-    - Honor smart watches: e.g. Honor MagicWatch 2
+    - Honor smartwatches: e.g. Honor MagicWatch 2
     - Honor fitness bands: e.g. Honor Band 4, Honor Band 5
     
 ## Installation
@@ -96,7 +95,7 @@ above. Your Hitrava installation folder should now contain at least the followin
 > Run_Hitrava_Decrypt.cmd
 
 ## How to convert your health activities and import them in Strava
-All users can use conversion from a **[ZIP](#Encrypted-ZIP-conversion-procedure)** file or a **[JSON](#JSON-file-conversion-example)** file.  
+All users can use conversion from a **[ZIP](#Windows-Users---Encrypted-ZIP-conversion-procedure)** file or a **[JSON](#JSON-file-conversion-example)** file.  
 For users with rooted phones, legacy **[file](#single-file-conversion-examples)** and 
 **[tar](#tar-file-conversion-examples)** options are still available.
 
@@ -128,7 +127,7 @@ step 3 below.
 
 #### Step 3 - Convert the data with Hitrava
 
->**Tip**: If you're on Windows and you're not familiar with the Command Prompt or just want to do a quick
+>**Tip**: If you're on Windows, and you're not familiar with the Command Prompt or just want to do a quick
 > conversion with default arguments, you can use the _Run_Hitrava_Decrypt.cmd_ batch file.
 >- Open the _Run_Hitrava_Decrypt.cmd_ file with a text editor and change the password 123456 to the password you 
 >provided in step 2 above. 
@@ -329,12 +328,12 @@ python Hitrava.py --file HiTrack_12345678901212345678912
 ```
 The next example converts extracted file HiTrack_12345678901212345678912 to HiTrack_12345678901212345678912.tcx in 
 the _./my_output_dir_ directory. The program logging level is set to display debug messages. The converted file is 
-validated against the TCX XSD schema (requires installed xmlschema library and an internet connection). 
+validated against the TCX XSD schema (requires xmlschema library and an internet connection). 
 ```
 python Hitrava.py --file HiTrack_12345678901212345678912 --output_dir my_output_dir --validate_xml --log_level DEBUG
 ```
 The following example converts an extracted file HiTrack_12345678901212345678912 to HiTrack_12345678901212345678912.tcx 
-in the _./output_ directory and forces the sport to walking. 
+in the _./output_ directory and forces the sport to 'walking'. 
 ```
 python Hitrava.py --file HiTrack_12345678901212345678912 --sport Walk
 ```
@@ -363,7 +362,7 @@ For a full changelog of all versions, please look in [`CHANGELOG.md`](./CHANGELO
 ## Copyright and License
 [![nposl3.0][shield nposl3.0]][tldrlegal nposl3.0]  
 
-Copyright (c) 2019-2022 Christoph Vanthuyne
+Copyright (c) 2019-2023 Christoph Vanthuyne
 
 Licensed under the Non-Profit Open Software License version 3.0 from Hitrava version 3.1.1 onward.  
 

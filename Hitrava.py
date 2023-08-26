@@ -2,7 +2,7 @@
 
 # Hitrava.py
 # Original Work Copyright (c) 2019 Ari Cooper-Davis / Christoph Vanthuyne - github.com/aricooperdavis/Huawei-TCX-Converter
-# Modified Work Copyright (c) 2019-2020 Christoph Vanthuyne - https://github.com/CTHRU/Hitrava
+# Modified Work Copyright (c) 2019-2023 Christoph Vanthuyne - https://github.com/CTHRU/Hitrava
 # Released under the Non-Profit Open Software License version 3.0
 
 
@@ -51,16 +51,16 @@ if sys.version_info < (3, 5, 1):
 PROGRAM_NAME = 'Hitrava'
 PROGRAM_MAJOR_VERSION = '5'
 PROGRAM_MINOR_VERSION = '1'
-PROGRAM_PATCH_VERSION = '1'
-PROGRAM_MAJOR_BUILD = '2207'
-PROGRAM_MINOR_BUILD = '2501'
+PROGRAM_PATCH_VERSION = '2'
+PROGRAM_MAJOR_BUILD = '2308'
+PROGRAM_MINOR_BUILD = '2601'
 
 OUTPUT_DIR = './output'
 GPS_TIMEOUT = dts_delta(seconds=10)
 
 
 class HiActivity:
-    """" This class represents all the data contained in a HiTrack file."""
+    """ This class represents all the data contained in a HiTrack file."""
 
     TYPE_WALK = 'Walk'
     TYPE_RUN = 'Run'
@@ -239,7 +239,7 @@ class HiActivity:
 
     # TODO Verify if something useful can be done with the (optional) altitude data in the tp=lbs records
     def add_location_data(self, data: []):
-        """"Add location data from a tp=lbs record in the HiTrack file.
+        """ Add location data from a tp=lbs record in the HiTrack file.
         Information:
         - When tracking an activity with a mobile phone only, the HiTrack files seem to contain altitude
           information in the alt data tag (in ft). This seems not to be the case when an activity is started from a
@@ -599,8 +599,8 @@ class HiActivity:
             self.stop = data['t']
 
     def get_segments(self) -> list:
-        """" Returns the segment list.
-            - For swimming activities, the segments were identified during parsing of the SWOLF data.
+        """ Returns the segment list.
+            - For pool swimming activities, the segments were identified during parsing of the SWOLF data.
             - For walking, running and cycling activities, the segments must be calculated once based on the parsed
               location data. Because the location data is not (always) in chronological order (e.g. loops in the track),
               for these activities
@@ -614,7 +614,7 @@ class HiActivity:
         self._current_segment = None
 
     def _detect_activity_type(self) -> str:
-        """"Auto-detection of the activity type. Only valid when called after all data has been parsed."""
+        """ Auto-detection of the activity type. Only valid when called after all data has been parsed."""
         logging.getLogger(PROGRAM_NAME).debug('Detecting activity type for activity %s with parameters %s',
                                               self.activity_id, self.activity_params)
 
@@ -673,7 +673,7 @@ class HiActivity:
             return self._activity_type
 
     def _calc_segments_and_distances(self):
-        """" Perform the following detailed data calculations for walk, run, or cycle activities:
+        """ Perform the following detailed data calculations for walk, run, or cycle activities:
         - segment list
         - segment start, stop, duration and cumulative distance
         - detailed track point cumulative distances
@@ -802,7 +802,7 @@ class HiActivity:
             segment_data_dict = {k: v for k, v in self.data_dict.items()
                                  if segment['start'] <= k <= segment['stop']}
         else:
-            # E.g for swimming activities, the last segment is not closed due to no stop record nor valid record that
+            # E.g. for swimming activities, the last segment is not closed due to no stop record nor valid record that
             # indicates the end of the activity. Return all remaining data starting from the start timestamp
             segment_data_dict = {k: v for k, v in self.data_dict.items()
                                  if segment['start'] <= k}
@@ -841,15 +841,15 @@ class HiActivity:
             return None
 
     def _calc_pool_swim_data(self) -> list:
-        """" Calculates the real swim (lap) data based on the raw parsed pool swim data
+        """ Calculates the real swim (lap) data based on the raw parsed pool swim data
         The following calculation steps on the raw parsed data is applied.
         1. Starting point is the raw parsed data per lap (segment). The data consists of multiple data records
-           with a 5 second time interval containing the same SWOLF and stroke frequency (in strokes/minute) values.
+           with a 5-second time interval containing the same SWOLF and stroke frequency (in strokes/minute) values.
         2. Calculate the number of strokes in the lap.
            Number of strokes = stroke frequency x (last - first lqp timestamp) / 60
             3. Calculate the lap time: lap time = SWOLF - number of strokes
 
-        :return
+        :return:
         A list of lap data dictionaries containing the following data:
            'lap' : lap number in the activity
            'start' : Start timestamp of the lap
@@ -919,7 +919,7 @@ class HiActivity:
         return swim_data
 
     def _get_open_water_swim_data(self) -> list:
-        """" Calculates the real swim (lap) data based on the raw parsed open water swim data"""
+        """ Calculates the real swim (lap) data based on the raw parsed open water swim data """
         logging.getLogger(PROGRAM_NAME).info('Calculating swim data for activity %s', self.activity_id)
 
         swim_data = []
@@ -1248,20 +1248,20 @@ class HiJson:
             # data {list}
             #   00 {dict}
             #     motionPathData {list}
-            #       0 {dict)
+            #       0 {dict}
             #         sportType {int}
             #         attribute {str} 'HW_EXT_TRACK_DETAIL@is<HiTrack File Data>&&HW_EXT_TRACK_SIMPLIFY@is<Other Data>
-            #       1 {dict)
+            #       1 {dict}
             #         sportType {int}
             #         attribute {str} 'HW_EXT_TRACK_DETAIL@is<HiTrack File Data>&&HW_EXT_TRACK_SIMPLIFY@is<Other Data>
             #     recordDay {int} 'YYYYMMDD'
             #
             # JSON data structure AS OF 07/2020
             # data {list}
-            #   0 {dict)
+            #   0 {dict}
             #     sportType {int}
             #     attribute {str} 'HW_EXT_TRACK_DETAIL@is<HiTrack File Data>&&HW_EXT_TRACK_SIMPLIFY@is<Other Data>
-            #   1 {dict)
+            #   1 {dict}
             #     sportType {int}
             #     attribute {str} 'HW_EXT_TRACK_DETAIL@is<HiTrack File Data>&&HW_EXT_TRACK_SIMPLIFY@is<Other Data>
             n = -1
@@ -1299,7 +1299,7 @@ class HiJson:
             logging.getLogger(PROGRAM_NAME).error('Error parsing JSON file <%s>\n%s', self.json_file.name, e)
             raise Exception('Error parsing JSON file <%s>', self.json_file.name)
 
-    def _parse_activity(self, activity_dict: dict) -> HiActivity:
+    def _parse_activity(self, activity_dict: dict) -> Optional[HiActivity]:
         # Create a HiTrack file from the HiTrack data
         hitrack_data = activity_dict['attribute']
         # Strip prefix and suffix from raw HiTrack data
@@ -1430,6 +1430,11 @@ class HiJson:
                                                         activity_start,
                                                         sport_type)
 
+            # For open water swimming activities, the SWOLF based segment data can not be used.
+            # Replace it by the raw GPS data (done in
+            if hi_activity.get_activity_type() == HiActivity.TYPE_OPEN_WATER_SWIM:
+                hi_activity.get_swim_data()
+
         # Start date and time (in UTC)
         hi_activity.start = activity_start
 
@@ -1499,7 +1504,7 @@ class TcxActivity:
                            (HiActivity.TYPE_INDOOR_CYCLE, 'biking'),  # Not recognized by Strava TCX upload, change activity type after upload manually to Virtual Ride.
                            (HiActivity.TYPE_CROSS_TRAINER, 'elliptical'),  # Not recognized by Strava TCX upload, change activity type after upload manually to Elliptical.
                            (HiActivity.TYPE_OTHER, _SPORT_OTHER),
-                           (HiActivity.TYPE_CROSSFIT, 'crossfit'),  # Not recognzied by Strava TCX upload, chnage activity type after upload manually to Crossfit.
+                           (HiActivity.TYPE_CROSSFIT, 'crossfit'),  # Not recognized by Strava TCX upload, change activity type after upload manually to Crossfit.
                            (HiActivity.TYPE_UNKNOWN, _SPORT_OTHER),
                            (HiActivity.TYPE_CROSS_COUNTRY_RUN, 'running')]
 
@@ -1543,7 +1548,7 @@ class TcxActivity:
         return sport
 
     def generate_xml(self) -> xml_et.Element:
-        """"Generates the TCX XML content."""
+        """ Generates the TCX XML content."""
         logging.getLogger(PROGRAM_NAME).debug('Generating TCX XML data for activity %s', self.hi_activity.activity_id)
         try:
             # * TrainingCenterDatabase
@@ -1920,16 +1925,16 @@ def _convert_hitrack_timestamp(hitrack_timestamp: float, timestamp_ref: datetime
 
 
 def _get_tz_aware_datetime(naive_datetime: dts, time_zone: tz):
-    """"All datetimes in the HiActivity are represented as UTC datetimes and are parsed as time zone unaware
+    """ All datetimes in the HiActivity are represented as UTC datetimes and are parsed as time zone unaware
     (naive) datetime objects. This method returns the equivalent time zone aware datetime representation using the
     time zone information of the HiTrack activity (if any). If the Hitrack activity has no time zone information,
     UTC (GMT) time zone is assumed.
 
     :param naive_datetime:
-    :param time_zone:
     :type naive_datetime: datetime.datetime
+    :param time_zone:
     :type time_zone: datetime.timezone
-    :return
+    :return:
     The (time zone) aware datetime corresponding to the naive datetime in the naive_datetime parameter
     """
     utc_datetime = dts.replace(naive_datetime, tzinfo=tz.utc)
@@ -1942,7 +1947,7 @@ def _get_tz_aware_datetime(naive_datetime: dts, time_zone: tz):
 
 
 def _init_logging(level: str = 'INFO'):
-    """"
+    """
     Initializes the Python logging.getLogger(PROGRAM_NAME). A program specific Logger is created.
 
     Parameters:
@@ -2039,7 +2044,7 @@ def _init_argument_parser() -> argparse.ArgumentParser:
     tcx_group.add_argument('--tcx_use_raw_distance_data',
                            help='In JSON or ZIP mode, when using this option the converted TCX files will use the raw \
                            distance data as calculated from the raw HiTrack data. When not specified (default), all \
-                           distances in the TCX files will be normalized to match the original Huawei distance.' ,
+                           distances in the TCX files will be normalized to match the original Huawei distance.',
                            action='store_true')
 
     output_group = parser.add_argument_group('OUTPUT options')
