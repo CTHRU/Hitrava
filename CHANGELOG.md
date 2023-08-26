@@ -3,6 +3,10 @@
 All notable changes to this project are documented in this file. 
 
 ## Release Notes
+### Version 5.1.2 (build 2308.2601)
+#### Solved Issues
+- Conversion failed for open water swimming activities in conjunction with distance normalization. Closes #74.
+
 ### Version 5.1.1 (build 2207.2501)
 #### New features and changes
 - Added support for conversion of activities with dummy location (start) records.
