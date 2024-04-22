@@ -17,9 +17,11 @@ directly uploaded to [`Strava`](https://strava.com).
 ### Hitrava Web
 [![Hitrava](images/Hitrava_Web_Screenshot_Small.png)](https://cthru.hopto.org/hitrava-web)  
   
-An alpha release of [Hitrava Web](https://cthru.hopto.org/hitrava-web) is now available. If you prefer on-line conversion in a web app with GUI over a script, 
-learn more on [https://cthru.hopto.org](https://cthru.hopto.org/hitrava-web).
-(Note: my website is not up all the time, plan your visit between 08:15 and 22:45 CET)
+**22-Apr-2024: [Hitrava Web](https://cthru.hopto.org/hitrava-web) just got updated!**  
+Though it is still an alpha release, it is the last step before a fully functional beta version.  
+The cthru website also got a major update and upgrade and is now always available.  
+If you prefer on-line conversion in a web app with GUI over a script, 
+you can give it a try on [https://cthru.hopto.org](https://cthru.hopto.org/hitrava-web).
 
 ----------
 
@@ -110,6 +112,10 @@ The procedure below assumes that you [installed Hitrava](#installation) and are 
 the Huawei Health app. If you don't have a Huawei account, you can create one in the app.  
 
 #### Step 1 - Request your data in the Huawei Health app
+**Before you read any further in this paragraph, 
+there is a complete step-by-step guide with pictures on how to request your Huawei Health data.
+Head over to the ['How To Convert' article on the cthru website](https://cthru.hopto.org/hitrava-web/convert/)**.
+
 - On your phone, open the Huawei Health app.
 - Tap the **'Me'** button in the lower right-hand corner of the main screen.
 - Now tap on your account name on top of the screen.
