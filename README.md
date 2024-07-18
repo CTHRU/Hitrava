@@ -6,6 +6,12 @@
 [![PayPal][shield paypal]][paypal]
 [![Buy me a coffee][shield buymeacoffee]][buymeacoffee]
 
+---------
+## IMPORTANT NOTICE
+As of July, 2024, there are breaking changes to the Huawei export format.
+Unfortunately, these changes also involve the raw data on which Hitrava relied to create your exported activities, to have disappeared.
+This will be apparent by Hitrava returning a message that decoding and decompressing of the ZIP file failed.
+I regret to inform you that Hitrava probably will not be able to export your activities in the future. The program is still available for now for users who want to convert any export files in the original export format.
 
 ----------
 ## Introduction
