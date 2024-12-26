@@ -8,10 +8,12 @@
 
 ---------
 ## IMPORTANT NOTICE
-As of July, 2024, there are breaking changes to the Huawei export format.
-Unfortunately, these changes also involve the raw data on which Hitrava relied to create your exported activities, to have disappeared.
-This will be apparent by Hitrava returning a message that decoding and decompressing of the ZIP file failed.
-I regret to inform you that Hitrava probably will not be able to export your activities in the future. The program is still available for now for users who want to convert any export files in the original export format.
+As of July, 2024, there were breaking changes to the Huawei export format.
+These changes also involve the raw data on which Hitrava relied to create your exported activities, to have disappeared.  
+**Update December 26, 2024** Thanks to community member [Davide Pacifico](https://github.com/jimiend) who took the 
+effort to sort out the [issue](https://github.com/CTHRU/Hitrava/issues/78) with Huawei and GDPR, 
+we can confirm that the data seems to be back, be it in another format.  
+I am working on an update to support the format changes in the coming weeks (it will be ready, when it's ready).
 
 ----------
 ## Introduction
