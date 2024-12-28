@@ -1158,7 +1158,6 @@ class HiZip:
 
         if platform.system() in ['Windows', 'Linux']:
             unzip_cmd = ('7za', 'e', '-aoa', '-o%s' % output_dir, '-bb0', '-bse0', '-bsp2', '-p%s' % password, '-sccUTF-8', '%s' % zip_filename, '--', '%s' % zip_json_filenames)
-            print(unzip_cmd)
         elif platform.system() == 'Darwin':
             message = f'Encrypted ZIP files in Huawei 2025 format not supported on platform {platform.system()}',
             logging.getLogger(PROGRAM_NAME).error(message)
