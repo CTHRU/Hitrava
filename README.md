@@ -16,7 +16,7 @@ These changes involved the raw data on which Hitrava relied to create your expor
 ### Thank you, Davide
 Thanks to community member [Davide Pacifico](https://github.com/jimiend) who took the
 effort to sort out the [issue](https://github.com/CTHRU/Hitrava/issues/78) with Huawei and GDPR,
-we can confirm that the data is back, be it packed in a different way then before.  
+we can confirm that the data is back, be it packed in a different way than before.  
 The latest version 6 update now supports the new format to give you your trusted Huawei Health activity converter back. 
 
 ----------
