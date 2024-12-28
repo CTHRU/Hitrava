@@ -380,7 +380,7 @@ For a full changelog of all versions, please look in [`CHANGELOG.md`](./CHANGELO
 ## Copyright and License
 [![nposl3.0][shield nposl3.0]][tldrlegal nposl3.0]  
 
-Copyright (c) 2019-2023 Christoph Vanthuyne
+Copyright (c) 2019-2025 Christoph Vanthuyne
 
 Licensed under the Non-Profit Open Software License version 3.0 from Hitrava version 3.1.1 onward.  
 
