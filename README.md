@@ -7,11 +7,17 @@
 [![Buy me a coffee][shield buymeacoffee]][buymeacoffee]
 
 ---------
-## IMPORTANT NOTICE
-As of July, 2024, there are breaking changes to the Huawei export format.
-Unfortunately, these changes also involve the raw data on which Hitrava relied to create your exported activities, to have disappeared.
-This will be apparent by Hitrava returning a message that decoding and decompressing of the ZIP file failed.
-I regret to inform you that Hitrava probably will not be able to export your activities in the future. The program is still available for now for users who want to convert any export files in the original export format.
+## Hitrava is Back (28-Dec-2024)
+  
+### Background
+In July, 2024, there were breaking changes to the Huawei export format.  
+These changes involved the raw data on which Hitrava relied to create your exported activities, to have disappeared.    
+
+### Thank you, Davide
+Thanks to community member [Davide Pacifico](https://github.com/jimiend) who took the
+effort to sort out the [issue](https://github.com/CTHRU/Hitrava/issues/78) with Huawei and GDPR,
+we can confirm that the data is back, be it packed in a different way then before.  
+The latest version 6 update now supports the new format to give you your trusted Huawei Health activity converter back. 
 
 ----------
 ## Introduction
@@ -23,9 +29,8 @@ directly uploaded to [`Strava`](https://strava.com).
 ### Hitrava Web
 [![Hitrava](images/Hitrava_Web_Screenshot_Small.png)](https://cthru.hopto.org/hitrava-web)  
   
-**22-Apr-2024: [Hitrava Web](https://cthru.hopto.org/hitrava-web) just got updated!**  
-Though it is still an alpha release, it is the last step before a fully functional beta version.  
-The cthru website also got a major update and upgrade and is now always available.  
+**28-Dec-2024: [Hitrava Web](https://cthru.hopto.org/hitrava-web) is not yet available for the new Huawei 2025 ZIP export format.  
+I am working on a solution in the coming weeks.**  
 If you prefer on-line conversion in a web app with GUI over a script, 
 you can give it a try on [https://cthru.hopto.org](https://cthru.hopto.org/hitrava-web).
 
@@ -37,13 +42,14 @@ you can give it a try on [https://cthru.hopto.org](https://cthru.hopto.org/hitra
 - [Features](#features)  
 - [Installation](#installation)  
 - [How To Convert](#how-to-convert-your-health-activities-and-import-them-in-strava)   
-  -[Windows Users](#windows-users---encrypted-zip-conversion-procedure)  
-  -[macOS / Linux / UNIX Users](#other-operating-systems-users-macos-linux-unix)  
+  -[Windows / Linux Users](#windows-users---encrypted-zip-conversion-procedure)  
+  -[macOS Users](#other-operating-systems-users-macos)  
 - [Usage](#usage)  
     - [Command Line Arguments](#command-line-arguments-overview)  
     - [Examples](#usage-examples)
 - [Release Notes](#release-notes)  
 - [Copyright and License](#copyright-and-license)
+- [Aim for the stars](#star-history)
 
 ## Features
 - Recognizes and converts the following activity types from Huawei Health to Strava:
@@ -70,12 +76,12 @@ or fitness band should be supported, if you see the data in Huawei Health, e.g.
 ## Installation
 ### Requirements
 To use Hitrava, you need:
-- [`Python 3.7.x`](https://www.python.org/downloads/) or higher.
-    - Python 3.7.6 is the lowest recommended version (developed and tested on this version).
-    - Python 3.5.1 is the lowest minimum required version (compatibility tested on this version). 
+- [`Python 3.12.1`](https://www.python.org/downloads/) or higher.
+    - Python 3.12.1 is the lowest recommended version (developed and tested on this version).
+    - Older Python versions might still work, but were / are not actively being tested.
 - A Huawei account to request your health data.
 - 7-Zip stand-alone version to convert directly from an encrypted Huawei Health ZIP file. Currently, this method is only 
-supported on Windows operating systems.
+supported on Windows and Linux operating systems.
 
 ### Installation Procedure
 #### Step 1 - Install Python
@@ -167,15 +173,15 @@ You can now go to the Strava website to import your data.
 - Once logged in, use the **'Browse...'** button on the page and select the converted TCX files (with the _.tcx_ 
 extension, up to 25 at once) to upload. 
 
-### Other Operating Systems Users (macOS, Linux, UNIX)
+### Other Operating Systems Users (macOS)
 #### Step 1 - Request your data
 Follow the same procedure as for Windows users explained [above](#step-1---request-your-data-in-the-huawei-health-app).
 
 #### Step 2 - Download and extract your data
 - In the mail from Huawei, click on the link to download your data and follow the instructions.
-- Extract the following file from the downloaded ZIP file using an unzip tool for your operating system that supports
+- Extract the following file(s) from the downloaded ZIP file using an unzip tool for your operating system that supports
  AES encrypted ZIP files.
-  > Motion path detail data & description/motion path detail data.json
+  > Motion path detail data & description/motion path detail data{epoch datetimestamp goes here}.json
 - Put (a copy of) the extracted file in the Hitrava installation folder and rename it to HiJson.json.
 
 #### Step 3 - Convert the JSON file with Hitrava
@@ -381,6 +387,10 @@ Licensed under the Non-Profit Open Software License version 3.0 from Hitrava ver
 Read the full license information [`here`](./LICENSE.md).
 
 If you're more into a TL;DR approach, start [`here`][tldrlegal nposl3.0].
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=CTHRU/Hitrava&type=Date)](https://star-history.com/#CTHRU/Hitrava&Date)
 
 [shield nposl3.0]: https://img.shields.io/badge/license-nposl--3.0-blue
 [tldrlegal nposl3.0]: https://tldrlegal.com/license/non-profit-open-software-license-3.0-(nposl-3.0)

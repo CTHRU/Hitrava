@@ -3,6 +3,17 @@
 All notable changes to this project are documented in this file. 
 
 ## Release Notes
+### Version 6.0.0 (build 2412.2801)
+#### New features and changes
+- Added support for the new Huawei 2025 ZIP export format for users on Windows or Linux.
+- Bumped recommended Python version to 3.12.1 or higher.
+  Older versions might still work, but were / are not actively being tested nor maintained / supported.
+- Did some minor code cleanup and changed code deprecations.
+
+#### Known limitations
+- This version has no support for the new Huawei 2025 ZIP export format for macOS users  
+  (I do not have access to a macOS system to properly develop / test the unzip process).
+
 ### Version 5.1.2 (build 2308.2601)
 #### Solved Issues
 - Conversion failed for open water swimming activities in conjunction with distance normalization. Closes #74.
