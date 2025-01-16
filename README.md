@@ -389,7 +389,7 @@ If you're more into a TL;DR approach, start [`here`][tldrlegal nposl3.0].
 
 ## Star History
 
-[![Star History Chart]([https://api.star-history.com/svg?repos=CTHRU/Hitrava&type=Date](https://star-history.com/embed?secret=Z2hwX3RTUHRWRWhQYmdJNHUyaWd6d0J6T0pqWUFoY3BIVTJqejljWg==#CTHRU/Hitrava&Date))]([https://star-history.com/#CTHRU/Hitrava&Date](https://star-history.com/embed?secret=Z2hwX3RTUHRWRWhQYmdJNHUyaWd6d0J6T0pqWUFoY3BIVTJqejljWg==#CTHRU/Hitrava&Date))
+[![Star History Chart](https://api.star-history.com/svg?repos=CTHRU/Hitrava&type=Date)](https://star-history.com/#CTHRU/Hitrava&Date)
 
 [shield nposl3.0]: https://img.shields.io/badge/license-nposl--3.0-blue
 [tldrlegal nposl3.0]: https://tldrlegal.com/license/non-profit-open-software-license-3.0-(nposl-3.0)
