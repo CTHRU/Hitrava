@@ -391,6 +391,8 @@ If you're more into a TL;DR approach, start [`here`][tldrlegal nposl3.0].
 
 [![Star History Chart](https://api.star-history.com/svg?repos=CTHRU/Hitrava&type=Date)](https://star-history.com/#CTHRU/Hitrava&Date)
 
+<iframe style="width:100%;height:auto;min-width:600px;min-height:400px;" src="https://star-history.com/embed?secret=Z2hwX3RTUHRWRWhQYmdJNHUyaWd6d0J6T0pqWUFoY3BIVTJqejljWg==#CTHRU/Hitrava&Date" frameBorder="0"></iframe>
+
 [shield nposl3.0]: https://img.shields.io/badge/license-nposl--3.0-blue
 [tldrlegal nposl3.0]: https://tldrlegal.com/license/non-profit-open-software-license-3.0-(nposl-3.0)
 [nposl3.0]: https://opensource.org/licenses/NPOSL-3.0
