@@ -47,6 +47,7 @@ you can give it a try on [https://cthru.hopto.org](https://cthru.hopto.org/hitra
 - [Usage](#usage)  
     - [Command Line Arguments](#command-line-arguments-overview)  
     - [Examples](#usage-examples)
+- [Uploading to Garmin Connect](#uploading-to-garmin-connect)
 - [Release Notes](#release-notes)  
 - [Copyright and License](#copyright-and-license)
 - [Aim for the stars](#star-history)
@@ -99,15 +100,16 @@ Only required if you don't have a (suitable) python installation on your system.
 #### Step 3 - Download and Extract Stand-alone 7-Zip
 NOTE: This step is required to convert **encrypted** Huawei Health ZIP files.
 
+##### Windows Users
 - Download the latest 7-zip **stand-alone** console version from the [`7-Zip website`](https://www.7-zip.org/download.html).
 The stand-alone version can be identified by the description below:
-> 7-Zip Extra: standalone console version, 7z DLL, Plugin for Far Manager
+  > 7-Zip Extra: standalone console version, 7z DLL, Plugin for Far Manager
 - Extract the file _7za.exe_ from the downloaded archive and place it in your Hitrava installation folder from step 2 
 above. Your Hitrava installation folder should now contain at least the following files.
-> Hitrava.py  
-> 7za.exe  
-> Run_Hitrava_Decrypt.cmd
-
+  > Hitrava.py  
+  > 7za.exe  
+  > Run_Hitrava_Decrypt.cmd
+  
 ## How to convert your health activities and import them in Strava
 All users can use conversion from a **[ZIP](#Windows-Users---Encrypted-ZIP-conversion-procedure)** file or a **[JSON](#JSON-file-conversion-example)** file.  
 For users with rooted phones, legacy **[file](#single-file-conversion-examples)** and 
@@ -373,6 +375,12 @@ later will be extracted and converted to the _./output_ directory.
 ```
 python Hitrava.py --tar com.huawei.health.tar --from_date 2019-08-20
 ```
+
+## Uploading to Garmin Connect
+Hitrava currently doesn't support uploading generated TCX files to [Garmin Connect](https://connect.garmin.com) right away.  
+  
+However, user [mic13esk](https://github.com/mic13esk) has created a [Hitrava2Garmin](https://github.com/mic13esk/Hitrava2Garmin) repository for this purpose.  
+Please visit [mic13esk's repository](https://github.com/mic13esk/Hitrava2Garmin) for more information on how to create the TCX files ready for import into Garmin Connect. 
   
 ## Release Notes
 For a full changelog of all versions, please look in [`CHANGELOG.md`](./CHANGELOG.md).
