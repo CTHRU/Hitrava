@@ -111,8 +111,10 @@ above. Your Hitrava installation folder should now contain at least the followin
   > Run_Hitrava_Decrypt.cmd
   
 ##### macOS Users
-- Install [Homebrew](https://brew.sh/).
-- Install the `p7zip` package
+macOS users can install the `p7zip` package through Homebrew 
+- If [Homebrew](https://brew.sh/) is not on your system, install [Homebrew](https://brew.sh/) 
+by following the instructions from the [Homebrew](https://brew.sh/).
+- If the `p7zip` package is not on your system, install it using the command below in a `Terminal` window.
   > brew install p7zip
 
 ## How to convert your health activities and import them in Strava
@@ -382,7 +384,7 @@ python Hitrava.py --tar com.huawei.health.tar --from_date 2019-08-20
 ```
 
 ## Uploading to Garmin Connect
-Hitrava currently doesn't support uploading generated TCX files to [Garmin Connect](https://connect.garmin.com) right-away.  
+Hitrava currently doesn't support uploading generated TCX files to [Garmin Connect](https://connect.garmin.com) right away.  
   
 However, user [mic13esk](https://github.com/mic13esk) has created a [Hitrava2Garmin](https://github.com/mic13esk/Hitrava2Garmin) repository for this purpose.  
 Please visit [mic13esk's repository](https://github.com/mic13esk/Hitrava2Garmin) for more information on how to create the TCX files ready for import into Garmin Connect. 

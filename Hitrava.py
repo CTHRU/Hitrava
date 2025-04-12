@@ -49,10 +49,10 @@ if sys.version_info < (3, 12, 1):
 # Global Constants
 PROGRAM_NAME = 'Hitrava'
 PROGRAM_MAJOR_VERSION = '6'
-PROGRAM_MINOR_VERSION = '0'
+PROGRAM_MINOR_VERSION = '1'
 PROGRAM_PATCH_VERSION = '0'
-PROGRAM_MAJOR_BUILD = '2412'
-PROGRAM_MINOR_BUILD = '2801'
+PROGRAM_MAJOR_BUILD = '2504'
+PROGRAM_MINOR_BUILD = '1201'
 
 OUTPUT_DIR = './output'
 GPS_TIMEOUT = dts_delta(seconds=10)
@@ -1022,7 +1022,7 @@ class HiTrackFile:
                         data_list.append(line[data_index].split('='))  # Parse values after the '=' character
                     self.activity.add_heart_rate_data(data_list)
                 elif line[0] == 'tp=alti':  # Altitude line format: tp=alti;k=_;v=_
-                    for data_index in [1, 2]:  # Parse parameters k (timestamp) and v (heart rate)
+                    for data_index in [1, 2]:  # Parse parameters k (timestamp) and v (altitude)
                         data_list.append(line[data_index].split('='))  # Parse values after the '=' character
                     self.activity.add_altitude_data(data_list)
                 elif line[0] == 'tp=s-r':  # Step frequency (steps/minute) format: tp=s-r;k=_;v=_
@@ -1030,15 +1030,15 @@ class HiTrackFile:
                         data_list.append(line[data_index].split('='))  # Parse values after the '=' character
                     self.activity.add_step_frequency_data(data_list)
                 elif line[0] == 'tp=swf':  # SWOLF format: tp=swf;k=_;v=_
-                    for data_index in [1, 2]:  # Parse parameters k (timestamp) and v (step frequency)
+                    for data_index in [1, 2]:  # Parse parameters k (timestamp) and v (SWOLF)
                         data_list.append(line[data_index].split('='))  # Parse values after the '=' character
                     self.activity.add_swolf_data(data_list)
                 elif line[0] == 'tp=p-f':  # Stroke frequency (strokes/minute) format: tp=p-f;k=_;v=_
-                    for data_index in [1, 2]:  # Parse parameters k (timestamp) and v (step frequency)
+                    for data_index in [1, 2]:  # Parse parameters k (timestamp) and v (stroke frequency)
                         data_list.append(line[data_index].split('='))  # Parse values after the '=' character
                     self.activity.add_stroke_frequency_data(data_list)
-                elif line[0] == 'tp=rs':  # Speed (decimeter/second) format: tp=p-f;k=_;v=_
-                    for data_index in [1, 2]:  # Parse parameters k (timestamp) and v (step frequency)
+                elif line[0] == 'tp=rs':  # Speed (decimeter/second) format: tp=rs;k=_;v=_
+                    for data_index in [1, 2]:  # Parse parameters k (timestamp) and v (speed)
                         data_list.append(line[data_index].split('='))  # Parse values after the '=' character
                     self.activity.add_speed_data(data_list)
         except Exception as e:
@@ -1156,12 +1156,8 @@ class HiZip:
         huawei_zip = zipfile.ZipFile(zip_filename)
         huawei_json_filenames = [f'{output_dir}/{f.filename.split('/')[-1]}' for f in huawei_zip.infolist() if f.filename.startswith(_MOTION_PATH_JSON_DIR + '/') and f.filename.endswith('.json')]
 
-        if platform.system() in ['Windows', 'Linux']:
+        if platform.system() in ['Windows', 'Linux', 'Darwin']:
             unzip_cmd = ('7za', 'e', '-aoa', '-o%s' % output_dir, '-bb0', '-bse0', '-bsp2', '-p%s' % password, '-sccUTF-8', '%s' % zip_filename, '--', '%s' % zip_json_filenames)
-        elif platform.system() == 'Darwin':
-            message = f'Encrypted ZIP files in Huawei 2025 format not supported on platform {platform.system()}',
-            logging.getLogger(PROGRAM_NAME).error(message)
-            raise NotImplementedError(message)
         else:
             message = f'Encrypted ZIP files in Huawei 2025 format not supported on platform {platform.system()}',
             logging.getLogger(PROGRAM_NAME).error(message)
