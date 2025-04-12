@@ -1037,7 +1037,7 @@ class HiTrackFile:
                     for data_index in [1, 2]:  # Parse parameters k (timestamp) and v (step frequency)
                         data_list.append(line[data_index].split('='))  # Parse values after the '=' character
                     self.activity.add_stroke_frequency_data(data_list)
-                elif line[0] == 'tp=rs':  # Speed (decimeter/second) format: tp=p-f;k=_;v=_
+                elif line[0] == 'tp=rs':  # Speed (decimeter/second) format: tp=rs;k=_;v=_
                     for data_index in [1, 2]:  # Parse parameters k (timestamp) and v (step frequency)
                         data_list.append(line[data_index].split('='))  # Parse values after the '=' character
                     self.activity.add_speed_data(data_list)
