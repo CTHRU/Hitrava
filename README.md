@@ -114,8 +114,10 @@ above. Your Hitrava installation folder should now contain at least the followin
 macOS users can install the `p7zip` package through Homebrew 
 - If [Homebrew](https://brew.sh/) is not on your system, install [Homebrew](https://brew.sh/) 
 by following the instructions from the [Homebrew](https://brew.sh/) web page.
-- If the `p7zip` package is not on your system, install it using the command below in a `Terminal` window.
-  > brew install p7zip
+- If the `p7zip` package is not on your system, install it using the command below in a `Terminal` window.  
+  ```
+  brew install p7zip
+  ```
 
 ## How to convert your health activities and import them in Strava
 All users can use conversion from a **[ZIP](#Windows-Users---Encrypted-ZIP-conversion-procedure)** file or a **[JSON](#JSON-file-conversion-example)** file.  
