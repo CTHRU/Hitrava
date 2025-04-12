@@ -113,7 +113,7 @@ above. Your Hitrava installation folder should now contain at least the followin
 ##### macOS Users
 macOS users can install the `p7zip` package through Homebrew 
 - If [Homebrew](https://brew.sh/) is not on your system, install [Homebrew](https://brew.sh/) 
-by following the instructions from the [Homebrew](https://brew.sh/).
+by following the instructions from the [Homebrew](https://brew.sh/) web page.
 - If the `p7zip` package is not on your system, install it using the command below in a `Terminal` window.
   > brew install p7zip
 
