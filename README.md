@@ -41,8 +41,8 @@ you can give it a try on [https://cthru.hopto.org](https://cthru.hopto.org/hitra
 - [Features](#features)  
 - [Installation](#installation)  
 - [How To Convert](#how-to-convert-your-health-activities-and-import-them-in-strava)   
-  -[Windows / Linux Users](#windows-users---encrypted-zip-conversion-procedure)  
-  -[macOS Users](#other-operating-systems-users-macos)  
+  -[Windows / Linux / macOS Users](#windows--linux--macos-users---encrypted-zip-conversion-procedure)  
+  -[Other Operating Systems](#other-operating-systems-manual-unzip)  
 - [Usage](#usage)  
     - [Command Line Arguments](#command-line-arguments-overview)  
     - [Examples](#usage-examples)
@@ -109,12 +109,21 @@ above. Your Hitrava installation folder should now contain at least the followin
   > 7za.exe  
   > Run_Hitrava_Decrypt.cmd
   
+##### macOS Users
+macOS users can install the `p7zip` package through Homebrew 
+- If [Homebrew](https://brew.sh/) is not on your system, install [Homebrew](https://brew.sh/) 
+by following the instructions from the [Homebrew](https://brew.sh/) web page.
+- If the `p7zip` package is not on your system, install it using the command below in a `Terminal` window.  
+  ```
+  brew install p7zip
+  ```
+
 ## How to convert your health activities and import them in Strava
 All users can use conversion from a **[ZIP](#Windows-Users---Encrypted-ZIP-conversion-procedure)** file or a **[JSON](#JSON-file-conversion-example)** file.  
 For users with rooted phones, legacy **[file](#single-file-conversion-examples)** and 
 **[tar](#tar-file-conversion-examples)** options are still available.
 
-### Windows Users - Encrypted ZIP conversion procedure
+### Windows / Linux / macOS Users - Encrypted ZIP conversion procedure
 NOTE: As of late October 2020, the latest version of the Huawei Health app obliges you to provide a password with which 
 your data in the ZIP file will be encrypted. If you need to convert from an older non-encrypted ZIP file, please refer 
 to the **[corresponding example](#zip-file-conversion-example)**.
@@ -174,7 +183,7 @@ You can now go to the Strava website to import your data.
 - Once logged in, use the **'Browse...'** button on the page and select the converted TCX files (with the _.tcx_ 
 extension, up to 25 at once) to upload. 
 
-### Other Operating Systems Users (macOS)
+### Other Operating Systems (Manual Unzip)
 #### Step 1 - Request your data
 Follow the same procedure as for Windows users explained [above](#step-1---request-your-data-in-the-huawei-health-app).
 
@@ -183,7 +192,7 @@ Follow the same procedure as for Windows users explained [above](#step-1---reque
 - Extract the following file(s) from the downloaded ZIP file using an unzip tool for your operating system that supports
  AES encrypted ZIP files.
   > Motion path detail data & description/motion path detail data{epoch datetimestamp goes here}.json
-- Put (a copy of) the extracted file in the Hitrava installation folder and rename it to HiJson.json.
+- Put (a copy of) an extracted file in the Hitrava installation folder and rename it to HiJson.json.
 
 #### Step 3 - Convert the JSON file with Hitrava
 - Open a Terminal window and change the directory to the installation folder of Hitrava.
