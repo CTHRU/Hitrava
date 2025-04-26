@@ -7,7 +7,7 @@
 [![Buy me a coffee][shield buymeacoffee]][buymeacoffee]
 
 ---------
-## Hitrava is Back (28-Dec-2024)
+## Hitrava is back (28-Dec-2024)
   
 ### Background
 In July, 2024, there were breaking changes to the Huawei export format.  
@@ -29,8 +29,7 @@ directly uploaded to [`Strava`](https://strava.com).
 ### Hitrava Web
 [![Hitrava](images/Hitrava_Web_Screenshot_Small.png)](https://cthru.hopto.org/hitrava-web)  
   
-**28-Dec-2024: [Hitrava Web](https://cthru.hopto.org/hitrava-web) is not yet available for the new Huawei 2025 ZIP export format.  
-I am working on a solution in the coming weeks.**  
+**12-Jan-2025: [Hitrava Web](https://cthru.hopto.org/hitrava-web) now also supports the new Huawei 2025 ZIP export format.**  
 If you prefer on-line conversion in a web app with GUI over a script, 
 you can give it a try on [https://cthru.hopto.org](https://cthru.hopto.org/hitrava-web).
 
