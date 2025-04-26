@@ -193,7 +193,7 @@ Follow the same procedure as for Windows users explained [above](#step-1---reque
 - Extract the following file(s) from the downloaded ZIP file using an unzip tool for your operating system that supports
  AES encrypted ZIP files.
   > Motion path detail data & description/motion path detail data{epoch datetimestamp goes here}.json
-- Put (a copy of) the extracted file in the Hitrava installation folder and rename it to HiJson.json.
+- Put (a copy of) an extracted file in the Hitrava installation folder and rename it to HiJson.json.
 
 #### Step 3 - Convert the JSON file with Hitrava
 - Open a Terminal window and change the directory to the installation folder of Hitrava.
