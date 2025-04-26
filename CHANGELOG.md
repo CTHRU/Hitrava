@@ -3,6 +3,14 @@
 All notable changes to this project are documented in this file. 
 
 ## Release Notes
+### Version 6.1.0 (build 2504.1201)
+#### New features and changes
+- Added support for extracting and converting the Huawei Health 2025 format on macOS. Closes #85.
+- Updated README with new installation procedure for 7-zip on macOS.
+
+#### Solved issues
+- Corrected some wrong descriptions in comments. Many thanks to [berber1016](https://github.com/berber1016) for bringing it to my attention.
+
 ### Version 6.0.0 (build 2412.2801)
 #### New features and changes
 - Added support for the new Huawei 2025 ZIP export format for users on Windows or Linux.
