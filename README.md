@@ -42,8 +42,8 @@ you can give it a try on [https://cthru.hopto.org](https://cthru.hopto.org/hitra
 - [Features](#features)  
 - [Installation](#installation)  
 - [How To Convert](#how-to-convert-your-health-activities-and-import-them-in-strava)   
-  -[Windows / Linux Users](#windows-users---encrypted-zip-conversion-procedure)  
-  -[macOS Users](#other-operating-systems-users-macos)  
+  -[Windows / Linux / macOS Users](#windows--linux--macos-users---encrypted-zip-conversion-procedure)  
+  -[Other Operating Systems](#other-operating-systems-manual-unzip)  
 - [Usage](#usage)  
     - [Command Line Arguments](#command-line-arguments-overview)  
     - [Examples](#usage-examples)
@@ -124,7 +124,7 @@ All users can use conversion from a **[ZIP](#Windows-Users---Encrypted-ZIP-conve
 For users with rooted phones, legacy **[file](#single-file-conversion-examples)** and 
 **[tar](#tar-file-conversion-examples)** options are still available.
 
-### Windows Users - Encrypted ZIP conversion procedure
+### Windows / Linux / macOS Users - Encrypted ZIP conversion procedure
 NOTE: As of late October 2020, the latest version of the Huawei Health app obliges you to provide a password with which 
 your data in the ZIP file will be encrypted. If you need to convert from an older non-encrypted ZIP file, please refer 
 to the **[corresponding example](#zip-file-conversion-example)**.
@@ -184,7 +184,7 @@ You can now go to the Strava website to import your data.
 - Once logged in, use the **'Browse...'** button on the page and select the converted TCX files (with the _.tcx_ 
 extension, up to 25 at once) to upload. 
 
-### Other Operating Systems Users (macOS)
+### Other Operating Systems (Manual Unzip)
 #### Step 1 - Request your data
 Follow the same procedure as for Windows users explained [above](#step-1---request-your-data-in-the-huawei-health-app).
 
