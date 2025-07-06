@@ -1,23 +1,10 @@
-[![Hitrava](images/Hitrava_Logo_With_Name.png)](https://cthru.hopto.org/hitrava-web)  
+[![Hitrava](images/Hitrava_Logo_With_Name.png)](https://cthru.duckdns.org/hitrava-web)  
 
 [![nposl3.0][shield nposl3.0]][tldrlegal nposl3.0]
 [![GitHub release (latest by date)][shield release]][latest release]
 [![GitHub Release Date][shield release date]][latest release]
 [![PayPal][shield paypal]][paypal]
 [![Buy me a coffee][shield buymeacoffee]][buymeacoffee]
-
----------
-## Hitrava is back (28-Dec-2024)
-  
-### Background
-In July, 2024, there were breaking changes to the Huawei export format.  
-These changes involved the raw data on which Hitrava relied to create your exported activities, to have disappeared.    
-
-### Thank you, Davide
-Thanks to community member [Davide Pacifico](https://github.com/jimiend) who took the
-effort to sort out the [issue](https://github.com/CTHRU/Hitrava/issues/78) with Huawei and GDPR,
-we can confirm that the data is back, be it packed in a different way than before.  
-The latest version 6 update now supports the new format to give you your trusted Huawei Health activity converter back. 
 
 ----------
 ## Introduction
@@ -27,11 +14,11 @@ directly uploaded to [`Strava`](https://strava.com).
 
 ----------
 ### Hitrava Web
-[![Hitrava](images/Hitrava_Web_Screenshot_Small.png)](https://cthru.hopto.org/hitrava-web)  
+[![Hitrava](images/Hitrava_Web_Screenshot_Small.png)](https://cthru.duckdns.org/hitrava-web)  
   
-**12-Jan-2025: [Hitrava Web](https://cthru.hopto.org/hitrava-web) now also supports the new Huawei 2025 ZIP export format.**  
+**12-Jan-2025: [Hitrava Web](https://cthru.duckdns.org/hitrava-web) now also supports the new Huawei 2025 ZIP export format.**  
 If you prefer on-line conversion in a web app with GUI over a script, 
-you can give it a try on [https://cthru.hopto.org](https://cthru.hopto.org/hitrava-web).
+you can give it a try on [https://cthru.duckdns.org](https://cthru.duckdns.org/hitrava-web).
 
 ----------
 
@@ -136,7 +123,7 @@ the Huawei Health app. If you don't have a Huawei account, you can create one in
 #### Step 1 - Request your data in the Huawei Health app
 **Before you read any further in this paragraph, 
 there is a complete step-by-step guide with pictures on how to request your Huawei Health data.
-Head over to the ['How To Convert' article on the cthru website](https://cthru.hopto.org/hitrava-web/convert/)**.
+Head over to the ['How To Convert' article on the cthru website](https://cthru.duckdns.org/hitrava-web/convert/)**.
 
 - On your phone, open the Huawei Health app.
 - Tap the **'Me'** button in the lower right-hand corner of the main screen.
