@@ -8,7 +8,7 @@
 
 ----------
 ## Notice  
-There is a temporary issue with the cthru.hopto.org website address due to a mistake on my part.
+There is a temporary issue with the cthru.hopto.org website address due to a mistake on my part.  
 For now, the website can be reached at [https://cthru.duckdns.org](https://cthru.duckdns.org).
 
 ----------
