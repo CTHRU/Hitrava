@@ -7,6 +7,11 @@
 [![Buy me a coffee][shield buymeacoffee]][buymeacoffee]
 
 ----------
+## Notice  
+There is a temporary issue with the cthru.hopto.org website address due to a mistake on my part.
+For now, the website can be reached at [https://cthru.duckdns.org](https://cthru.duckdns.org).
+
+----------
 ## Introduction
 Hitrava converts health activities registered using a Honor or Huawei activity tracker or smartwatch in the 
 [`Huawei Health`](https://play.google.com/store/apps/details?id=com.huawei.health) app into a file format that can be 
