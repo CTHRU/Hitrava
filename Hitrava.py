@@ -396,7 +396,7 @@ class HiActivity:
         self._add_data_detail(hr_data)
 
     def add_altitude_data(self, data: []):
-        """Add altitude data from a tp=alti record in a HiTrack file"""
+        """Add altitude data from a tp=alt or tp=alti record in a HiTrack file"""
         # Create a dictionary from the key value pairs
         logging.getLogger(PROGRAM_NAME).debug('Adding altitude data %s', data)
 
@@ -1021,7 +1021,7 @@ class HiTrackFile:
                     for data_index in [1, 2]:  # Parse parameters k (timestamp) and v (heart rate)
                         data_list.append(line[data_index].split('='))  # Parse values after the '=' character
                     self.activity.add_heart_rate_data(data_list)
-                elif line[0] == 'tp=alti':  # Altitude line format: tp=alti;k=_;v=_
+                elif line[0] == 'tp=alt' or line[0] == 'tp=alti':  # Altitude line format: tp=alt;k=_;v=_ or tp=alti;k=_;v=_
                     for data_index in [1, 2]:  # Parse parameters k (timestamp) and v (altitude)
                         data_list.append(line[data_index].split('='))  # Parse values after the '=' character
                     self.activity.add_altitude_data(data_list)
