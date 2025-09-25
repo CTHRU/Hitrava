@@ -3,6 +3,11 @@
 All notable changes to this project are documented in this file. 
 
 ## Release Notes
+### Version 6.2.0 (build 2509.2501)
+#### New features and changes
+- Added support for updated Huawei JSON altitude information. Closes #88.  
+  Credits to [jiaweixiao](https://github.com/jiaweixiao).
+
 ### Version 6.1.0 (build 2504.1201)
 #### New features and changes
 - Added support for extracting and converting the Huawei Health 2025 format on macOS. Closes #85.
