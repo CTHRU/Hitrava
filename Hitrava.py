@@ -1342,10 +1342,20 @@ class HiJson:
 
     def _parse_activity(self, activity_dict: dict) -> Optional[HiActivity]:
         # Create a HiTrack file from the HiTrack data
+        # Note: Huawei includes a training metadata block called 'actionSummary' at
+        # the end of the raw data between 'HW_EXT_TRACK_DETAIL@is' and
+        # '&&HW_EXT_TRACK_SIMPLIFY@is' within the JSON 'attribute' field.
+        '''
+        tp=rp;k=5430;gct=272;gia=-1;sa=-1;ee=-101;fsp=-1;wsp=-1;hsp=-1;aht=-1;htr=-1;ap=-1;vo=8.7;gtb=49.5;vr=-1;
+
+        actionSummary=[{"actionTargetType":1,"actionName":"跑步","actionId":"RD002","finishedAct":300,"finishRate":100,"targetValue":300,"actType":"run_time","theoryAct":300},{"actionTargetType":1,"actionName":"跑步","actionId":"RD002","finishedAct":300,"finishRate":100,"targetValue":300,"actType":"run_time","theoryAct":300}]
+
+        '''
         hitrack_data = activity_dict['attribute']
         # Strip prefix and suffix from raw HiTrack data
         hitrack_data = re.sub('HW_EXT_TRACK_DETAIL@is', '', hitrack_data)
         hitrack_data = re.sub('&&HW_EXT_TRACK_SIMPLIFY@is(.*)', '', hitrack_data, flags=re.DOTALL)
+        hitrack_data = re.sub(r'\n+actionSummary=.*', '', hitrack_data, flags=re.DOTALL)
 
         # Get additional activity detail data
         activity_detail_data = activity_dict['attribute']
