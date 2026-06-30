@@ -395,6 +395,29 @@ class HiActivity:
         # Add heart rate data
         self._add_data_detail(hr_data)
 
+    def add_cadence_data(self, data: []):
+        """Add cadence data from a tp=cad record in the HiTrack file"""
+        logging.getLogger(PROGRAM_NAME).debug('Adding cadence data %s', data)
+
+        try:
+            cad_data = dict(data)
+            # Use unique keys. Update keys k -> t and v -> cad
+            cad_data['t'] = _convert_hitrack_timestamp(float(cad_data.pop('k')))
+            cad_data['cad'] = int(cad_data.pop('v'))
+
+            # Ignore invalid cadence data (for export)
+            if cad_data['cad'] < 0 or cad_data['cad'] > 254:
+                logging.getLogger(PROGRAM_NAME).warning('Invalid cadence data detected and ignored in data %s', data)
+                return
+        except Exception as e:
+            logging.getLogger(PROGRAM_NAME).error(
+                'One or more required data fields (k, v) missing or invalid in cadence data %s\n%s', data, e)
+            raise Exception('One or more required data fields (k, v) missing or invalid in cadence data %s\n%s',
+                            data)
+
+        # Add cadence data
+        self._add_data_detail(cad_data)
+
     def add_altitude_data(self, data: []):
         """Add altitude data from a tp=alt or tp=alti record in a HiTrack file"""
         # Create a dictionary from the key value pairs
@@ -1021,6 +1044,10 @@ class HiTrackFile:
                     for data_index in [1, 2]:  # Parse parameters k (timestamp) and v (heart rate)
                         data_list.append(line[data_index].split('='))  # Parse values after the '=' character
                     self.activity.add_heart_rate_data(data_list)
+                elif line[0] == 'tp=cad':  # Cadence line format: tp=cad;k=_;v=_
+                    for data_index in [1, 2]:  # Parse parameters k (timestamp) and v (cadence)
+                        data_list.append(line[data_index].split('='))  # Parse values after the '=' character
+                    self.activity.add_cadence_data(data_list)
                 elif line[0] == 'tp=alt' or line[0] == 'tp=alti':  # Altitude line format: tp=alt;k=_;v=_ or tp=alti;k=_;v=_
                     for data_index in [1, 2]:  # Parse parameters k (timestamp) and v (altitude)
                         data_list.append(line[data_index].split('='))  # Parse values after the '=' character
@@ -1728,6 +1755,11 @@ class TcxActivity:
                         el_heart_rate_bpm.set('xsi:type', 'HeartRateInBeatsPerMinute_t')
                         value = xml_et.SubElement(el_heart_rate_bpm, 'Value')
                         value.text = str(data['hr'])
+
+                    if 'cad' in data:
+                        if self.hi_activity.get_activity_type() in (HiActivity.TYPE_CYCLE, HiActivity.TYPE_INDOOR_CYCLE):
+                            el_cadence = xml_et.SubElement(el_trackpoint, 'Cadence')
+                            el_cadence.text = str(data['cad'])
 
                     if 's-r' in data:  # Step frequency (for walking and running)
                         if self.hi_activity.get_activity_type() in (HiActivity.TYPE_WALK, HiActivity.TYPE_RUN,
