@@ -2,7 +2,7 @@
 
 # Hitrava.py
 # Original Work Copyright (c) 2019 Ari Cooper-Davis / Christoph Vanthuyne - github.com/aricooperdavis/Huawei-TCX-Converter
-# Modified Work Copyright (c) 2019-2025 Christoph Vanthuyne - https://github.com/CTHRU/Hitrava
+# Modified Work Copyright (c) 2019-2026 Christoph Vanthuyne - https://github.com/CTHRU/Hitrava
 # Released under the Non-Profit Open Software License version 3.0
 
 
@@ -35,7 +35,7 @@ from typing import Optional
 
 try:
     import xmlschema  # (only) needed to validate the generated TCX XML.
-except:
+except ModuleNotFoundError:
     sys.stderr.write('\nInfo - External library xmlschema could not be imported.\n' +
                      'It is required when using the --validate_xml argument.\n' +
                      'It can be installed using: pip install xmlschema\n')
@@ -49,10 +49,10 @@ if sys.version_info < (3, 12, 1):
 # Global Constants
 PROGRAM_NAME = 'Hitrava'
 PROGRAM_MAJOR_VERSION = '6'
-PROGRAM_MINOR_VERSION = '2'
+PROGRAM_MINOR_VERSION = '3'
 PROGRAM_PATCH_VERSION = '0'
-PROGRAM_MAJOR_BUILD = '2509'
-PROGRAM_MINOR_BUILD = '2501'
+PROGRAM_MAJOR_BUILD = '2607'
+PROGRAM_MINOR_BUILD = '0101'
 
 OUTPUT_DIR = './output'
 GPS_TIMEOUT = dts_delta(seconds=10)
@@ -80,7 +80,7 @@ class HiActivity:
                            TYPE_MOUNTAIN_HIKE, TYPE_INDOOR_RUN, TYPE_INDOOR_CYCLE, TYPE_CROSS_TRAINER, TYPE_OTHER,
                            TYPE_CROSSFIT, TYPE_CROSS_COUNTRY_RUN)
 
-    def __init__(self, activity_id: str, activity_type: str = TYPE_UNKNOWN, timestamp_ref: datetime = None, start_timestamp_ref: datetime = None):
+    def __init__(self, activity_id: str, activity_type: str = TYPE_UNKNOWN, timestamp_ref: dts|None = None, start_timestamp_ref: dts|None = None):
         logging.getLogger(PROGRAM_NAME).debug('New HiTrack activity to process <%s>', activity_id)
         self.activity_id = activity_id
 
@@ -111,7 +111,7 @@ class HiActivity:
         self._current_segment = None
         self._segment_list = None
 
-        # Create an empty detail data dictionary. key = timestamp, value = dict{t, lat, lon, alt, hr)
+        # Create an empty detail data dictionary. key = timestamp, value = dict{t, lat, lon, alt, hr}
         self.data_dict = {}
 
         # Create an empty list for the (pool) swim data
@@ -124,14 +124,14 @@ class HiActivity:
         self.start_timestamp_ref = start_timestamp_ref
 
     @classmethod
-    def from_json_pool_swim_data(cls, activity_id: str, start: datetime, json_pool_swim_dict):
+    def from_json_pool_swim_data(cls, activity_id: str, start: dts, json_pool_swim_dict):
         """Create a HiActivity from the swim data in the JSON file.
         Uses the data in the mSwimSegments section of the JSON file (lap distance, duration, swolf)
         """
         if json_pool_swim_dict is None or len(json_pool_swim_dict) == 0:
             logging.getLogger(PROGRAM_NAME).warning('Swimming activity %s is empty (no segment data) and can not be ' +
                                                     'instantiated.', activity_id)
-            return
+            return None
 
         swim_activity = cls(activity_id, HiActivity.TYPE_POOL_SWIM)
         swim_activity.start = start
@@ -162,7 +162,7 @@ class HiActivity:
         return swim_activity
 
     @classmethod
-    def from_manual_json_pool_swim_data(cls, activity_id: str, start: datetime, duration_millis: int, distance: int):
+    def from_manual_json_pool_swim_data(cls, activity_id: str, start: dts, duration_millis: int, distance: int):
         swim_activity = cls(activity_id, HiActivity.TYPE_POOL_SWIM)
         swim_activity.start = start
         swim_activity.stop = start + dts_delta(milliseconds=duration_millis)
@@ -201,7 +201,7 @@ class HiActivity:
                 'Pool length for activity %s of type %s will not be used. It is not a pool swimming activity',
                 self.activity_id, self._activity_type)
 
-    def _add_segment_start(self, segment_start: datetime):
+    def _add_segment_start(self, segment_start: dts):
         if self._current_segment:
             logging.getLogger(PROGRAM_NAME).error(
                 'Request to start segment at %s when there is already a current segment active', segment_start)
@@ -219,7 +219,7 @@ class HiActivity:
             # Set activity start
             self.start = segment_start
 
-    def _add_segment_stop(self, segment_stop: datetime, segment_distance: int = -1):
+    def _add_segment_stop(self, segment_stop: dts, segment_distance: int = -1):
         logging.getLogger(PROGRAM_NAME).debug('Adding segment stop at %s', segment_stop)
         if not self._current_segment:
             logging.getLogger(PROGRAM_NAME).error(
@@ -237,7 +237,7 @@ class HiActivity:
         self._current_segment = None
 
     # TODO Verify if something useful can be done with the (optional) altitude data in the tp=lbs records
-    def add_location_data(self, data: []):
+    def add_location_data(self, data: list):
         """ Add location data from a tp=lbs record in the HiTrack file.
         Information:
         - When tracking an activity with a mobile phone only, the HiTrack files seem to contain altitude
@@ -299,7 +299,8 @@ class HiActivity:
 
     # TODO - Discovered on 18 Feb 2020 that this method is a 1:1 copy of the code in the vincenty 0.1.4 package on pypi.org (https://pypi.org/project/vincenty/)
     # TODO - Evaluate to either keep this method (facilitates easier install) versus import the vincenty 0.1.4 package
-    def _vincenty(self, point1: tuple, point2: tuple) -> float:
+    @staticmethod
+    def _vincenty(point1: tuple, point2: tuple) -> float:
         """
         Update 2020-02-18 - Discovered that this method is a 1:1 copy of the code in the vincenty 0.1.4 package
         on pypi.org (https://pypi.org/project/vincenty/) released under the Public Domain Unlicense license.
@@ -371,7 +372,7 @@ class HiActivity:
 
         return round(s, 6)
 
-    def add_heart_rate_data(self, data: []):
+    def add_heart_rate_data(self, data: list):
         """Add heart rate data from a tp=h-r record in the HiTrack file
         """
         # Create a dictionary from the key value pairs
@@ -395,7 +396,7 @@ class HiActivity:
         # Add heart rate data
         self._add_data_detail(hr_data)
 
-    def add_cadence_data(self, data: []):
+    def add_cadence_data(self, data: list):
         """Add cadence data from a tp=cad record in the HiTrack file"""
         logging.getLogger(PROGRAM_NAME).debug('Adding cadence data %s', data)
 
@@ -418,7 +419,7 @@ class HiActivity:
         # Add cadence data
         self._add_data_detail(cad_data)
 
-    def add_altitude_data(self, data: []):
+    def add_altitude_data(self, data: list):
         """Add altitude data from a tp=alt or tp=alti record in a HiTrack file"""
         # Create a dictionary from the key value pairs
         logging.getLogger(PROGRAM_NAME).debug('Adding altitude data %s', data)
@@ -444,7 +445,7 @@ class HiActivity:
 
     # TODO Further verification of assumptions and testing required related to auto activity type detection
     # TODO For activities that were tracked using a phone only without a fitness device, there are no s-r records. Hence, in these cases auto detection should use a 'fallback mode' e.g. by using the p-m records (and assume that swimming activities with phone only won't occur)
-    def add_step_frequency_data(self, data: []):
+    def add_step_frequency_data(self, data: list):
         """Add step frequency data from a tp=s-r record in a HiTrack file.
         The unit of measure of the step frequency is steps/minute.
          Assumptions:
@@ -489,7 +490,7 @@ class HiActivity:
         # Add step frequency data.
         self._add_data_detail(step_freq_data)
 
-    def add_swolf_data(self, data: []):
+    def add_swolf_data(self, data: list):
         """ Add SWOLF (swimming) data from a tp=swf record in a HiTrack file
         SWOLF value = time to swim one pool length + number of strokes
         """
@@ -541,7 +542,7 @@ class HiActivity:
         # Add SWOLF data
         self._add_data_detail(swolf_data)
 
-    def add_stroke_frequency_data(self, data: []):
+    def add_stroke_frequency_data(self, data: list):
         """ Add stroke frequency (swimming) data (in strokes/minute) from a tp=p-f record in a HiTrack file """
 
         logging.getLogger(PROGRAM_NAME).debug('Adding stroke frequency swim data %s', data)
@@ -571,7 +572,7 @@ class HiActivity:
         # Add stroke frequency data
         self._add_data_detail(stroke_freq_data)
 
-    def add_speed_data(self, data: []):
+    def add_speed_data(self, data: list):
         """ Add speed data (in decimeter/second) from a tp=rs record in a HiTrack file """
 
         logging.getLogger(PROGRAM_NAME).debug('Adding speed data %s', data)
@@ -717,7 +718,7 @@ class HiActivity:
         self.data_dict = collections.OrderedDict(sorted(self.data_dict.items()))
 
         # Do calculations
-        last_location = None
+        last_location: dict|None = None
         paused = False
         segment_start_distance = 0
 
@@ -851,7 +852,7 @@ class HiActivity:
                     if 'distance' in data:
                         data['distance'] = data['distance'] / normalize_ratio
 
-    def get_swim_data(self) -> Optional[list]:
+    def get_swim_data(self) -> list:
         if self.get_activity_type() == self.TYPE_POOL_SWIM:
             if self.swim_data:
                 return self.swim_data
@@ -860,7 +861,7 @@ class HiActivity:
         elif self.get_activity_type() == self.TYPE_OPEN_WATER_SWIM:
             return self._get_open_water_swim_data()
         else:
-            return None
+            return []
 
     def _calc_pool_swim_data(self) -> list:
         """ Calculates the real swim (lap) data based on the raw parsed pool swim data
@@ -977,7 +978,7 @@ class HiTrackFile:
     """The HiTrackFile class represents a single HiTrack file. It contains all file handling and parsing methods."""
 
     def __init__(self, hitrack_filename: str, activity_type: str = HiActivity.TYPE_UNKNOWN,
-                 timestamp_ref: datetime = None, start_timestamp_ref: datetime = None):
+                 timestamp_ref: dts|None = None, start_timestamp_ref: dts|None = None):
         # Validate the file parameter and (try to) open the file for reading
         if not hitrack_filename:
             logging.getLogger(PROGRAM_NAME).error('Parameter HiTrack filename is missing')
@@ -1164,7 +1165,7 @@ class HiTarBall:
 
 class HiZip:
     @staticmethod
-    def extract_json_list(zip_filename: str, output_dir: str = OUTPUT_DIR, password: str = None) -> Optional[list]:
+    def extract_json_list(zip_filename: str, output_dir: str = OUTPUT_DIR, password: str|None = None) -> Optional[list]:
         _MOTION_PATH_JSON_DIR = 'Motion path detail data & description'
 
         if not zipfile.is_zipfile(zip_filename):
@@ -1203,7 +1204,7 @@ class HiZip:
 
 
     @staticmethod
-    def extract_json(zip_filename: str, output_dir: str = OUTPUT_DIR, password: str = None):
+    def extract_json(zip_filename: str, output_dir: str = OUTPUT_DIR, password: str|None = None):
         _MOTION_PATH_JSON_FILENAME = 'data/Motion path detail data & description/motion path detail data.json'
         _MOTION_PATH_JSON_FILENAME_ALT = 'Motion path detail data & description/motion path detail data.json'
         _WINDOWS_UNZIP_CMD = '7za x -aoa "-o%s" -bb0 -bse0 -bsp2 "-p%s" -sccUTF-8 "%s" -- "%s"'
@@ -1419,6 +1420,9 @@ class HiJson:
 
         logging.getLogger(PROGRAM_NAME).info(
             'Saving activity from %s to HiTrack file %s for parsing', activity_start, hitrack_filename)
+
+        hitrack_file = None
+
         try:
             hitrack_file = open(hitrack_filename, 'w+')
             hitrack_file.write(hitrack_data)
@@ -1440,7 +1444,7 @@ class HiJson:
             logging.getLogger(PROGRAM_NAME).warning('Activity from %s has an unsupported '
                                                     'activity type %d and will NOT be converted.',
                                                     activity_start, sport_type)
-            return
+            return None
 
         # Sport type (internal HiActivity sport type)
         sport = HiActivity.TYPE_UNKNOWN
@@ -1453,7 +1457,7 @@ class HiJson:
         if sport == HiActivity.TYPE_POOL_SWIM:
             # Pool swimming activity, parse the JSON data
             activity_id = os.path.basename(hitrack_filename)
-            hi_activity = None
+            # hi_activity = None
             if 'mSwimSegments' in activity_detail_dict:
                 hi_activity = HiActivity.from_json_pool_swim_data(activity_id,
                                                                   activity_start,
@@ -1471,12 +1475,12 @@ class HiJson:
                     logging.getLogger(PROGRAM_NAME).warning('Swimming activity %s with sport data source %d has no '
                                                             'swim segment data and can not be converted.', activity_id,
                                                             sport_data_source)
-                    return
+                    return None
 
             if hi_activity is None:
                 logging.getLogger(PROGRAM_NAME).warning('Swimming activity %s has empty swim segment data and can ' +
                                                         'not be converted.', activity_id)
-                return
+                return None
         else:
             # For all activities except pool swimming, parse the HiTrack file
 
@@ -1577,7 +1581,7 @@ class TcxActivity:
                            (HiActivity.TYPE_CROSS_COUNTRY_RUN, 'running')]
 
     def __init__(self, hi_activity: HiActivity, tcx_xml_schema=None, save_dir: str = OUTPUT_DIR,
-                 filename_prefix: str = None, filename_suffix: str = None, insert_altitude: bool = False):
+                 filename_prefix: str|None = None, filename_suffix: str|None = None, insert_altitude: bool = False):
         if not hi_activity:
             logging.getLogger(PROGRAM_NAME).error("No valid HiTrack activity specified to construct TCX activity.")
             raise Exception("No valid HiTrack activity specified to construct TCX activity.")
@@ -1871,7 +1875,7 @@ class TcxActivity:
 
         return el_lap
 
-    def save(self, tcx_filename: str = None):
+    def save(self, tcx_filename: str|None = None):
         if not self.training_center_database:
             # Call generation of TCX XML date if not already done
             self.generate_xml()
@@ -1939,9 +1943,13 @@ class TcxActivity:
                                              tcx_xml_filename, self.hi_activity.activity_id)
 
         try:
-            self.tcx_xml_schema.validate(tcx_xml_filename)
+            if not self.tcx_xml_schema:
+                logging.getLogger(PROGRAM_NAME).warning('Unable to validate TCX XML file for activity <%s>\n%s.' +
+                                                         'xmlschema library is not available.',self.hi_activity.activity_id)
+            else:
+                self.tcx_xml_schema.validate(tcx_xml_filename)
         except Exception as e:
-            logging.getLogger(PROGRAM_NAME).error('Error validating TCX XML for activity <%s>\n%s',
+            logging.getLogger(PROGRAM_NAME).error('Error validating TCX XML file for activity <%s>\n%s',
                                                   self.hi_activity.activity_id, e)
             raise Exception('Error validating TCX XML for activity <%s>\n%s', self.hi_activity.activity_id, e)
 
@@ -1977,7 +1985,7 @@ def _init_tcx_xml_schema():
                                                     'The following exception occured: %s', e)
 
 
-def _convert_hitrack_timestamp(hitrack_timestamp: float, timestamp_ref: datetime = None) -> datetime:
+def _convert_hitrack_timestamp(hitrack_timestamp: float, timestamp_ref: dts|None = None) -> dts:
     """ Converts the different timestamp formats appearing in HiTrack files to a Python datetime.
 
     Known formats are
