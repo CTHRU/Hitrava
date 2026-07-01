@@ -3,6 +3,12 @@
 All notable changes to this project are documented in this file. 
 
 ## Release Notes
+### Version 6.3.0 (build 2607.0101)
+#### New features and changes
+- Added support for cycling cadence. Closes #92.  
+  Credits to [ravenich](https://github.com/ravenich).
+- Code cleanup to make linter happy.
+
 ### Version 6.2.0 (build 2509.2501)
 #### New features and changes
 - Added support for updated Huawei JSON altitude information. Closes #88.  
