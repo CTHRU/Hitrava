@@ -3,6 +3,18 @@
 All notable changes to this project are documented in this file. 
 
 ## Release Notes
+### Unreleased
+#### New features and changes
+- Added support for the 2026 Huawei JSON format, where each motion path record has `detailData` (HiTrack data) and
+  `summaryData` (activity detail JSON) instead of a single `attribute` string.
+- Added support for the new pool swim sport type (262) used in the 2026 Huawei JSON format.
+
+#### Solved issues
+- Fixed `KeyError: 'attribute'` when parsing the 2026 Huawei JSON format.
+- Fixed `KeyError: 'distance'` in `normalize_distances` for running (and other non-swimming) activities. Newer exports
+  contain `tp=swf` records for these activities, which were wrongly treated as SWOLF swim data and created bogus laps.
+- Fixed a syntax error on Python versions before 3.12 caused by nested quotes in an f-string in `HiZip`.
+
 ### Version 6.3.0 (build 2607.0101)
 #### New features and changes
 - Added support for cycling cadence. Closes #92.  
