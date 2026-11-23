@@ -3,7 +3,10 @@
 All notable changes to this project are documented in this file. 
 
 ## Release Notes
-### Unreleased
+### Version 6.4.0 (build 2611.2301)
+
+Credits for this release go to [lorenzoPrimi](https://github.com/lorenzoPrimi).
+
 #### New features and changes
 - Added support for the 2026 Huawei JSON format, where each motion path record has `detailData` (HiTrack data) and
   `summaryData` (activity detail JSON) instead of a single `attribute` string.
