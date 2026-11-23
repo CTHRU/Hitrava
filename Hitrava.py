@@ -497,6 +497,13 @@ class HiActivity:
 
         logging.getLogger(PROGRAM_NAME).debug('Adding SWOLF swim data %s', data)
 
+        # Newer Huawei exports also contain tp=swf records for non-swimming activities (e.g. running). Treating them
+        # as SWOLF data would create bogus swim laps (segments) and break the segment/distance calculation.
+        if self._activity_type not in (self.TYPE_UNKNOWN, self.TYPE_POOL_SWIM, self.TYPE_OPEN_WATER_SWIM):
+            logging.getLogger(PROGRAM_NAME).debug('Ignored SWOLF record for non-swimming activity type %s',
+                                                  self._activity_type)
+            return
+
         try:
             # Create a dictionary from the key value pairs
             swolf_data = dict(data)
@@ -1182,7 +1189,7 @@ class HiZip:
         zip_json_filenames = f'{_MOTION_PATH_JSON_DIR}/*.json'
 
         huawei_zip = zipfile.ZipFile(zip_filename)
-        huawei_json_filenames = [f'{output_dir}/{f.filename.split('/')[-1]}' for f in huawei_zip.infolist() if f.filename.startswith(_MOTION_PATH_JSON_DIR + '/') and f.filename.endswith('.json')]
+        huawei_json_filenames = [f'{output_dir}/{f.filename.split("/")[-1]}' for f in huawei_zip.infolist() if f.filename.startswith(_MOTION_PATH_JSON_DIR + '/') and f.filename.endswith('.json')]
 
         if platform.system() in ['Windows', 'Linux', 'Darwin']:
             unzip_cmd = ('7za', 'e', '-aoa', '-o%s' % output_dir, '-bb0', '-bse0', '-bsp2', '-p%s' % password, '-sccUTF-8', '%s' % zip_filename, '--', '%s' % zip_json_filenames)
@@ -1267,6 +1274,7 @@ class HiJson:
                          (4, HiActivity.TYPE_RUN),
                          (3, HiActivity.TYPE_CYCLE),
                          (102, HiActivity.TYPE_POOL_SWIM),
+                         (262, HiActivity.TYPE_POOL_SWIM),  # Pool swim in the 2026 Huawei JSON format
                          (104, HiActivity.TYPE_OPEN_WATER_SWIM),
                          (282, HiActivity.TYPE_HIKE),
                          (2, HiActivity.TYPE_MOUNTAIN_HIKE),
@@ -1369,6 +1377,15 @@ class HiJson:
             raise Exception('Error parsing JSON file <%s>', self.json_file.name)
 
     def _parse_activity(self, activity_dict: dict) -> Optional[HiActivity]:
+        # JSON data structure AS OF 11/2026: no 'attribute' string, instead 'detailData' holds the HiTrack data
+        # and 'summaryData' holds the activity detail JSON (including sportType, totalTime, etc.).
+        # Normalise it to the older structure.
+        if 'attribute' not in activity_dict and 'detailData' in activity_dict and 'summaryData' in activity_dict:
+            summary_dict = json.loads(activity_dict['summaryData'])
+            activity_dict = {**summary_dict, **activity_dict,
+                             'attribute': 'HW_EXT_TRACK_DETAIL@is%s&&HW_EXT_TRACK_SIMPLIFY@is%s' %
+                                          (activity_dict['detailData'], activity_dict['summaryData'])}
+
         # Create a HiTrack file from the HiTrack data
         hitrack_data = activity_dict['attribute']
         # Strip prefix and suffix from raw HiTrack data
@@ -1494,6 +1511,11 @@ class HiJson:
             hi_activity = hitrack_file.parse()
             if sport != HiActivity.TYPE_UNKNOWN:
                 hi_activity.set_activity_type(sport)
+                if sport != HiActivity.TYPE_OPEN_WATER_SWIM:
+                    # Newer Huawei exports contain tp=swf records for non-swimming activities too. Parsing those
+                    # created bogus swim laps (segments); discard them so segments are calculated from the track data.
+                    hi_activity._reset_segments()
+                    hi_activity.activity_params.pop('swim', None)
             else:
                 logging.getLogger(PROGRAM_NAME).warning('Activity %s from %s has an unknown activity '
                                                         'type %d. Conversion will be attempted but may '
